@@ -58,15 +58,16 @@ _Sigue estos pasos sencillos para configurar y ejecutar el proyecto localmente._
    ```sh
    git clone https://github.com/Hope-uni/hope.api.git
    ```
-3. Install NPM packages
+2. Install NPM packages
    ```sh
    npm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
    ```
-5. Run the develpoment server
+3. Run npx sequelize makemigrations
+
+4. Run npx sequelize migrate
+
+5. Run the development server
     ```bash
     npm run dev
     # or
@@ -76,7 +77,7 @@ _Sigue estos pasos sencillos para configurar y ejecutar el proyecto localmente._
     # or
     bun dev
     ```
-6. Open Postman, insomnia u otra herramienta en donde puedas testiar los endpoints. localhost://3000/"Nombre del Modulo"/"Nombre del endpoint"
+6. Abre Postman, insomnia u otra herramienta en donde puedas testiar los endpoints. localhost://3000/"Nombre del Modulo"/"Nombre del endpoint"
 
 
 <!-- Maintainers -->
