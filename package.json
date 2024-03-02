@@ -7,6 +7,24 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js"
   },
+  "_moduleAliases": {
+    "@root": "<rootDir>/$1",
+    "@models": "./src/models",
+    "@controllers": "./src/controllers",
+    "@services": "./src/services",
+    "@routes": "./src/routes",
+    "@utils": "./src/utils",
+    "@config": "./src/config",
+    "@helpers": "./src/helpers",
+    "@middlewares": "./src/middlewares",
+    "@validations": "./src/validations",
+    "@views": "./src/view",
+    "@events": "./src/events",
+    "@listeners": "./src/listeners"
+  },
+  "_moduleDirectories": [
+    "node_modules_custom"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hope-uni/hope.api.git"
@@ -28,6 +46,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.3",
     "express": "^4.18.2",
+    "joi": "^17.12.2",
     "module-alias": "^2.2.3",
     "pg": "^8.11.3",
     "sequelize": "^6.37.0",

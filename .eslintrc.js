@@ -11,5 +11,6 @@ module.exports = {
     },
     rules: {
         'arrow-body-style': 'off',
+        'import/no-unresolved': 'off',
     },
 };

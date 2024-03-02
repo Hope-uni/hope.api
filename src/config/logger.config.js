@@ -11,7 +11,7 @@ require('winston-daily-rotate-file');
 // DailyRotateFile
 const fileRotateTransport = new transports.DailyRotateFile({
   level: 'error',
-  filename: `${__dirname}/../../logs/error-%DATE%.log`,
+  filename: `${__dirname}/../logs/error-%DATE%.log`,
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
   maxSize: '2d',
