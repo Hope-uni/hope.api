@@ -5,14 +5,14 @@ module.exports = {
   createRoleValidation(data) {
     const schema = joi.object().keys({
       name: joi.string().required().messages({
-        'any.required': `Role name is required`,
-        'string.base': `Role name must be a valid text`,
-        'string.empty': `Rle name can not be empty`
+        'any.required': `Nombre es requerido`,
+        'string.base': `Nombre debe ser un texto válido`,
+        'string.empty': `Nombre no debe estar vacío`
       }),
       permissions: joi.array().required().min(1).messages({
-        'any.required': `Role permissions are required`,
-        'array.min': `Role permissions must have at least 1 permission`,
-        'array.base': `Permissions must be a valid array`,
+        'any.required': `Permisos son requeridos.`,
+        'array.min': `Debe ingresar al menos un permiso.`,
+        'array.base': `Permisos deben ser enviados en formato valido.`,
       }),
     });
     return schema.validate(data);
@@ -21,9 +21,9 @@ module.exports = {
   findRoleValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({
-        'any.required': `Role id is required`,
-        'number.base': `Role id must be a valid number`,
-        'number.positive': `Role id must be a positive number`,
+        'any.required': `Identificador es requerido`,
+        'number.base': `Identificador debe ser un numero valido`,
+        'number.positive': `Identificador debe ser un numero positivo`,
       })
     });
     return schema.validate(data);
@@ -32,16 +32,16 @@ module.exports = {
   updateRoleValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({
-        'any.required': `Role id is required`,
-        'number.base': `Role id must be a valid number`,
-        'number.positive': `Role id must be a positive number`,
+        'any.required': `Identificador es requerido`,
+        'number.base': `Identificador debe ser un numero valido`,
+        'number.positive': `Identificador debe ser un numero positivo`,
       }),
       name: joi.string().empty(' ').messages({
-        'string.base': `Role name must be a valid text`,
+        'string.base': `Nombre debe ser un texto válido`,
       }),
       permissions: joi.array().empty(' ').min(1).messages({
-        'array.min': `Role permissions must have at least 1 permission`,
-        'array.base': `Permissions must be a valid array`,
+        'array.min': `Debe ingresar al menos un permiso.`,
+        'array.base': `Permisos deben ser enviados en formato valido.`,
       }),
     });
     return schema.validate(data);
