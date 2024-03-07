@@ -14,4 +14,7 @@ module.exports = {
   dialect: process.env.DB_DIALECT,
   ssl: process.env.DB_SSL === 'true',
 
+  // User Variables
+  userCode: process.env.USER_CODE,
+
 }
