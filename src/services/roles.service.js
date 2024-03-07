@@ -15,9 +15,16 @@ module.exports = {
 
       const data = await Role.findAll({
         where: {
-          id: {
-            [Op.ne]: 1,
-          }
+          [Op.and]: [
+            {
+              id: {
+                [Op.ne]: 1,
+              }
+            },
+            {
+              status: true
+            }
+          ]
         },
         include: {
           model: Permission,
@@ -74,7 +81,16 @@ module.exports = {
     try {
       
       const data = await Role.findOne({ 
-        where: { id },
+        where: { 
+          [Op.and]: [
+            {
+              id
+            },
+            {
+              status: true
+            }
+          ]
+        },
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'status'],
         },
@@ -140,7 +156,7 @@ module.exports = {
       
       // Vaslidate if name exist
       const nameExist = await Role.findOne({where: { name: body.name }});
-      if(!nameExist) {
+      if(nameExist) {
         await transaction.rollback();
         return {
           message: `Role name already exist`,
@@ -274,7 +290,7 @@ module.exports = {
           ]
         }
       });
-      if(!nameExist) {
+      if(nameExist) {
         await transaction.rollback();
         return {
           message: `Role name already exist`,
@@ -295,10 +311,12 @@ module.exports = {
         }
       );
 
-      await roleExist.removePermissions(await roleExist.getPermissions(), {
-        transaction
-      });
-      await roleExist.addPermissions(body.permissions,{ transaction });
+      if(body.permissions) {
+        await roleExist.removePermissions(await roleExist.getPermissions(), {
+          transaction
+        });
+        await roleExist.addPermissions(body.permissions,{ transaction });
+      }
 
       if(!roleExist) {
         await transaction.rollback();
