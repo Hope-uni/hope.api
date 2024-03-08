@@ -1,0 +1,79 @@
+
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f5f6f8;
+}
+
+.title {
+  font-family: sans-serif;
+  color: #121b2d;
+  font-weight: 400;
+  text-align: center;
+}
+
+.main-content {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.card {
+  background-color: #fff;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, .4);
+  border-radius: 5%;
+}
+
+.link-content {
+  background-color: #1F5EA8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 60%;
+  height: 70px;
+  align-content: center;
+  font-size: 30px;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0 10px;
+  margin: 15px 0;
+}
+
+.hope-logo {
+  height: 50px;
+  width: auto;
+  margin-bottom: 10px;
+  padding-top: 30px;
+}
+
+.card p {
+  font-size: 1.2em;
+  color: #191919;
+  margin: 15px 3%;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+.link-content:hover {
+  cursor: pointer;
+  color: #494949 !important;
+  border-radius: 50px;
+  border-color: #494949 !important;
+  transition: all 0.4s ease 0s;
+}
