@@ -58,13 +58,13 @@ module.exports = {
   async findOne(req,res) {
     try {
       
-      const { error } = findRoleValidation(req.params.id);
+      const { error } = findRoleValidation({id:req.params.id});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error: dataError, message, data } = await findRole(req.params.id);
       if(dataError) {
         return res.status(400).json({
-          error,
+          error:dataError,
           message
         });
       };
@@ -161,7 +161,7 @@ module.exports = {
    */
   async deleteRole(req,res) {
     try {
-      const { error } = findRoleValidation(req.params.id);
+      const { error } = findRoleValidation({id:req.params.id});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { message, error:dataError } = await deleteRole(req.params.id);

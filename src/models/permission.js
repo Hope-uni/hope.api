@@ -12,12 +12,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
     },
     description: {
-      type: DataTypes.STRING,
       allowNull: false,
+      type: DataTypes.STRING,
     },
     group: {
       allowNull: false,
-      type: DataTypes.TEXT
+      type: DataTypes.TEXT,
     },
     status: {
       type: DataTypes.BOOLEAN,
@@ -30,7 +30,10 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Permission.associate = (models) => {
-    Permission.belongsToMany(models.Role, { through: 'RolesPermisions', as: 'roles', foreignKey: 'permissionId' });
+    Permission.belongsToMany(models.Role, { 
+      through: 'RolesPermissions', 
+      as: 'roles', 
+      foreignKey: 'permissionId' });
   };
 
   return Permission;
