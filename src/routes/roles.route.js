@@ -6,15 +6,16 @@ const {
   update,
   deleteRole
 } = require('@controllers/roles.controller');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
 
-router.get('/', all);
+router.get('/',verifyToken, rolePermissions(['Superadmin'],['listar roles']), all);
 
-router.get('/:id', findOne);
+router.get('/:id',verifyToken, rolePermissions(['Superadmin'],['listar roles']), findOne);
 
-router.post('/', create);
+router.post('/',verifyToken, rolePermissions(['Superadmin'],['listar roles']), create);
 
-router.put('/:id', update);
+router.put('/:id',verifyToken, rolePermissions(['Superadmin'],['listar roles']), update);
 
-router.delete('/:id', deleteRole);
+router.delete('/:id',verifyToken, rolePermissions(['Superadmin'],['listar roles']), deleteRole);
 
 module.exports = router;

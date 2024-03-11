@@ -59,7 +59,7 @@ module.exports = {
       if(!token) {
         return {
           error: true,
-          message: `Hubo un error al momento de loguearse`,
+          message: `Hubo un error al momento de Iniciar sesion`,
           statusCode: 400
         }
       };
@@ -129,16 +129,16 @@ module.exports = {
         from: userEmail,
         to: userData.email,
         subject: `Cambio de Contraseña`,
-        template: 'email',
+        template:'email',
         context: {
           name: userData.name,
-          email: userData.email,
+          email: userData.email, 
           url,
         }
       };
 
       // Send email
-      const send = await transporter.sendEmail(message);
+      const send = await transporter.sendMail(message);
       if(send === null) {
         return {
           error: true,
