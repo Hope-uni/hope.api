@@ -18,6 +18,11 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
       ]
     });
 
+    // Admin Validation
+    if(user.Role.name === 'Superadmin') {
+      next();
+      return;
+    }
     // Role validation
     const haveRole = permittedRoles.includes(user.Role.name);
 
@@ -35,9 +40,6 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
       })
     }
     
-    if(user.Role.name === 'Superadmin') {
-      havePermission = true;
-    }
 
     if(user && haveRole && havePermission) {
       next();

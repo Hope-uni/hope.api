@@ -59,7 +59,7 @@ module.exports = {
       if(!token) {
         return {
           error: true,
-          message: `Hubo un error al momento de Iniciar sesion`,
+          message: `Hubo un error al momento de Iniciar sesión`,
           statusCode: 400
         }
       };
