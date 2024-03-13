@@ -19,20 +19,42 @@ module.exports = {
    */
   async login(body) {
     try {
+      // variables
+      let userVerify;
+
       // Username Exist
-      const userVerify = await User.findOne({
-        where: {
-          username: body.username,
-          status: true
-        }
-      });
-      if(!userVerify) {
-        return {
-          error: true,
-          message: `Usuario no está regístrado en el sistema`,
-          statusCode: 400
-        }
+      if(body.username) {
+        userVerify = await User.findOne({
+          where: {
+            username: body.username,
+            status: true
+          }
+        });
+        if(!userVerify) {
+          return {
+            error: true,
+            message: `Usuario no está regístrado en el sistema`,
+            statusCode: 400
+          }
+        };
       };
+
+      // Email Validation
+      if(body.email) {
+        userVerify = await User.findOne({
+          where: {
+            email: body.email,
+            status: true,
+          }
+        });
+        if(!userVerify) {
+          return {
+            error: true,
+            message: `Correo no esta registrado o usuario no existe en el sistema`,
+            statusCode: 400
+          }
+        };
+      }
       
       // Password Match Validation
       const passwordValid = await bcrypt.compare(body.password, userVerify.password);
@@ -66,7 +88,7 @@ module.exports = {
       
       return {
         error: false,
-        message: `Logueado!`,
+        message: `Inicio de sesión existoso!`,
         token
       };
     } catch (error) {

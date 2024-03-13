@@ -5,10 +5,12 @@ module.exports = {
 
   loginValidation(data) {
     const schema = joi.object().keys({
-      username: joi.string().required().messages({
-        'any.required': `Nombre de usuario es requerido`,
+      username: joi.string().empty(' ').messages({
         'string.base': `Nombre de usuario debe ser un texto válido`,
         'string.empty': `Nombre de usuario no debe estar vacío`
+      }),
+      email: joi.string().email().empty(' ').messages({
+        'string.email': `Correo debe ser válido`,
       }),
       password: joi.string().required().messages({
         'any.required': `Contraseña es requerida`,
