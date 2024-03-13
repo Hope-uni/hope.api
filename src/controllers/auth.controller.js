@@ -18,6 +18,12 @@ module.exports = {
   is a breakdown of what it does: */
   async login(req,res) {
     try {
+
+      // Username | email validation
+      if(!req.body.username && !req.body.email) {
+        return res.status(400).json({error: 'Nombre de usuario o correo es necesario para iniciar sesión'})
+      };
+
       // Joi Validation
       const { error } = loginValidation(req.body);
       if(error) return res.status(400).json({ error: error.details[0].message });	
