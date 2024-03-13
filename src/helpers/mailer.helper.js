@@ -7,7 +7,7 @@ const {
   emailHost,
   emailPort,
   emailSecure
-} = require('../config/variables.config');
+} = require('@config/variables.config');
 
 
 const transporter = nodemailer.createTransport({
@@ -20,15 +20,17 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const handlebarOption = {
+const handlebarsOption = {
   viewEngine: {
+    extName: ".handlebars",
     partialsDir: path.resolve('src/views/'),
     defaultLayout: false,
   },
-  viewPath: path.resolve('src/views/')
+  viewPath: path.resolve('src/views/'),
+  extName: ".handlebars",
 };
 
 module.exports = {
   transporter,
-  handlebarOption
+  handlebarsOption
 }

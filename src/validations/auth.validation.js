@@ -22,7 +22,7 @@ module.exports = {
 
   forgotPasswordValidation(data) {
     const schema = joi.object().keys({
-      email: joi.email().string().required().messages({
+      email: joi.string().email().required().messages({
         'any.required': `Correo es requerido`,
         'string.email': `Correo debe ser válido`,
       }),
@@ -40,15 +40,11 @@ module.exports = {
         'string.pattern.base': `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`
       }),
       confirmPassword: joi
-        .string()
+        .any()
         .valid(joi.ref('password'))
         .required()
-        .pattern(new RegExp("^[a-zA-z0-9]{8,30}$"))
         .messages({
-          'any.required': `Confirmar contraseña es requerida`,
-          'string.base': `Confirmar contraseña debe ser un texto válido`,
-          'string.empty': `Confirmar contraseña no debe estar vacía`,
-          'string.pattern.base': `Confirmar contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`
+          'any.only': `Contraseñas no coinciden`,
         })
     });
     return schema.validate(data);

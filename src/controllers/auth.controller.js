@@ -12,7 +12,7 @@ const {
   resetPasswordValidation
 } = require('@validations/auth.validation');
 
-module.exports.exports = {
+module.exports = {
 
   /* The `async login(req,res)` function is a controller function that handles the login process. Here
   is a breakdown of what it does: */
