@@ -9,7 +9,7 @@ module.exports = {
   // secret Key
   secretKey: process.env.SECRET_KEY,
 
-  // Database 
+  // Database Variables
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -20,7 +20,7 @@ module.exports = {
   // User Variables
   userCode: process.env.USER_CODE,
 
-  // Email 
+  // Email Variables
   userEmail:process.env.EMAIL_ADDRESS,
   passwordEmail: process.env.EMAIL_PASSWORD,
   emailPort: process.env.EMAIL_PORT,
@@ -28,4 +28,6 @@ module.exports = {
   domain: process.env.EMAIL_DOMAIN,
   emailSecure: process.env.EMAIL_SECURE,
 
+  // Token Variables
+  jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION
 }

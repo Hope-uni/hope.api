@@ -15,11 +15,10 @@ module.exports = {
           error: true
         });
       };
-
       const payload = jwt.verify(token, secretKey);
       if(!payload) {
         return res.status(401).json({
-          message: `Token Invalido`,
+          message: `Token Inválido`,
           error: true,
         });
       };
