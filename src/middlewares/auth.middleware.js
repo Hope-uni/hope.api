@@ -4,7 +4,7 @@ const { secretKey } = require('../config/variables.config');
 
 
 module.exports = {
-  /* eslint-disable consistent-return */
+  /* eslint-disable consistent-return */ 
   async verifyToken(req,res,next) {
     try {
       

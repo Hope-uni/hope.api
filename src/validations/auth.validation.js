@@ -14,7 +14,7 @@ module.exports = {
       }),
       password: joi.string().required().messages({
         'any.required': `Contraseña es requerida`,
-        'string.base': `Contraseña debe ser un texto válido`,
+        'string.base': `Contraseña debe ser un texto válido`, 
         'string.empty': `Contraseña no debe estar vacía`
       })
     });
