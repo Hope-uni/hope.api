@@ -50,7 +50,7 @@ module.exports = {
         if(!userVerify) {
           return {
             error: true,
-            message: `Nombre de Usuario no esta registrado o usuario no existe en el sistema`,
+            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
             statusCode: 400
           }
         };
@@ -78,7 +78,7 @@ module.exports = {
         if(!userVerify) {
           return {
             error: true,
-            message: `Correo no esta registrado o usuario no existe en el sistema`,
+            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
             statusCode: 400
           }
         };
@@ -207,7 +207,7 @@ module.exports = {
       if(!userData) {
         return {
           error: true,
-          message: `Correo no esta registrado o usuario no existe en el sistema`,
+          message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
           statusCode: 400
         }
       };
