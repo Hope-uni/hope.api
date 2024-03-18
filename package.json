@@ -4,8 +4,10 @@
   "description": "Hope API ",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
     "dev": "nodemon app.js",
+    "build": "npx sequelize-cli db:migrate",
+    "format": "npx prettier --write",
     "import-permissions": "node ./src/commands/update-permissions.js"
   },
   "_moduleAliases": {
