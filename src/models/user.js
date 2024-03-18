@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsTo(models.Role, {
       foreignKey: 'roleId',
     });
+    User.hasOne(models.AuthToken, {
+      foreignKey: 'userId',
+      as: 'User'
+    });
   }
 
   return User;

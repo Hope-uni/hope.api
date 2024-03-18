@@ -1,23 +1,29 @@
-const { User, Role, Permission } = require('@models/index');
+const { User, Role, Permission, AuthToken, sequelize } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
 const { secretKey, domain, userEmail } = require('@config/variables.config');
 const logger = require('@config/logger.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
+const { jwtAccessExpiration } = require('@config/variables.config');
 
 module.exports = {
 
+
   /**
-   * The function performs user login authentication by verifying username existence, validating
-   * password match, generating a JWT token, and handling potential errors.
-   * @param body - The `body` parameter in the `async login` function likely contains the user input
-   * data for logging in, such as the username and password entered by the user. This data is used to
-   * verify the user's credentials during the login process.
-   * @returns The `login` function returns an object with different properties based on the outcome of
-   * the login process. Here are the possible return values:
+   * The function performs user authentication by verifying credentials, generating access and refresh
+   * tokens using JWT, and handling errors with logging.
+   * @param body - The `login` function you provided is an asynchronous function that handles user
+   * authentication and generates access and refresh tokens using JWT. Here's a breakdown of the
+   * process:
+   * @returns The `login` function returns an object with the following properties:
+   * - `error`: A boolean indicating if an error occurred during the login process.
+   * - `message`: A message describing the outcome of the login attempt.
+   * - `accessToken`: A JWT access token generated for the user.
+   * - `refreshToken`: The refresh token generated for the user.
    */
   async login(body) {
+    const transaction = await sequelize.transaction();
     try {
       // variables
       let userVerify;
@@ -28,12 +34,23 @@ module.exports = {
           where: {
             username: body.username,
             status: true
-          }
+          },
+          include: [
+            {
+              model: Role,
+              include: [
+                {
+                  model: Permission,
+                  as: 'permissions'
+                }
+              ]
+            }
+          ]
         });
         if(!userVerify) {
           return {
             error: true,
-            message: `Usuario no está regístrado en el sistema`,
+            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
             statusCode: 400
           }
         };
@@ -45,12 +62,23 @@ module.exports = {
           where: {
             email: body.email,
             status: true,
-          }
+          },
+          include: [
+            {
+              model: Role,
+              include: [
+                {
+                  model: Permission,
+                  as: 'permissions'
+                }
+              ]
+            }
+          ]
         });
         if(!userVerify) {
           return {
             error: true,
-            message: `Correo no esta registrado o usuario no existe en el sistema`,
+            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
             statusCode: 400
           }
         };
@@ -66,30 +94,84 @@ module.exports = {
         }
       };
 
+      // Verify if user has a Refresh Token
+      const refreshTokenData = await AuthToken.findOne({
+        where: {
+          userId: userVerify.id,
+          email: userVerify.email
+        }
+      });
+      if(refreshTokenData) {
+        await AuthToken.destroy({
+          where: {
+            id: refreshTokenData.id
+          },
+          transaction
+        });
+      }
+
       // Generate Token  with JWT
-      const token = jwt.sign(
+      /* eslint-disable radix */
+      /* eslint-disable prefer-const */
+      let accessToken;
+
+      accessToken = jwt.sign(
         {
           id: userVerify.id,
           email: userVerify.email
         },
         secretKey,
         {
-          expiresIn: 86400 // 24 hours from now\
+          expiresIn: `${parseInt(jwtAccessExpiration)}d`
         }
       );
 
-      if(!token) {
+      if(userVerify.Role.name === 'Superadmin') {
+        accessToken = jwt.sign(
+          {
+            id: userVerify.id,
+            email: userVerify.email
+          },
+          secretKey,
+          {
+            expiresIn: 86400 // 24hrs
+          }
+        );
+      }
+
+      if(!accessToken) {
         return {
           error: true,
-          message: `Hubo un error al momento de Iniciar sesión`,
+          message: `Hubo un error al momento de iniciar sesión`,
           statusCode: 400
         }
       };
-      
+
+      // Generate refresh Token
+      const refreshToken = jwt.sign(
+        {
+          id: userVerify.id,
+          email: userVerify.email
+        },
+        secretKey,
+        {
+          expiresIn: `365d`
+        }
+      );
+      const authtokenReponse = await AuthToken.create({
+        token: refreshToken,
+        userId: userVerify.id,
+        email: userVerify.email,
+      },{transaction});
+
+      // Commit the refresh token
+      await transaction.commit();
+
       return {
         error: false,
         message: `Inicio de sesión existoso!`,
-        token
+        accessToken,
+        refreshToken: authtokenReponse.token
       };
     } catch (error) {
       logger.error(error);
@@ -125,7 +207,7 @@ module.exports = {
       if(!userData) {
         return {
           error: true,
-          message: `Correo no esta registrado o usuario no existe en el sistema`,
+          message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
           statusCode: 400
         }
       };
@@ -309,6 +391,194 @@ module.exports = {
         statusCode: 500
       }
     }
-  }
+  },
+
+  /**
+   * The function `refreshAuth` handles the refreshing of access tokens using refresh tokens in a
+   * Node.js application.
+   * @param refreshToken - The provided code snippet is an asynchronous function named `refreshAuth`
+   * that handles the refreshing of authentication tokens. It takes a `refreshToken` as a parameter,
+   * which is used to generate a new access token and refresh token for the user.
+   * @returns The `refreshAuth` function returns an object with different properties based on the
+   * execution flow:
+   */
+  async refreshAuth(refreshToken) {
+    const transaction = await sequelize.transaction();
+    // validate if the parameter is empty
+    if(refreshToken === null) {
+      return {
+        error: true,
+        message: `El token de actualización está vacío`,
+        statusCode: 400
+      }
+    };
+    try {
+
+      // Validate if token is valid
+      const refreshTokenValid = jwt.verify(refreshToken, secretKey);
+      if(!refreshTokenValid) {
+        return {
+          message: `Token Inválido`,
+          error: true,
+          statusCode: 401
+        };
+      };
+
+      const refreshTokenExist = await AuthToken.findOne({
+        where: {
+          token: refreshToken
+        }
+      });
+
+      if(!refreshTokenExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: `Inicio de sesión es requerido`,
+          statusCode: 401
+        }
+      };
+
+      const newAccessToken = jwt.sign(
+        {
+          id: refreshTokenExist.userId,
+          email: refreshTokenExist.email
+        },
+        secretKey,
+        {
+          expiresIn: `${parseInt(jwtAccessExpiration)}d`
+        }
+      );
+
+      if(!newAccessToken) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: `Hubo un error al momento de actualizar el token`,
+          statusCode: 400
+        }
+      };
+
+      // Remove authToken register
+      await AuthToken.destroy({
+        where: {
+          id: refreshTokenExist.id
+        },
+        transaction
+      });
+
+      // Generate refresh Token
+      const newRefreshToken = jwt.sign(
+        {
+          id: refreshTokenExist.userId,
+          email: refreshTokenExist.email
+        },
+        secretKey,
+        {
+          expiresIn: `365d`
+        }
+      );
+
+      // Create new Access Token register
+      const authtokenResponse = await AuthToken.create({
+        token: newRefreshToken,
+        userId: refreshTokenExist.userId,
+        email: refreshTokenExist.email
+      },{transaction});
+
+
+      // Commit the refresh token
+      await transaction.commit();
+
+      return {
+        error: false,
+        accessToken: newAccessToken,
+        refreshToken: authtokenResponse.token
+      };
+
+    } catch (error) {
+      logger.error(error);
+      return {
+        error: true,
+        message: `There was an error in refreshAuth services: ${error}`,
+        statusCode: 500
+      }
+    }
+  },
+
+
+  /**
+   * The function `removeRefreshToken` removes a refresh token from the database after validating its
+   * authenticity and existence.
+   * @param refreshToken - The `removeRefreshToken` function you provided is designed to remove a
+   * refresh token from the database. The `refreshToken` parameter is the token that needs to be
+   * removed from the database. This token is used for authentication purposes and is typically issued
+   * to clients for requesting new access tokens.
+   * @returns The `removeRefreshToken` function returns an object with properties based on different
+   * scenarios:
+   */
+  async removeRefreshToken(refreshToken) {
+    const transaction = await sequelize.transaction();
+    try {
+
+      // validate if the parameter is empty
+      if(refreshToken === null) {
+        return {
+          error: true,
+          message: `El token de actualización está vacío`,
+          statusCode: 400
+        }
+      };
+
+      // Validate if token is valid
+      const refreshTokenValid = jwt.verify(refreshToken, secretKey);
+      if(!refreshTokenValid) {
+        return {
+          message: `Token Inválido`,
+          error: true,
+          statusCode: 401
+        };
+      };
+
+      const refreshTokenExist = await AuthToken.findOne({
+        where: {
+          token: refreshToken
+        }
+      });
+
+      if(!refreshTokenExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: `Inicio de sesión es requerido`,
+          statusCode: 401
+        }
+      };
+
+      // Remove authToken register
+      await AuthToken.destroy({
+        where: {
+          id: refreshTokenExist.id
+        },
+        transaction
+      });
+
+      // Commit transaction
+      await transaction.commit();
+
+      return {
+        error: false,
+        message: `Refresh token was removed`
+      }
+
+    } catch (error) {
+      logger.error(error);
+      return {
+        error: true,
+        message: `Refresh token was not removed: ${error}`,
+        statusCode: 500
+      }
+    }
+  },
 
 }

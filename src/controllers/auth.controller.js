@@ -3,7 +3,9 @@ const {
   login,
   forgotPassword,
   resetPassword,
-  me
+  me,
+  refreshAuth,
+  removeRefreshToken
 } = require('@services/auth.service');
 
 const { 
@@ -28,7 +30,7 @@ module.exports = {
       const { error } = loginValidation(req.body);
       if(error) return res.status(400).json({ error: error.details[0].message });	
 
-      const { error:dataError, statusCode, message ,token } = await login(req.body);
+      const { error:dataError, statusCode, message , accessToken, refreshToken } = await login(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -40,7 +42,8 @@ module.exports = {
       return res.status(200).json({
         error: dataError,
         message,
-        token
+        accessToken,
+        refreshToken
       });
 
     } catch (error) {
@@ -139,4 +142,57 @@ module.exports = {
       });
     }
   },
+
+  /* The `async getRefreshToken(req,res)` function is a controller function that handles the process of
+  refreshing the authentication token. Here is a breakdown of what it does: */
+  async getRefreshToken(req,res) {
+    try {
+      
+      const { error, message, statusCode, accessToken, refreshToken } = await refreshAuth(req.body.refreshToken);
+      if(error) {
+        return res.status(statusCode).json({
+          error,
+          message
+        });
+      };
+
+      return res.status(200).json({
+        error,
+        accessToken,
+        refreshToken
+      });
+
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).json({
+        error: true,
+        message: `There was an error in RefreshToken controller: ${error}`,
+      });
+    }
+  },
+
+  async removeToken(req,res) {
+    try {
+      
+      const { error, message, statusCode } = await removeRefreshToken(req.body.refreshToken);
+      if(error) {
+        return res.status(statusCode).json({
+          error,
+          message
+        });
+      };
+
+      return res.status(200).json({
+        error,
+        message
+      });
+
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).json({
+        error: true,
+        message: `There was an error in removeRefreshToken controller: ${error}`,
+      });
+    }
+  }
 }
