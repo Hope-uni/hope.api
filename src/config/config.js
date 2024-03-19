@@ -1,6 +1,6 @@
 const {
   database,
- // dialect,
+  dialect,
   host,
   password,
   user,
@@ -14,7 +14,7 @@ module.exports = {
     password,
     database,
     host,
-    dialect: 'postgres',
+    dialect,
     ssl
   },
   test: {
@@ -22,14 +22,14 @@ module.exports = {
     password,
     database,
     host,
-    dialect: 'postgres',
+    dialect,
   },
   production: {
     username: user,
     password,
     database,
     host,
-    dialect: 'postgres',
+    dialect,
     dialectOptions: {
       ssl: {
         rejectUnauthorized: false,
