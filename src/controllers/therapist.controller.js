@@ -1,7 +1,7 @@
 const logger = require('@config/logger.config');
 const {
   all
-} = require('../services/therapist.service');
+} = require('@services/therapist.service');
 
 module.exports = {
 
