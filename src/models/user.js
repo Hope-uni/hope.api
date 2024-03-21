@@ -33,10 +33,24 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsTo(models.Role, {
       foreignKey: 'roleId',
     });
+
     User.hasOne(models.AuthToken, {
       foreignKey: 'userId',
       as: 'User'
     });
+
+    User.hasOne(models.Therapist, {
+      foreignKey: 'idUser',
+    });
+
+    User.hasOne(models.Tutor, {
+      foreignKey: 'idUser',
+    });
+
+    User.hasOne(models.Patient, {
+      foreignKey: 'idUser',
+    });
+
   }
 
   return User;
