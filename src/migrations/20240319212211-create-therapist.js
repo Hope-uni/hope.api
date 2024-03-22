@@ -11,12 +11,10 @@ module.exports = {
       identificationNumber: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       phoneNumber: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
       },
       status: {
         type: Sequelize.BOOLEAN,
