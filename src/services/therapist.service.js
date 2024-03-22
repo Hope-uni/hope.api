@@ -249,9 +249,8 @@ module.exports = {
       };
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message, data  } = await createUserPerson(resBody);
+      const { error:userPersonError, statusCode, message = 'Terapeuta no creado', data  } = await createUserPerson(resBody, transaction);
       if(userPersonError) {
-        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -431,9 +430,8 @@ module.exports = {
       };
 
       // User and Person update
-      const { error:userPersonError, statusCode, message  } = await updateUserPerson(id,resBody);
+      const { error:userPersonError, statusCode, message  } = await updateUserPerson(resBody, transaction);
       if(userPersonError) {
-        await transaction.rollback();
         return {
           error: userPersonError,
           message,

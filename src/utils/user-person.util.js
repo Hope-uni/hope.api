@@ -1,5 +1,5 @@
 const logger = require('@config/logger.config');
-const { Person, sequelize } = require('@models/index.js');
+const { Person/* , sequelize */ } = require('@models/index.js');
 const { 
   createUser,
   updateUser
@@ -8,8 +8,7 @@ const {
 
 module.exports = {
 
-  async createUserPerson(body) {
-    const transaction = await sequelize.transaction();
+  async createUserPerson(body, transaction) {
     try {
       
       // destructuring Object
@@ -56,13 +55,9 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: 'Tutor no creado',
         statusCode: 400
       };
     };
-
-    // commit transaction
-    await transaction.commit();
 
     return {
       data: {
@@ -81,8 +76,7 @@ module.exports = {
     }
   },
 
-  async updateUserPerson(body) {
-    const transaction = await sequelize.transaction();
+  async updateUserPerson(body, transaction) {
     try {
       
       // destructuring Object
@@ -116,9 +110,24 @@ module.exports = {
           }
         };
       };
-
+      
       // Update Person
       if(firstName || secondName || surname || secondSurname || imageProfile || address) {
+        // validate if person exist
+        const personExist = await Person.findOne({
+          where: {
+            id: idPerson
+          }
+        });
+        if(!personExist) {
+          logger.error(`La entidad persona que desea modificar no esta activa o no existe en el sistema`);
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 400
+          };
+        }
+
         const personData = await Person.update({
           firstName,
           secondName,
@@ -129,13 +138,13 @@ module.exports = {
         },{
           where: {
             id: idPerson
-          }
-        },{transaction});
+          },
+          transaction
+        });
         if(!personData) {
           await transaction.rollback();
           return {
             error: true,
-            message: 'Tutor no actualizado',
             statusCode: 400
           };
         };
