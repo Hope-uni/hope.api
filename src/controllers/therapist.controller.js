@@ -133,7 +133,7 @@ module.exports = {
       if(customError) return res.status(400).json({ error: customError});
 
       // Therapist joi validation
-      const { error } = updateTherapistValidation({ id:req.params.id, phoneNumber, identificationNumber });
+      const { error } = updateTherapistValidation({ phoneNumber, identificationNumber });
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, message, statusCode, data } = await update(req.params.id,req.body);
