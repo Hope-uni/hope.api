@@ -62,14 +62,6 @@ module.exports = {
         ]
       });
 
-      if(data.count === 0) {
-        return {
-          message: `No existen usuarios en el Sistema`,
-          error: true,
-          statusCode: 404
-        }
-      };
-
       const dataResponse = getPageData(data, query.page, limit);
 
       return {
