@@ -1,24 +1,24 @@
 const logger = require('@config/logger.config');
-const { Op } = require('sequelize');
-const { Tutor, User, Person, Permission, Role, sequelize } = require('@models/index.js');
+const { Patient, Tutor, User, Role, Permission, Person, sequelize } = require('@models/index.js');
 const { paginationValidation, getPageData } = require('@utils/pagination.util');
 const { 
   createUserPerson,
   updateUserPerson
 } = require('@utils/user-person.util');
-const { 
+const {
   deleteUser
 } = require('./user.service');
+
+
 
 module.exports = {
 
   async all(query) {
     try {
-    
-      // Pagination
+      
       const { limit, offset } = paginationValidation(query.page, query.size);
 
-      const data = await Tutor.findAndCountAll({
+      const data = await Patient.findAndCountAll({
         limit,
         offset,
         where: {
@@ -33,6 +33,16 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
+          },
+          {
+            model: Tutor,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
           },
           {
             model: User,
@@ -74,23 +84,22 @@ module.exports = {
       return {
         error: false,
         ...dataResponse
-      }
+      };
 
     } catch (error) {
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`There was an error in Patient services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in Patient services: ${error}`,
         statusCode: 500
       }
     }
   },
 
-
   async findOne(id) {
     try {
       
-      const data = await Tutor.findOne({
+      const data = await Patient.findOne({
         where: {
           id,
           status: true
@@ -104,6 +113,16 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
+          },
+          {
+            model: Tutor,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
           },
           {
             model: User,
@@ -143,108 +162,69 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: `Tutor no encontrado`,
-          statusCode: 404,
+          message: 'Paciente no encontrado',
+          statusCode: 404
         }
       };
 
       return {
         error: false,
-        message: 'Tutor encontrado',
+        message: 'Paciente encontrado',
         data
-      }
+      };
 
     } catch (error) {
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`There was an error in Patient services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in Patient services: ${error}`,
         statusCode: 500
       }
     }
   },
 
-
   async create(body) {
     const transaction = await sequelize.transaction();
     try {
+      
+      const { age, idTutor, ...resData } = body;
 
-      // Destructuring object
-      const { identificationNumber, phoneNumber, telephone, ...resBody } = body;
-
-      // IdentificationNumber validation
-      const identificationNumberExist = await Tutor.findOne({
+      // Tutor Exist validation
+      const tutorExist = await Tutor.findOne({
         where: {
-          identificationNumber,
+          id: idTutor,
           status: true
         }
       });
-      if(identificationNumberExist) {
+      if(!tutorExist) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'El número de identificación ya está en uso',
-          statusCode: 400
+          message: 'Tutor no encontrado',
+          statusCode: 404
         };
       };
 
-      // Phone number validation
-      const phoneNumberExist = await Tutor.findOne({
-        where: {
-          phoneNumber,
-          status: true
-        }
-      });
-      if(phoneNumberExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'El número de teléfono ya está en uso',
-          statusCode: 400
-        };
-      };
-
-      // Telephone validation
-      if(telephone) {
-        const telephoneExist = await Tutor.findOne({
-          where: {
-            telephone,
-            status: true
-          }
-        });
-        if(telephoneExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: 'El número de teléfono convencional ya está en uso',
-            statusCode: 400
-          };
-        };
-      }
-
-      // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, data } = await createUserPerson(resBody, transaction);
+      const { error:userPersonError, statusCode, message = 'Paciente no creado', data  } = await createUserPerson(resData, transaction);
       if(userPersonError) {
         return {
           error: userPersonError,
           message,
           statusCode
         };
-      }
+      };
 
-      // create Tutor
-      const tutorResponse = await Tutor.create({
-        identificationNumber,
-        phoneNumber,
-        telephone,
+      const patientResponse = await Patient.create({
+        age,
         idPerson: data.idPerson,
         idUser: data.idUser,
+        idTutor
       },{transaction});
-      if(!tutorResponse) {
+      if(!patientResponse) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no creado',
+          message: 'Paciente no creado',
           statusCode: 400
         };
       };
@@ -252,10 +232,10 @@ module.exports = {
       // commit transaction
       await transaction.commit();
 
-      // find Tutor
-      const newData = await Tutor.findOne({
+      // find Patient
+      const newData = await Patient.findOne({
         where: {
-          id: tutorResponse.id,
+          id: patientResponse.id,
           status: true
         },
         attributes: {
@@ -267,6 +247,16 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
+          },
+          {
+            model: Tutor,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
           },
           {
             model: User,
@@ -305,15 +295,15 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Tutor creado',
+        message: 'Paciente creado',
         data: newData
       };
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`There was an error in Patient services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in Patient services: ${error}`,
         statusCode: 500
       }
     }
@@ -322,92 +312,46 @@ module.exports = {
   async update(id,body) {
     const transaction = await sequelize.transaction();
     try {
-      // validate if tutor exist
-      const tutorExist = await Tutor.findOne({
+
+      // validate if patient exist
+      const patientExist = await Patient.findOne({
         where: {
           id,
           status: true
         }
       });
-      if(!tutorExist) {
+      if(!patientExist) {
+        await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no encontrado',
-          statusCode: 404,
-        }
+          message: 'Paciente no encontrado',
+          statusCode: 404
+        };
+      };
+      
+      // Destructuring Object
+      const { age, idTutor,...resData } = body;
+
+      // Tutor Exist validation
+      if(idTutor) {
+        const tutorExist = await Tutor.findOne({
+          where: {
+            id: idTutor,
+            status: true
+          }
+        });
+        if(!tutorExist) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: 'Tutor no encontrado',
+            statusCode: 404
+          };
+        };	
       };
 
-      // destructuring Object
-      const {
-        identificationNumber,
-        phoneNumber,
-        telephone,
-        ...resData
-      } = body;
 
-      // identification number validation
-      if(identificationNumber) {
-        const identificationNumberExist = await Tutor.findOne({
-          where: {
-            identificationNumber,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(identificationNumberExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: 'El número de identificación ya está en uso',
-            statusCode: 400
-          };
-        };
-      }
-      // phone number validation
-      if(phoneNumber) {
-        const phoneNumberExist = await Tutor.findOne({
-          where: {
-            phoneNumber,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(phoneNumberExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: 'El número de teléfono ya está en uso',
-            statusCode: 400
-          };
-        };
-      }
-      // telephone validation
-      if(telephone) {
-        const telephoneExist = await Tutor.findOne({
-          where: {
-            telephone,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(telephoneExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: 'El número de teléfono convencional ya está en uso',
-            statusCode: 400
-          };
-        };
-      }
-
-      // Validate and update User and Person
-      const { error:userPersonError, statusCode, message = 'Tutor no actualizado'  } = await updateUserPerson(resData, transaction);
+      const { error:userPersonError, statusCode, message = 'Paciente no actualizado' } = await updateUserPerson(resData, transaction);
       if(userPersonError) {
         return {
           error: userPersonError,
@@ -417,34 +361,29 @@ module.exports = {
       };
 
 
-      // update transaction
-      const updateTutorResponse = await Tutor.update(
-        {
-          identificationNumber,
-          phoneNumber,
-          telephone
+      const patientResponse = await Patient.update({
+        age,
+        idTutor
+      },{
+        where: {
+          id
         },
-        {
-          where: {
-            id
-          },
-          transaction
-        }
-      );
-      if(!updateTutorResponse) {
+        transaction
+      });
+      if(!patientResponse) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no actualizado',
+          message: 'Paciente no actualizado',
           statusCode: 400
         };
       };
 
-      // Commit Transaction 
+      // Commit transaction
       await transaction.commit();
 
-      // find Tutor
-      const newData = await Tutor.findOne({
+      // find Patient
+      const newData = await Patient.findOne({
         where: {
           id,
           status: true
@@ -458,6 +397,16 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
+          },
+          {
+            model: Tutor,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
           },
           {
             model: User,
@@ -496,83 +445,83 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Tutor actualizado',
+        message: 'Paciente actualizado',
         data: newData
       }
+
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`There was an error in Patient services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in Patient services: ${error}`,
         statusCode: 500
       }
     }
   },
 
-  async removeTutor(id) {
+  async removePatient(id) {
     const transaction = await sequelize.transaction();
     try {
-      // validate if tutor exist
-      const tutorExist = await Tutor.findOne({
+      
+      // validate if patient exist
+      const patientExist = await Patient.findOne({
         where: {
           id,
           status: true
         }
       });
-      if(!tutorExist) {
+      if(!patientExist) {
         return {
           error: true,
-          message: 'Tutor no encontrado',
-          statusCode: 404,
-        }
+          message: 'Paciente no encontrado',
+          statusCode: 404
+        };
       };
-
-      // remove User
-      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser);
+  
+      // remove user 
+      const { error:userError, statusCode } = await deleteUser(patientExist.idUser);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
-          message: 'Tutor no fue eliminado',
+          message: 'Paciente no fue eliminado',
           statusCode
         }
       };
 
-      // update transaction
-      const updateTutorResponse = await Tutor.update(
-        {
-          status: false
+      // remove patient
+      const patientResponse = await Patient.update({
+        status: false
+      },{
+        where: {
+          id
         },
-        {
-          where: {
-            id
-          },
-          transaction
-        }
-      );
-      if(!updateTutorResponse) {
+        transaction
+      });
+      if(!patientResponse) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no fue eliminado',
+          message: 'Paciente no eliminado',
           statusCode: 400
         };
       };
 
-      // commit transaction
+      // Commit transaction
       await transaction.commit();
 
       return {
         error: false,
-        message: 'Tutor eliminado',
+        message: 'Paciente eliminado',
       }
+
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`There was an error in Patient services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in Patient services: ${error}`,
         statusCode: 500
       }
     }

@@ -319,7 +319,8 @@ module.exports = {
       // User Exist
       const userExist = await User.findOne({
         where: {
-          id
+          id,
+          status: true,
         }
       });
       if(!userExist) {
