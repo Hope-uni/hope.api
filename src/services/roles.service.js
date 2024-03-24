@@ -46,15 +46,9 @@ module.exports = {
         }
       });
 
-      if(!data) {
-        return {
-          message: `Roles were not found`,
-          error: true,
-        }
-      };
-
       return {
         error: false,
+        message: 'Lista de Roles',
         data
       };
       
@@ -116,21 +110,24 @@ module.exports = {
 
       if(!data) {
         return {
-          message: `Role does not exist`,
           error: true,
+          statusCode: 404,
+          message: `Rol no encontrado`,
         }
       };
 
       return {
         error: false,
+        message: 'Rol encontrado',
         data
       };
 
     } catch (error) {
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Services: ${error.message}`,
-        error: true
       };
     }
   },
@@ -159,8 +156,9 @@ module.exports = {
       if(nameExist) {
         await transaction.rollback();
         return {
-          message: `Role name already exist`,
-          error: true
+          error: true,
+          statusCode: 400,
+          message: `Nombre de rol ya esta en uso`,
         }
       };
 
@@ -174,8 +172,9 @@ module.exports = {
       if(!data) {
         await transaction.rollback();
         return {
-          message: `Role was not created`,
-          error: true
+          error: true,
+          statusCode: 400,
+          message: `Rol no creado`,
         }
       };
 
@@ -184,8 +183,9 @@ module.exports = {
       if(!data) {
         await transaction.rollback();
         return {
-          message: `Role was not created`,
           error: true,
+          statusCode: 400,
+          message: `Rol no creado`,
         }
       };
 
@@ -220,8 +220,8 @@ module.exports = {
       });
 
       return {
-        message: `Role created successfully`,
         error: false,
+        message: `Rol creado`,
         data: newRole
       };
 
@@ -229,8 +229,9 @@ module.exports = {
       await transaction.rollback();
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Services: ${error.message}`,
-        error: true
       };
     }
   },
@@ -270,8 +271,9 @@ module.exports = {
       if(!roleExist) {
         await transaction.rollback();
         return {
-          message: `Role not found`,
           error: true,
+          statusCode: 404,
+          message: `Rol no encontrado`,
         };
       };
 
@@ -293,8 +295,9 @@ module.exports = {
       if(nameExist) {
         await transaction.rollback();
         return {
-          message: `Role name already exist`,
-          error: true
+          error: true,
+          statusCode: 400,
+          message: `Nombre de rol ya esta en uso`,
         };
       };
 
@@ -321,8 +324,9 @@ module.exports = {
       if(!roleExist) {
         await transaction.rollback();
         return {
-          message: `Role was not updated`,
           error: true,
+          statusCode: 400,
+          message: `Rol no actualizado`,
         }
       };
 
@@ -355,8 +359,8 @@ module.exports = {
       });
 
       return {
-        message: `Role updated successfully`,
         error: false,
+        message: `Rol actualizado`,
         data: roleExist
       };
 
@@ -364,8 +368,9 @@ module.exports = {
       await transaction.rollback();
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Services: ${error.message}`,
-        error: true
       };
     }
   },
@@ -385,8 +390,9 @@ module.exports = {
 
       if (id === 1) {
         return {
-          message: `Role can not be deleted`,
           error: true,
+          statusCodw: 404,
+          message: `Rol no encontrado`,
         };
       }
       
@@ -406,8 +412,9 @@ module.exports = {
       if(!roleExist) {
         await transaction.rollback();
         return {
-          message: `Role not found`,
           error: true,
+          statusCode: 404,
+          message: `Rol no encontrado`,
         };
       };
 
@@ -427,7 +434,7 @@ module.exports = {
       await transaction.commit();
 
       return {
-        message: `Role was deleted successfully`,
+        message: `Rol eliminado`,
         error: false,
       };
 
@@ -435,8 +442,9 @@ module.exports = {
       await transaction.rollback();
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Services: ${error.message}`,
-        error: true
       };
     }
   }

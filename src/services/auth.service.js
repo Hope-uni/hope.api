@@ -50,8 +50,8 @@ module.exports = {
         if(!userVerify) {
           return {
             error: true,
-            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
-            statusCode: 400
+            message: `El nombre de usuario ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+            statusCode: 404
           }
         };
       };
@@ -79,7 +79,7 @@ module.exports = {
           return {
             error: true,
             message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
-            statusCode: 400
+            statusCode: 404
           }
         };
       }
@@ -170,8 +170,14 @@ module.exports = {
       return {
         error: false,
         message: `Inicio de sesión existoso!`,
-        accessToken,
-        refreshToken: authtokenReponse.token
+        data: [
+          {
+            accessToken,
+          },
+          {
+            refreshToken: authtokenReponse.token
+          }
+        ]
       };
     } catch (error) {
       logger.error(error);
@@ -208,7 +214,7 @@ module.exports = {
         return {
           error: true,
           message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
-          statusCode: 400
+          statusCode: 404
         }
       };
 
@@ -256,7 +262,7 @@ module.exports = {
         message: `Correo enviado satisfactoriamente`
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in forgotPassword services: ${error}`);
       return {
         error: true,
         message: `There was an error in forgotPassword services: ${error}`,
@@ -310,7 +316,7 @@ module.exports = {
       }
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in resetPassword services: ${error}`);
       return {
         error: true,
         message: `There was an error in resetPassword services: ${error}`,
@@ -379,12 +385,12 @@ module.exports = {
 
       return {
         error: false,
-        message: `User data`,
+        message: `Información de usuario`,
         data
       }
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in Me services: ${error}`);
       return {
         error: true,
         message: `There was an error in Me services: ${error}`,
@@ -435,7 +441,7 @@ module.exports = {
         return {
           error: true,
           message: `Inicio de sesión es requerido`,
-          statusCode: 401
+          statusCode: 403
         }
       };
 
@@ -454,7 +460,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: `Hubo un error al momento de actualizar el token`,
+          message: `Token no actualizado`,
           statusCode: 400
         }
       };
@@ -492,8 +498,15 @@ module.exports = {
 
       return {
         error: false,
-        accessToken: newAccessToken,
-        refreshToken: authtokenResponse.token
+        message: 'Token actualizado',
+        data: [
+          {
+            accessToken: newAccessToken,
+          },
+          {
+            refreshToken: authtokenResponse.token
+          }
+        ]
       };
 
     } catch (error) {
@@ -568,7 +581,7 @@ module.exports = {
 
       return {
         error: false,
-        message: `Refresh token was removed`
+        message: `Refresh token eliminado`
       }
 
     } catch (error) {

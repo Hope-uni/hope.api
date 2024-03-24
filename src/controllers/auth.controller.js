@@ -23,33 +23,43 @@ module.exports = {
 
       // Username | email validation
       if(!req.body.username && !req.body.email) {
-        return res.status(400).json({error: 'Nombre de usuario o correo es necesario para iniciar sesión'})
+        return res.status(400).json({
+          error: true,
+          statusCode: 400,
+          message: 'Nombre de usuario o correo es necesario para iniciar sesión',
+        })
       };
 
       // Joi Validation
       const { error } = loginValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });	
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message,
+      });	
 
-      const { error:dataError, statusCode, message , accessToken, refreshToken } = await login(req.body);
+      const { error:dataError, statusCode, message , data } = await login(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
-        accessToken,
-        refreshToken
+        data
       });
 
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in login controller: ${error}`,
       });
     }
@@ -61,19 +71,25 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = forgotPasswordValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message,
+      });
 
       const { error:dataError, statusCode, message } = await forgotPassword(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message
       });
 
@@ -81,6 +97,7 @@ module.exports = {
       logger.error(error);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in forgot password controller: ${error}`,
       });
     }
@@ -92,25 +109,32 @@ module.exports = {
     try { 
       // Joi Validation
       const { error } = resetPasswordValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message,
+      });
 
       const { error:dataError, message, statusCode } = await resetPassword(req.body,req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message
       });
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in reset password controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in reset password controller: ${error}`,
       });
     }
@@ -125,12 +149,14 @@ module.exports = {
       if(error) {
         return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
         message,
         data
       });
@@ -138,6 +164,7 @@ module.exports = {
       logger.error(error);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Me controller: ${error}`,
       });
     }
@@ -148,24 +175,27 @@ module.exports = {
   async getRefreshToken(req,res) {
     try {
       
-      const { error, message, statusCode, accessToken, refreshToken } = await refreshAuth(req.body.refreshToken);
+      const { error, message, statusCode, data } = await refreshAuth(req.body.refreshToken);
       if(error) {
         return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
-        accessToken,
-        refreshToken
+        statusCode,
+        message,
+        data
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in RefreshToken controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in RefreshToken controller: ${error}`,
       });
     }
@@ -178,19 +208,22 @@ module.exports = {
       if(error) {
         return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
         message
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in removeRefreshToken controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in removeRefreshToken controller: ${error}`,
       });
     }

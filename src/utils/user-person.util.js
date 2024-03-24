@@ -32,9 +32,8 @@ module.exports = {
       password,
       email,
       roleId
-    });
+    }, transaction);
     if(dataError) {
-      await transaction.rollback();
       return {
         error: dataError,
         message,
@@ -53,7 +52,6 @@ module.exports = {
     },{transaction});
     if(!personData) {
       logger.error(`Persona no pudo ser creada`);
-      await transaction.rollback();
       return {
         error: true,
         message: 'Tutor no creado',
@@ -106,9 +104,8 @@ module.exports = {
           username,
           email,
           roleId
-        });
+        },transaction);
         if(userError) {
-          await transaction.rollback();
           return {
             error: userError,
             message,
@@ -119,6 +116,23 @@ module.exports = {
 
       // Update Person
       if(firstName || secondName || surname || secondSurname || imageProfile || address) {
+<<<<<<< HEAD
+        // validate if person exist
+        const personExist = await Person.findOne({
+          where: {
+            id: idPerson
+          }
+        });
+        if(!personExist) {
+          logger.error(`La entidad persona que desea modificar no esta activa o no existe en el sistema`);
+          return {
+            error: true,
+            statusCode: 400
+          };
+        }
+
+=======
+>>>>>>> develop
         const personData = await Person.update({
           firstName,
           secondName,
@@ -132,7 +146,6 @@ module.exports = {
           }
         },{transaction});
         if(!personData) {
-          await transaction.rollback();
           return {
             error: true,
             message: 'Tutor no actualizado',
