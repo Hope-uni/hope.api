@@ -15,21 +15,23 @@ module.exports = {
     };
   },
 
-  getPageData(dataResponse, page, limit) {
-    if(+page <= 0) {
-      page = 1;
+  getPageData(dataResponse, pageNumber, limit) {
+    if(+pageNumber <= 0) {
+      pageNumber = 1;
     }
 
-    const { count: totalItems, rows: data } = dataResponse;
-    const currentPage = page ? +page : 1;
-    const totalPages = Math.ceil(totalItems / limit);
+    const { count, rows: data } = dataResponse;
+    const page = pageNumber ? +pageNumber : 1;
+    const totalPages = Math.ceil(count / limit);
 
     return {
-      totalItems,
-      totalPages,
-      currentPage,
-      totalData: data.length,
-      data
+      data,
+      paginate: {
+        total: count,
+        page_count:totalPages,
+        page,
+        page_size: data.length,
+      },
     }
 
   }

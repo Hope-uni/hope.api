@@ -26,20 +26,24 @@ module.exports = {
       if(error) {
         return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
+        message,
         ...resData
       });
 
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in User services: ${error}`,
-        error: true
       });
     }
   },
@@ -57,12 +61,14 @@ module.exports = {
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
+          statusCode,
           message
         })
       };
 
       return res.status(200).json({
         error:dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -70,8 +76,9 @@ module.exports = {
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in User services: ${error}`,
-        error: true
       });
     }
   },
@@ -88,12 +95,14 @@ module.exports = {
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         })
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode,
         message,
         data
       });
@@ -101,8 +110,9 @@ module.exports = {
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in User services: ${error}`,
-        error: true
       });
     }
   },
@@ -121,12 +131,14 @@ module.exports = {
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -134,8 +146,9 @@ module.exports = {
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in User services: ${error}`,
-        error: true
       });
     }
   },
@@ -152,18 +165,22 @@ module.exports = {
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
-        message
+        error: false,
+        statusCode: 200,
+        message,
       });
     } catch (error) {
       logger.error(error);
       return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in User services: ${error}`,
-        error: true
       });
     }
   },

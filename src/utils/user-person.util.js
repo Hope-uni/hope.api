@@ -31,9 +31,8 @@ module.exports = {
       password,
       email,
       roleId
-    });
+    }, transaction);
     if(dataError) {
-      await transaction.rollback();
       return {
         error: dataError,
         message,
@@ -52,7 +51,6 @@ module.exports = {
     },{transaction});
     if(!personData) {
       logger.error(`Persona no pudo ser creada`);
-      await transaction.rollback();
       return {
         error: true,
         statusCode: 400
@@ -100,9 +98,8 @@ module.exports = {
           username,
           email,
           roleId
-        });
+        },transaction);
         if(userError) {
-          await transaction.rollback();
           return {
             error: userError,
             message,
@@ -121,7 +118,6 @@ module.exports = {
         });
         if(!personExist) {
           logger.error(`La entidad persona que desea modificar no esta activa o no existe en el sistema`);
-          await transaction.rollback();
           return {
             error: true,
             statusCode: 400
@@ -142,7 +138,6 @@ module.exports = {
           transaction
         });
         if(!personData) {
-          await transaction.rollback();
           return {
             error: true,
             statusCode: 400

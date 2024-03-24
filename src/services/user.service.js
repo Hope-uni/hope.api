@@ -1,4 +1,4 @@
-const { User, Role,Permission ,sequelize } = require('@models/index.js');
+const { User, Role,Permission } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
@@ -25,6 +25,7 @@ module.exports = {
       const data = await User.findAndCountAll({
         limit,
         offset,
+        distinct: true,
         where: {
           id: {
             [Op.ne]: 1
@@ -66,6 +67,7 @@ module.exports = {
 
       return {
         error: false,
+        message: 'Lista de Usuarios',
         ...dataResponse
       };
 
@@ -166,13 +168,12 @@ module.exports = {
    * @param body - The `createUser` function you provided is an asynchronous function that creates a
    * new user in a database using Sequelize ORM. It performs various validations before creating the
    * user and handles errors using transactions.
+   * @param ts => transaction param. this will be use it when you create therapist, tutor or patient register
    * @returns The function `createUser` returns an object with different properties based on the
    * outcome of the user creation process. Here are the possible return values:
    */
-  async createUser(body) {
-    const transaction = await sequelize.transaction();
+  async createUser(body,transaction) {
     try {
-      
       // username Validation
       const usernameExist = await User.findOne({
         where: {
@@ -181,7 +182,6 @@ module.exports = {
         }
       });
       if(usernameExist) {
-        await transaction.rollback();
         return {
           message: `Nombre de Usuario está en uso`,
           error: true,
@@ -196,7 +196,6 @@ module.exports = {
         }
       });
       if(emailExist) {
-        await transaction.rollback();
         return {
           message: `Correo está en uso`,
           error: true,
@@ -212,7 +211,6 @@ module.exports = {
         }
       });
       if(!roleExist) {
-        await transaction.rollback();
         return {
           message: `Rol no encontrado`,
           error: true,
@@ -224,6 +222,7 @@ module.exports = {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(body.password, salt);
       
+      // Create User
       const data = await User.create(
         {
           ...body,
@@ -242,53 +241,13 @@ module.exports = {
         }
       };
 
-      await transaction.commit();
-
-       // finding User
-      const newData = await User.findOne({
-        where: {
-          id:data.id,
-          status: true
-        },
-        attributes: {
-          exclude: ['createdAt','updatedAt','status','password'],
-        },
-        include: [
-          {
-            model: Role,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Permission,
-              as: 'permissions',
-              attributes: {
-                exclude: ['group','createdAt','updatedAt']
-              },
-              through: {
-                attributes: {
-                  exclude: [
-                    'id',
-                    'createdAt',
-                    'updatedAt',
-                    'roleId',
-                    'permissionId',
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      });
-
       return {
         error: false,
         message: 'Usuario creado',
-        data: newData
+        data
       };
     } catch (error) {
-      await transaction.rollback();
-      logger.error(error);
+      logger.error(`There was an error in User services: ${error}`);
       return {
         message: `There was an error in User services: ${error}`,
         error: true,
@@ -303,6 +262,7 @@ module.exports = {
    * @param id - The `id` parameter in the `updateUser` function represents the unique identifier of
    * the user whose information is being updated. This identifier is used to locate the specific user
    * record in the database that needs to be updated.
+   * @param ts => transaction param. this will be use it when you update therapist, tutor or patient register
    * @param body - The `body` parameter in the `updateUser` function contains the data that needs to be
    * updated for a user. It can include fields like `username`, `email`, `roleId`, etc. The function
    * first checks if the user with the specified `id` exists in the database. Then it
@@ -312,19 +272,27 @@ module.exports = {
    * - `data`: The updated user data if the operation was successful.
    * - `statusCode`: The status code of the response.
    */
-  async updateUser(id, body) {
-    const transaction = await sequelize.transaction();
+  async updateUser(id, body, transaction) {
     try {
 
       // User Exist
       const userExist = await User.findOne({
         where: {
-          id,
+          [Op.and]: [
+            {
+              id
+            },
+            {
+              id: {
+                [Op.ne]: 1
+              }
+            }
+          ],
           status: true,
+
         }
       });
       if(!userExist) {
-        await transaction.rollback();
         return {
           message: `Usuario no encontrado`,
           error: true,
@@ -344,7 +312,6 @@ module.exports = {
           }
         });
         if(usernameExist) {
-          await transaction.rollback();
           return {
             message: `Nombre de Usuario está en uso`,
             error: true,
@@ -365,7 +332,6 @@ module.exports = {
           }
         });
         if(emailExist) {
-          await transaction.rollback();
           return {
             message: `Correo está en uso`,
             error: true,
@@ -383,7 +349,6 @@ module.exports = {
           }
         });
         if(!roleExist) {
-          await transaction.rollback();
           return {
             message: `Rol no encontrado`,
             error: true,
@@ -396,11 +361,11 @@ module.exports = {
         where: {
           id
         },
+        returning: true,
         transaction
       });
 
       if(!data) {
-        await transaction.rollback();
         return {
           error: true,
           message: `Usuario no actualizado`,
@@ -408,55 +373,13 @@ module.exports = {
         }
       };
 
-      // Commit Transaction 
-      await transaction.commit();
-
-      
-       // finding User
-      const newData = await User.findOne({
-        where: {
-          id,
-          status: true
-        },
-        attributes: {
-          exclude: ['createdAt','updatedAt','status','password'],
-        },
-        include: [
-          {
-            model: Role,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Permission,
-              as: 'permissions',
-              attributes: {
-                exclude: ['group','createdAt','updatedAt']
-              },
-              through: {
-                attributes: {
-                  exclude: [
-                    'id',
-                    'createdAt',
-                    'updatedAt',
-                    'roleId',
-                    'permissionId',
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      });
-
       return {
         error: false,
         message: 'Usuario actualizado',
-        data: newData
+        data
       };
 
     } catch (error) {
-      await transaction.rollback();
       logger.error(error);
       return {
         message: `There was an error in User services: ${error}`,
@@ -473,11 +396,11 @@ module.exports = {
    * @param id - The `id` parameter in the `deleteUser` function represents the unique identifier of
    * the user that you want to delete from the database. This identifier is used to locate the specific
    * user record that needs to be marked as deleted by setting its `status` field to `false`.
+   * @param ts => transaction param. this will be use it when you delete therapist, tutor or patient register
    * @returns The `deleteUser` function returns an object with different properties based on the
    * outcome of the operation. Here are the possible return values:
    */
-  async deleteUser(id) {
-    const transaction = await sequelize.transaction();
+  async deleteUser(id, transaction) {
     try {
       
       // User Exist
@@ -487,7 +410,6 @@ module.exports = {
         }
       });
       if(!userExist) {
-        await transaction.rollback();
         return {
           message: `Usuario no encontrado`,
           error: true,
@@ -508,7 +430,6 @@ module.exports = {
       );
 
       if (!data) {
-        await transaction.rollback();
         return {
           message: `Usuario no fue eliminado`,
           error: true,
@@ -516,16 +437,12 @@ module.exports = {
         };
       };
 
-      // Commit Transaction 
-      await transaction.commit();
-
       return {
         error: false,
         message: 'Usuario eliminado',
       }
 
     } catch (error) {
-      await transaction.rollback();
       logger.error(error);
       return {
         message: `There was an error in User services: ${error}`,

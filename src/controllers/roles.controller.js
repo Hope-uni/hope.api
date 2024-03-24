@@ -25,27 +25,30 @@ module.exports = {
   async all(req,res) {
     try {
       
-      const { error, data, message } = await allRoles();
+      const { error, statusCode, data, message } = await allRoles();
 
       if(error) {
         return res.status(400).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
         message,
         data
       });
 
     } catch (error) {
       logger.error(error.message);
-      return {
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Controller: ${error.message}`,
-        error: true
-      };
+      });
     }
   },
 
@@ -59,18 +62,24 @@ module.exports = {
     try {
       
       const { error } = findRoleValidation({id:req.params.id});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
-      const { error: dataError, message, data } = await findRole(req.params.id);
+      const { error: dataError, statusCode, message, data } = await findRole(req.params.id);
       if(dataError) {
         return res.status(400).json({
           error:dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -78,8 +87,9 @@ module.exports = {
     } catch (error) {
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Controller: ${error.message}`,
-        error: true
       };
     }
   },
@@ -94,18 +104,24 @@ module.exports = {
     try {
       
       const { error } = createRoleValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
-      const { error: dataError, message, data } = await createRole(req.body);
+      const { error: dataError, statusCode, message, data } = await createRole(req.body);
       if(dataError) {
         return res.status(400).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -113,8 +129,9 @@ module.exports = {
     } catch (error) {
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Controller: ${error.message}`,
-        error: true
       };
     }
   },
@@ -129,18 +146,24 @@ module.exports = {
     try {
       
       const { error } = updateRoleValidation({id:req.params.id,...req.body});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
-      const { error:dataError, message, data } = await updateRole(req.params.id,req.body);
+      const { error:dataError, statusCode, message, data } = await updateRole(req.params.id,req.body);
       if(dataError) {
-        return res.status(400).json({
+        return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -148,8 +171,9 @@ module.exports = {
     } catch (error) {
       logger.error(error.message);
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Controller: ${error.message}`,
-        error: true
       };
     }
   },
@@ -162,25 +186,32 @@ module.exports = {
   async deleteRole(req,res) {
     try {
       const { error } = findRoleValidation({id:req.params.id});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
-      const { message, error:dataError } = await deleteRole(req.params.id);
+      const { message, statusCode, error:dataError } = await deleteRole(req.params.id);
       if(dataError) {
-        return res.status(400).json({
+        return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
         message
       });
 
     } catch (error) {
       return {
+        error: true,
+        statusCode: 500,
         message: `There was an error in Role Controller: ${error.message}`,
-        error: true
       };
     }
   }

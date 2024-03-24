@@ -21,6 +21,7 @@ module.exports = {
       const data = await Patient.findAndCountAll({
         limit,
         offset,
+        distinct: true,
         where: {
           status: true
         },
@@ -83,6 +84,7 @@ module.exports = {
 
       return {
         error: false,
+        message: 'Lista de Pacientes',
         ...dataResponse
       };
 
@@ -207,6 +209,7 @@ module.exports = {
 
       const { error:userPersonError, statusCode, message = 'Paciente no creado', data  } = await createUserPerson(resData, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -332,6 +335,16 @@ module.exports = {
       // Destructuring Object
       const { age, idTutor,...resData } = body;
 
+      // Validate if user and person are correct
+      if(patientExist.idUser !== resData.idUser || patientExist.idPerson !== resData.idPerson) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: 'Identificador de usuario o identificador de persona no son correctos',
+          statusCode: 400
+        };
+      }
+
       // Tutor Exist validation
       if(idTutor) {
         const tutorExist = await Tutor.findOne({
@@ -353,6 +366,7 @@ module.exports = {
 
       const { error:userPersonError, statusCode, message = 'Paciente no actualizado' } = await updateUserPerson(resData, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -480,7 +494,7 @@ module.exports = {
       };
   
       // remove user 
-      const { error:userError, statusCode } = await deleteUser(patientExist.idUser);
+      const { error:userError, statusCode } = await deleteUser(patientExist.idUser, transaction);
       if(userError) {
         await transaction.rollback();
         return {

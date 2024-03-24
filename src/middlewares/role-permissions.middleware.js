@@ -44,7 +44,11 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
     if(user && haveRole && havePermission) {
       next();
     } else {
-      response.status(403).json({ message: 'Acceso Denegado' }); // user is forbidden
+      response.status(403).json({
+        error: true,
+        statusCode: 403,
+        message: 'Acceso Denegado' 
+      }); // user is forbidden
     }
 
   }

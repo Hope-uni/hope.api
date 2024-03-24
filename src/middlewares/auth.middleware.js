@@ -11,15 +11,17 @@ module.exports = {
       const token = req.headers.authorization.split(' ')[1];
       if(!token) {
         return res.status(403).json({
+          error: true,
+          statusCode: 403,
           message: `Token no fue proveído`,
-          error: true
         });
       };
       const payload = jwt.verify(token, secretKey);
       if(!payload) {
         return res.status(401).json({
-          message: `Token Inválido`,
           error: true,
+          statusCode: 401,
+          message: `Token Inválido`,
         });
       };
 
@@ -28,8 +30,9 @@ module.exports = {
     } catch (error) {
       logger.error(`There was an error in verifyToken middleware: ${error}`);
       return res.status(401).json({
-        message: `No autorizado`,
         error: true,
+        statusCode: 401,
+        message: `No autorizado`,
       });
     }
 

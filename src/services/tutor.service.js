@@ -21,6 +21,7 @@ module.exports = {
       const data = await Tutor.findAndCountAll({
         limit,
         offset,
+        distinct: true,
         where: {
           status: true
         },
@@ -73,6 +74,7 @@ module.exports = {
 
       return {
         error: false,
+        message: 'Lista de Tutores',
         ...dataResponse
       }
 
@@ -225,6 +227,7 @@ module.exports = {
       // Validate and create User and Person
       const { error:userPersonError, message, statusCode, data } = await createUserPerson(resBody, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -345,6 +348,16 @@ module.exports = {
         ...resData
       } = body;
 
+      // validate if user and person is correct
+      if(tutorExist.idUser !== resData.idUser || tutorExist.idPerson !== resData.idPerson) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: 'Identificador de usuario o identificador de persona no son correctos',
+          statusCode: 400
+        };
+      }
+
       // identification number validation
       if(identificationNumber) {
         const identificationNumberExist = await Tutor.findOne({
@@ -409,6 +422,7 @@ module.exports = {
       // Validate and update User and Person
       const { error:userPersonError, statusCode, message = 'Tutor no actualizado'  } = await updateUserPerson(resData, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -529,7 +543,7 @@ module.exports = {
       };
 
       // remove User
-      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser);
+      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser, transaction);
       if(userError) {
         await transaction.rollback();
         return {

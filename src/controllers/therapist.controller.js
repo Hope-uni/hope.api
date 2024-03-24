@@ -31,12 +31,15 @@ module.exports = {
       if(error) {
         return res.status(statusCode).json({
           error,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error,
+        statusCode: 200,
+        message,
       ...resData
       });
 
@@ -44,6 +47,7 @@ module.exports = {
       logger.error(`There was an error in Therapist controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist controller: ${error}`
       }); 
     }
@@ -56,18 +60,24 @@ module.exports = {
     try {
       
       const { error } = findOneValidation({id:req.params.id});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
       const { error:dataError, statusCode, message, data } = await findOne(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -76,6 +86,7 @@ module.exports = {
       logger.error(`There was an error in Therapist controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist controller: ${error}`
       }); 
     }
@@ -91,22 +102,32 @@ module.exports = {
 
       // User and Person joi validation
       const { error:customError } = userPersonCreateValidation(resBody);
-      if(customError) return res.status(400).json({ error: customError});
+      if(customError) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: customError
+      });
 
       // Therapist joi validation
       const { error } = createTherapistValidation({ phoneNumber, identificationNumber });
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
       const { error:dataError, statusCode, message, data } = await create(req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -115,6 +136,7 @@ module.exports = {
       logger.error(`There was an error in Therapist controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist controller: ${error}`
       }); 
     }
@@ -130,22 +152,32 @@ module.exports = {
 
       // User and Person joi validation
       const { error:customError } = userPersonUpdateValidation(resBody);
-      if(customError) return res.status(400).json({ error: customError});
+      if(customError) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: customError
+      });
 
       // Therapist joi validation
       const { error } = updateTherapistValidation({ id:req.params.id, phoneNumber, identificationNumber });
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: error.details[0].message
+      });
 
       const { error:dataError, message, statusCode, data } = await update(req.params.id,req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
+          statusCode,
           message
         });
       };
 
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message,
         data
       });
@@ -154,6 +186,7 @@ module.exports = {
       logger.error(`There was an error in Therapist controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist controller: ${error}`
       }); 
     }
@@ -174,12 +207,14 @@ module.exports = {
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
+          statusCode,
           message
         });
       };
       
       return res.status(200).json({
         error: dataError,
+        statusCode: 200,
         message
       });
 
@@ -187,6 +222,7 @@ module.exports = {
       logger.error(`There was an error in Therapist controller: ${error}`);
       return res.status(500).json({
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist controller: ${error}`
       }); 
     }

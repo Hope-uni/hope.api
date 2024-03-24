@@ -33,6 +33,7 @@ module.exports = {
       const data = await Therapist.findAndCountAll({
         limit,
         offset,
+        distinct: true,
         where: {
           status: true
         },
@@ -85,6 +86,7 @@ module.exports = {
 
       return {
         error: false,
+        message: 'Lista de Terapeutas',
         ...dataResponse
       }
 
@@ -92,8 +94,8 @@ module.exports = {
       logger.error(`There was an error in Therapiist services: ${error}`);
       return {
         error: true,
+        statusCode: 500,
         message: `There was an error in Therapist services: ${error}`,
-        statusCode: 500
       }
     }
   },
@@ -251,6 +253,7 @@ module.exports = {
       // User and Person creation
       const { error:userPersonError, statusCode, message = 'Terapeuta no creado', data  } = await createUserPerson(resBody, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -387,6 +390,16 @@ module.exports = {
         ...resBody
       } = body;
 
+      // validate if user and person is correct
+      if(therapistExist.idUser !== resBody.idUser || therapistExist.idPerson !== resBody.idPerson) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: 'Identificador de usuario o identificador de persona no son correctos',
+          statusCode: 400
+        };
+      }
+
       // identification number validation
       if(identificationNumber) {
         const identificationNumberExist = await Therapist.findOne({
@@ -430,8 +443,9 @@ module.exports = {
       };
 
       // User and Person update
-      const { error:userPersonError, statusCode, message  } = await updateUserPerson(resBody, transaction);
+      const { error:userPersonError, statusCode, message = 'Terapeuta no actualizado'  } = await updateUserPerson(resBody, transaction);
       if(userPersonError) {
+        await transaction.rollback();
         return {
           error: userPersonError,
           message,
@@ -558,7 +572,7 @@ module.exports = {
       };
 
       // update User
-      const { error:userError, statusCode } = await deleteUser(therapistExist.idUser);
+      const { error:userError, statusCode } = await deleteUser(therapistExist.idUser, transaction);
       if(userError) {
         await transaction.rollback();
         return {
