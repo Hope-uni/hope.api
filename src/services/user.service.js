@@ -278,6 +278,7 @@ module.exports = {
       // User Exist
       const userExist = await User.findOne({
         where: {
+<<<<<<< HEAD
           [Op.and]: [
             {
               id
@@ -290,6 +291,9 @@ module.exports = {
           ],
           status: true,
 
+=======
+          id
+>>>>>>> develop
         }
       });
       if(!userExist) {

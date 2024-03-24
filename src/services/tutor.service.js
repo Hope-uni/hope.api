@@ -82,7 +82,7 @@ module.exports = {
       logger.error(`There was an error in Tutor services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in utor services: ${error}`,
         statusCode: 500
       }
     }
@@ -160,7 +160,7 @@ module.exports = {
       logger.error(`There was an error in Tutor services: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `There was an error in utor services: ${error}`,
         statusCode: 500
       }
     }
@@ -225,7 +225,7 @@ module.exports = {
       }
 
       // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, data } = await createUserPerson(resBody, transaction);
+      const { error:userPersonError, message, statusCode, data } = await createUserPerson(resBody);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -420,7 +420,7 @@ module.exports = {
       }
 
       // Validate and update User and Person
-      const { error:userPersonError, statusCode, message = 'Tutor no actualizado'  } = await updateUserPerson(resData, transaction);
+      const { error:userPersonError, statusCode, message } = await updateUserPerson(resData);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -542,8 +542,13 @@ module.exports = {
         }
       };
 
+<<<<<<< HEAD
       // remove User
       const { error:userError, statusCode } = await deleteUser(tutorExist.idUser, transaction);
+=======
+      // update User
+      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser);
+>>>>>>> develop
       if(userError) {
         await transaction.rollback();
         return {
