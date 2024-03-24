@@ -159,17 +159,12 @@ module.exports = {
       });
 
       // Therapist joi validation
-<<<<<<< HEAD
       const { error } = updateTherapistValidation({ id:req.params.id, phoneNumber, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
         message: error.details[0].message
       });
-=======
-      const { error } = updateTherapistValidation({ phoneNumber, identificationNumber });
-      if(error) return res.status(400).json({ error: error.details[0].message });
->>>>>>> develop
 
       const { error:dataError, message, statusCode, data } = await update(req.params.id,req.body);
       if(dataError) {

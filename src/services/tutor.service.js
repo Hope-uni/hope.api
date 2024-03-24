@@ -542,13 +542,8 @@ module.exports = {
         }
       };
 
-<<<<<<< HEAD
       // remove User
       const { error:userError, statusCode } = await deleteUser(tutorExist.idUser, transaction);
-=======
-      // update User
-      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser);
->>>>>>> develop
       if(userError) {
         await transaction.rollback();
         return {

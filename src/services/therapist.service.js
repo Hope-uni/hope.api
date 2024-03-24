@@ -443,11 +443,7 @@ module.exports = {
       };
 
       // User and Person update
-<<<<<<< HEAD
       const { error:userPersonError, statusCode, message = 'Terapeuta no actualizado'  } = await updateUserPerson(resBody, transaction);
-=======
-      const { error:userPersonError, statusCode, message  } = await updateUserPerson(id,resBody);
->>>>>>> develop
       if(userPersonError) {
         await transaction.rollback();
         return {

@@ -116,7 +116,6 @@ module.exports = {
 
       // Update Person
       if(firstName || secondName || surname || secondSurname || imageProfile || address) {
-<<<<<<< HEAD
         // validate if person exist
         const personExist = await Person.findOne({
           where: {
@@ -131,8 +130,6 @@ module.exports = {
           };
         }
 
-=======
->>>>>>> develop
         const personData = await Person.update({
           firstName,
           secondName,
