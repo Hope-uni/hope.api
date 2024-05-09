@@ -1,17 +1,41 @@
-const { User, Role, Permission } = require('@models/index');
+const { User, Role, Permission, UserRoles } = require('@models/index');
 
 module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
 
+  /* eslint-disable no-unused-vars */
+    /* eslint-disable array-callback-return */
+    /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-loop-func */
   return async (request, response, next) => {
     const { id } = request.payload;
     const user = await User.findByPk(id,{
       include: [
         {
-          model: Role,
+          model: UserRoles,
           include: [
             {
-              model: Permission,
-              as: 'permissions'
+              model: Role,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Permission,
+                as: 'permissions',
+                attributes: {
+                  exclude: ['group','createdAt','updatedAt']
+                },
+                through: {
+                  attributes: {
+                    exclude: [
+                      'id',
+                      'createdAt',
+                      'updatedAt',
+                      'roleId',
+                      'permissionId',
+                    ]
+                  }
+                }
+              }
             }
           ]
         }
@@ -19,25 +43,37 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
     });
 
     // Admin Validation
-    if(user.Role.name === 'Superadmin') {
+
+    // Variables
+    let getAdmin; // Admin validation
+    let havePermission; // Permission validation
+    let haveRole = false;
+
+    user.UserRoles.some((rolElement) => {
+      if(rolElement.Role.name === 'Superadmin' || rolElement.Role.name === 'Admin') {
+        getAdmin = rolElement.Role.name;
+      }
+    });
+
+    if(getAdmin === 'Superadmin' || getAdmin === 'Admin') {
       next();
       return;
     }
     // Role validation
-    const haveRole = permittedRoles.includes(user.Role.name);
-
-    // Permission validation
-    let havePermission;
+    user.UserRoles.map((element ) => {
+      if(permittedRoles.includes(element.Role.name)) {
+        haveRole = true;
+      }
+    });
     
-    /* eslint-disable array-callback-return */
-    /* eslint-disable no-restricted-syntax */
-    /* eslint-disable no-loop-func */
     for (const iterator of permittedPermissions) {
-      user.Role.permissions.some((permission) => {
-        if(permission.description === iterator){
-          havePermission = true;
-        }
-      })
+      user.UserRoles.map((element) => {
+        element.Role.permissions.some((permission) => {
+          if(permission.description === iterator) {
+            havePermission = true
+          }
+        });
+      });
     }
     
 

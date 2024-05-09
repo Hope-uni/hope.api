@@ -33,17 +33,22 @@ module.exports = {
         'string.empty': `Dirección no debe estar vacía`,
         'string.min': `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
       }),
-    });
+      birthday: joi.date().iso().min('01-01-1900').required().messages({
+        'any.required': 'Fecha de Nacimiento es requerida',
+        'date.min': 'Fecha de nacimiento indica una edad que sobrepasa el estandar de longevidad a nivel mundial.',
+        'date.format': 'Fecha de Nacimiento debe tener un formato de (Año-Mes-Dia)'
+      }),
+      gender: joi.string().valid('Femenino','femenino','Masculino','masculino').required().messages({
+        'any.required': 'Sexo debe ser especificado',
+        'any.only': 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
+        'string.base': 'Sexo debe ser un texto valido '
+      })
+    }).unknown(false);
     return schema.validate(data);
   },
 
   updatePersonValidation(data) {
     const schema = joi.object().keys({
-      id: joi.number().positive().required().messages({
-        'any.required': `Identificador Persona es requerido`,
-        'number.base': `Identificador Persona debe ser un número válido`,
-        'number.positive': `Identificador Persona debe ser un número positivo`,
-      }),
       firstName: joi.string().empty(' ').min(3,'utf8').messages({
         'string.base': `Primer Nombre debe ser un texto válido`,
         'string.min': `Primer Nombre debe tener como minimo 3 caracteres`
@@ -67,7 +72,15 @@ module.exports = {
         'string.base': `Dirección debe ser un texto válido`,
         'string.min': `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
       }),
-    });
+      birthday: joi.date().iso().min('01-01-1900').empty(' ').messages({
+        'date.min': 'Fecha de nacimiento indica una edad que sobrepasa el estandar de longevidad a nivel mundial.',
+        'date.format': 'Fecha de Nacimiento debe tener un formato de (Año-Mes-Dia)'
+      }),
+      gender: joi.string().valid('Femenino','femenino','Masculino','masculino').empty(' ').messages({
+        'any.only': 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
+        'string.base': 'Sexo debe ser un texto valido '
+      })
+    }).unknown(false);
     return schema.validate(data);
   },
 

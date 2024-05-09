@@ -7,10 +7,10 @@ const {
   deleteRole,
 } = require('@services/roles.service');
 const { 
-  createRoleValidation,
-  findRoleValidation,
-  updateRoleValidation
-} = require('@validations/roles.validation');
+  roleEntry,
+  idEntry
+} = require('@validations/index');
+const { messages } = require('@utils/index');
 
 module.exports = {
 
@@ -25,7 +25,7 @@ module.exports = {
   async all(req,res) {
     try {
       
-      const { error, statusCode, data, message } = await allRoles();
+      const { error, statusCode, message, ...resData } = await allRoles(req.query);
 
       if(error) {
         return res.status(400).json({
@@ -39,15 +39,15 @@ module.exports = {
         error,
         statusCode: 200,
         message,
-        data
+        ...resData
       });
 
     } catch (error) {
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.controller}: ${error.message}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Controller: ${error.message}`,
+        message: `${messages.role.errors.controller}: ${error.message}`,
       });
     }
   },
@@ -61,7 +61,7 @@ module.exports = {
   async findOne(req,res) {
     try {
       
-      const { error } = findRoleValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -85,12 +85,12 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error.message);
-      return {
+      logger.error(`${messages.role.errors.controller}: ${error.message}`);
+      return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Controller: ${error.message}`,
-      };
+        message: `${messages.role.errors.controller}: ${error.message}`,
+      });
     }
   },
 
@@ -103,7 +103,7 @@ module.exports = {
   async create(req,res) {
     try {
       
-      const { error } = createRoleValidation(req.body);
+      const { error } = roleEntry.createRoleValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -127,12 +127,12 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error.message);
-      return {
+      logger.error(`${messages.role.errors.controller}: ${error.message}`);
+      return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Controller: ${error.message}`,
-      };
+        message: `${messages.role.errors.controller}: ${error.message}`,
+      });
     }
   },
 
@@ -145,7 +145,7 @@ module.exports = {
   async update(req,res) {
     try {
       
-      const { error } = updateRoleValidation({id:req.params.id,...req.body});
+      const { error } = roleEntry.updateRoleValidation({id:req.params.id,...req.body});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -169,12 +169,12 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error.message);
-      return {
+      logger.error(`${messages.role.errors.controller}: ${error.message}`);
+      return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Controller: ${error.message}`,
-      };
+        message: `${messages.role.errors.controller}: ${error.message}`,
+      });
     }
   },
 
@@ -185,7 +185,7 @@ module.exports = {
    */
   async deleteRole(req,res) {
     try {
-      const { error } = findRoleValidation({id:req.params.id});
+      const { error } = idEntry.findRoleValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -208,11 +208,12 @@ module.exports = {
       });
 
     } catch (error) {
-      return {
+      logger.error(`${messages.role.errors.controller}: ${error.message}`);
+      return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Controller: ${error.message}`,
-      };
+        message: `${messages.role.errors.controller}: ${error.message}`,
+      });
     }
   }
 

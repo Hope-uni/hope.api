@@ -2,6 +2,7 @@ const { Permission, Role } = require('@models/index');
 const logger = require('@config/logger.config');
 const { sequelize } = require('@models/index');
 const { Op } = require('sequelize');
+const { pagination, messages } = require('@utils/index');
 
 module.exports = {
 
@@ -9,11 +10,59 @@ module.exports = {
    * The function `allRoles` retrieves all roles excluding the role with id 1 along with their
    * associated permissions, handling errors appropriately.
    * @returns The function `allRoles()` returns an object with two possible structures:
-   */
-  async allRoles() {
-    try {
+  */
+  /* eslint-disable radix */
+  /* eslint-disable consistent-return */
+  async allRoles(query) {
+    try { 
 
-      const data = await Role.findAll({
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0){
+        const data = await Role.findAll({
+          where: {
+            [Op.and]: [
+              {
+                id: {
+                  [Op.ne]: 1,
+                }
+              },
+              {
+                status: true
+              }
+            ]
+          },
+          include: {
+            model: Permission,
+            as: 'permissions',
+            attributes: {
+              exclude: ['group','createdAt','updatedAt']
+            },
+            through: {
+              attributes: {
+                exclude: [
+                  'id',
+                  'createdAt',
+                  'updatedAt',
+                  'roleId',
+                  'permissionId',
+                ]
+              }
+            }
+          }
+        });
+  
+        return {
+          error: false,
+          message: messages.role.success.all,
+          data
+        };
+      }
+
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Role.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
         where: {
           [Op.and]: [
             {
@@ -46,17 +95,19 @@ module.exports = {
         }
       });
 
+      const dataResponse = pagination.getPageData(data, query.page, limit);
       return {
         error: false,
-        message: 'Lista de Roles',
-        data
+        message: messages.role.success.all,
+        ...dataResponse
       };
       
     } catch (error) {
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
-        message: `There was an error in Role Services: ${error.message}`,
-        error: true
+        error: true,
+        statusCode: 500,
+        message: `${messages.role.errors.service.base}: ${error}`,
       };
     }
   },
@@ -112,22 +163,22 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: `Rol no encontrado`,
+          message: messages.role.errors.not_found,
         }
       };
 
       return {
         error: false,
-        message: 'Rol encontrado',
+        message: messages.role.success.found,
         data
       };
 
     } catch (error) {
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Services: ${error.message}`,
+        message: `${messages.role.errors.service.base}: ${error}`,
       };
     }
   },
@@ -161,6 +212,26 @@ module.exports = {
           message: `Nombre de rol ya esta en uso`,
         }
       };
+
+      // Validate if permissions ID exist
+      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
+      for (const iterator of body.permissions) {
+        const permissionsExist = await Permission.findOne({
+          where: {
+            id: iterator
+          }
+        });
+        if(!permissionsExist) {
+          logger.error(`El Identificador: ${iterator} no existe en la table Permisos de la base de datos`)
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 400,
+            message: `Permiso no encontrado`,
+          }
+        }
+      }
 
       // Create Role
       const data = await Role.create(

@@ -1,4 +1,5 @@
 const logger = require('@config/logger.config');
+const { messages, userPersonEntries } = require('@utils/index');
 const {
   all,
   findOne,
@@ -6,18 +7,7 @@ const {
   update,
   removePatient
 } = require('@services/patient.service');
-
-const {
-  findOneValidation
-} = require('@validations/index.validation');
-const {
-  createPatientValidation,
-  updatePatientValidation
-} = require('@validations/patient.validation');
-const {
-  userPersonCreateValidation,
-  userPersonUpdateValidation
-} = require('@utils/user-person-entries.util');
+const { patientEntry, idEntry } = require('@validations/index');
 
 module.exports = {
 
@@ -40,11 +30,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Patient controller: ${error}`);
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Patient controller: ${error}`
+        message: `${messages.patient.errors.controller}: ${error}`
       }); 
     }
   },
@@ -53,7 +43,7 @@ module.exports = {
     try {
       
       // joi validation
-      const { error } = await findOneValidation({id: req.params.id});
+      const { error } = await idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -77,11 +67,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Patient controller: ${error}`);
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Patient controller: ${error}`
+        message: `${messages.patient.errors.controller}: ${error}`
       }); 
     }
   },
@@ -92,7 +82,7 @@ module.exports = {
       const { age, idTutor, ...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = createPatientValidation({ age, idTutor});
+      const { error } = patientEntry.createPatientValidation({ age, idTutor});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -100,7 +90,7 @@ module.exports = {
       });
 
       // User and Person joi validation
-      const { error:customError } = userPersonCreateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
       if(customError) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -123,23 +113,22 @@ module.exports = {
         data
       });
     } catch (error) {
-      logger.error(`There was an error in Patient controller: ${error}`);
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Patient controller: ${error}`
+        message: `${messages.patient.errors.controller}: ${error}`
       }); 
     }
   },
 
   async updatePatient(req,res) {
     try {
-      
       // Destructuring Object
       const { age, idTutor,...resBody } = req.body;
       
       // Patient joi validation
-      const { error } = updatePatientValidation({ id: req.params.id, age, idTutor});
+      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, age, idTutor});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -147,7 +136,7 @@ module.exports = {
       });
 
       // User and Person joi validation
-      const { error:customError } = userPersonUpdateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
       if(customError) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -171,11 +160,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Patient controller: ${error}`);
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Patient controller: ${error}`
+        message: `${messages.patient.errors.controller}: ${error}`
       }); 
     }
   },
@@ -183,7 +172,7 @@ module.exports = {
   async removePatient(req,res) {
     try {
       // Joi Validation
-      const { error } = findOneValidation({id: req.params.id});
+      const { error } = idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -206,11 +195,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Patient controller: ${error}`);
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Patient controller: ${error}`
+        message: `${messages.patient.errors.controller}: ${error}`
       }); 
     }
   }

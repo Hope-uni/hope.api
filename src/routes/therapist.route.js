@@ -6,17 +6,18 @@ const {
   updateTherapist,
   removeTherapist
 } = require('@controllers/therapist.controller');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
 
-router.get('/', all);
+router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar terapeutas']), all);
 
-router.get('/:id', findTherapist);
+router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['buscar terapeutas']), findTherapist);
 
-router.post('/', createTherapist);
+router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear terapeutas']), createTherapist);
 
-router.put('/:id', updateTherapist);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar terapeutas']), updateTherapist);
 
-router.delete('/:id', removeTherapist);
+router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar terapeutas']), removeTherapist);
 
 module.exports = router;

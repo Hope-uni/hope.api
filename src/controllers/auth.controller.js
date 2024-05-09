@@ -1,4 +1,5 @@
 const logger = require('@config/logger.config');
+const { messages } = require('@utils/index');
 const {
   login,
   forgotPassword,
@@ -7,12 +8,7 @@ const {
   refreshAuth,
   removeRefreshToken
 } = require('@services/auth.service');
-
-const { 
-  loginValidation,
-  forgotPasswordValidation,
-  resetPasswordValidation
-} = require('@validations/auth.validation');
+const { authEntry } = require('../validations/index');
 
 module.exports = {
 
@@ -26,12 +22,12 @@ module.exports = {
         return res.status(400).json({
           error: true,
           statusCode: 400,
-          message: 'Nombre de usuario o correo es necesario para iniciar sesión',
+          message: messages.auth.fields.username_email,
         })
       };
 
       // Joi Validation
-      const { error } = loginValidation(req.body);
+      const { error } = authEntry.loginValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -56,11 +52,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in login controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   },
@@ -70,7 +66,7 @@ module.exports = {
   async forgotPassword(req,res) {
     try {
       // Joi Validation
-      const { error } = forgotPasswordValidation(req.body);
+      const { error } = authEntry.forgotPasswordValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -94,11 +90,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in forgot password controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   },
@@ -108,7 +104,7 @@ module.exports = {
   async resetPassword(req,res) {
     try { 
       // Joi Validation
-      const { error } = resetPasswordValidation(req.body);
+      const { error } = authEntry.resetPasswordValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -131,11 +127,11 @@ module.exports = {
         message
       });
     } catch (error) {
-      logger.error(`There was an error in reset password controller: ${error}`);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in reset password controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   },
@@ -161,11 +157,11 @@ module.exports = {
         data
       });
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Me controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   },
@@ -192,11 +188,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in RefreshToken controller: ${error}`);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in RefreshToken controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   },
@@ -220,11 +216,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in removeRefreshToken controller: ${error}`);
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in removeRefreshToken controller: ${error}`,
+        message: `${messages.auth.errors.controller}: ${error}`,
       });
     }
   }

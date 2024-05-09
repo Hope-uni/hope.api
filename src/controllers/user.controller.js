@@ -6,12 +6,10 @@ const {
   updateUser,
   deleteUser
 } = require('@services/user.service');
-
 const {
-  createUserValidation,
-  updateUserValidation
-} = require('@validations/user.validation');
-const { findOneValidation } = require('@validations/index.validation');
+  idEntry,
+  userEntry
+} = require('../validations/index');
 
 
 module.exports = {
@@ -43,7 +41,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User services: ${error}`,
+        message: `There was an error in User controller: ${error}`,
       });
     }
   },
@@ -54,7 +52,7 @@ module.exports = {
     try {
 
       // Joi Validation
-      const { error } = findOneValidation({ id: req.params.id });
+      const { error } = idEntry.findOneValidation({ id: req.params.id });
       if(error) return res.status(400).json({ error: error.details[0].message });
       
       const { error:dataError, message, statusCode, data} = await findUser(req.params.id);
@@ -88,7 +86,7 @@ module.exports = {
   async create(req,res) {
     try {
       // Joi Validation
-      const { error } = createUserValidation(req.body);
+      const { error } = userEntry.createUserValidation(req.body);
       if(error) return res.status(400).json({ error: error.details[0].message });
       const { error:dataError, statusCode, message, data } = await createUser(req.body);
 
@@ -123,7 +121,7 @@ module.exports = {
   async update(req,res) {
     try {
       // Joi Validation
-      const { error } = updateUserValidation({ id: req.params.id, ...req.body });
+      const { error } = userEntry.updateUserValidation({ id: req.params.id, ...req.body });
       if(error) return res.status(400).json({ error: error.details[0].message });
       
       const { error:dataError, statusCode, message, data} = await updateUser(req.params.id,req.body);
@@ -158,7 +156,7 @@ module.exports = {
   async removeUser(req,res) {
     try {
       // Joi Validation
-      const { error } = findOneValidation({id: req.params.id});
+      const { error } = idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, statusCode, message} = await deleteUser(req.params.id);
