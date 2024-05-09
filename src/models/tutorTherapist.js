@@ -3,8 +3,8 @@ const {
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class Tutor extends Model {}
-  Tutor.init({
+  class TutorTherapist extends Model {}
+  TutorTherapist.init({
     identificationNumber: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -24,24 +24,19 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Tutor',
+    modelName: 'TutorTherapist',
   });
 
-  Tutor.associate = (models) => {
+  TutorTherapist.associate = (models) => {
 
-    Tutor.belongsTo(models.Person, {
-      foreignKey: 'idPerson',
+    TutorTherapist.belongsTo(models.Person, {
+      foreignKey: 'personId',
     });
 
-    Tutor.belongsTo(models.User, {
-      foreignKey: 'idUser',
+    TutorTherapist.belongsTo(models.User, {
+      foreignKey: 'userId',
     });
-
-    Tutor.hasMany(models.Patient,{
-      foreignKey: 'idTutor'
-    });
-
   }
 
-  return Tutor;
+  return TutorTherapist;
 };

@@ -29,20 +29,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    birthday: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
   }, {
     sequelize,
     modelName: 'Person',
   });
 
   Person.associate = (models) => {
-    Person.hasOne(models.Therapist, {
-      foreignKey: 'idPerson'
-    });
-    Person.hasOne(models.Tutor, {
-      foreignKey: 'idPerson'
+    Person.hasOne(models.TutorTherapist, {
+      foreignKey: 'personId'
     });
     Person.hasOne(models.Patient, {
-      foreignKey: 'idPerson'
+      foreignKey: 'personId'
     });
   };
 
