@@ -9,9 +9,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      age: {
+      tutorId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        references: {
+          model: 'TutorTherapists',
+          key: 'id'
+        }
+      },
+      therapistId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'TutorTherapists',
+          key: 'id'
+        }
       },
       status: {
         type: Sequelize.BOOLEAN,

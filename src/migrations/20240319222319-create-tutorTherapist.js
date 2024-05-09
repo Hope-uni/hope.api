@@ -1,7 +1,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Therapists', {
+    await queryInterface.createTable('TutorTherapists', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -15,6 +15,10 @@ module.exports = {
       phoneNumber: {
         type: Sequelize.INTEGER,
         allowNull: false,
+      },
+      telephone: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
       },
       status: {
         type: Sequelize.BOOLEAN,
@@ -32,6 +36,6 @@ module.exports = {
     });
   },
   async down(queryInterface) {
-    await queryInterface.dropTable('Therapists');
+    await queryInterface.dropTable('TutorTherapists');
   }
 };

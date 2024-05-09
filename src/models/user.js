@@ -28,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   User.associate = (models) => {
-    User.belongsTo(models.Role, {
-      foreignKey: 'roleId',
+    User.hasMany(models.UserRoles, {
+      foreignKey: 'userId'
     });
 
     User.hasOne(models.AuthToken, {
@@ -37,16 +37,12 @@ module.exports = (sequelize, DataTypes) => {
       as: 'User'
     });
 
-    User.hasOne(models.Therapist, {
-      foreignKey: 'idUser',
-    });
-
-    User.hasOne(models.Tutor, {
-      foreignKey: 'idUser',
+    User.hasOne(models.TutorTherapist, {
+      foreignKey: 'userId',
     });
 
     User.hasOne(models.Patient, {
-      foreignKey: 'idUser',
+      foreignKey: 'userId',
     });
 
   }

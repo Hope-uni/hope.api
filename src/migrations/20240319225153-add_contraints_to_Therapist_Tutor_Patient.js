@@ -7,7 +7,7 @@ module.exports = {
     try {
       
       // Therapist
-      await queryInterface.addColumn('Therapists','idUser',{
+      await queryInterface.addColumn('TutorTherapists','userId',{
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
@@ -16,24 +16,16 @@ module.exports = {
       }, {transaction});
 
       // Tutor
-      await queryInterface.addColumn('Tutors','idPerson',{
+      await queryInterface.addColumn('TutorTherapists','personId',{
         type: Sequelize.INTEGER,
         references: {
           model: 'People',
-          key: 'id',
-        }
-      }, {transaction});
-      
-      await queryInterface.addColumn('Tutors','idUser',{
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
           key: 'id',
         }
       }, {transaction});
 
       // Patient
-      await queryInterface.addColumn('Patients','idPerson',{
+      await queryInterface.addColumn('Patients','personId',{
         type: Sequelize.INTEGER,
         references: {
           model: 'People',
@@ -41,18 +33,10 @@ module.exports = {
         }
       }, {transaction});
 
-      await queryInterface.addColumn('Patients','idUser',{
+      await queryInterface.addColumn('Patients','userId',{
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
-          key: 'id',
-        }
-      }, {transaction});
-
-      await queryInterface.addColumn('Patients','idTutor',{
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Tutors',
           key: 'id',
         }
       }, {transaction});
@@ -70,12 +54,10 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       
-      await queryInterface.removeColumn('Therapists','idUser',{transaction});
-      await queryInterface.removeColumn('Tutors','idPerson',{transaction});
-      await queryInterface.removeColumn('Tutors','idUser',{transaction});
-      await queryInterface.removeColumn('Patients','idPerson',{transaction});
-      await queryInterface.removeColumn('Patients','idUser',{transaction});
-      await queryInterface.removeColumn('Patients','idTutor',{transaction});
+      await queryInterface.removeColumn('TutorTherapists','personId',{transaction});
+      await queryInterface.removeColumn('TutorTherapists','userId',{transaction});
+      await queryInterface.removeColumn('Patients','personId',{transaction});
+      await queryInterface.removeColumn('Patients','userId',{transaction});
 
       await transaction.commit();
 

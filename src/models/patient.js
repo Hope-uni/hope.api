@@ -5,10 +5,6 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Patient extends Model {}
   Patient.init({
-    age: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     status: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
@@ -22,15 +18,21 @@ module.exports = (sequelize, DataTypes) => {
   Patient.associate = (models) => {
     
     Patient.belongsTo(models.Person, {
-      foreignKey: 'idPerson'
+      foreignKey: 'personId'
     });
 
     Patient.belongsTo(models.User, {
-      foreignKey: 'idUser'
+      foreignKey: 'userId'
     });
 
-    Patient.belongsTo(models.Tutor, {
-      foreignKey: 'idTutor'
+    Patient.belongsTo(models.TutorTherapist, {
+      as: 'tutor',
+      foreignKey: 'tutorId'
+    });
+
+    Patient.belongsTo(models.TutorTherapist, {
+      as: 'therapist',
+      foreignKey: 'therapistId'
     });
 
   }
