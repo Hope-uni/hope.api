@@ -1,19 +1,24 @@
 const joi = require('joi');
+const { messages } = require('@utils/index');
 
 module.exports = {
 
   createRoleValidation(data) {
     const schema = joi.object().keys({
       name: joi.string().required().messages({
-        'any.required': `Nombre es requerido`,
-        'string.base': `Nombre debe ser un texto válido`,
-        'string.empty': `Nombre no debe estar vacío`
+        'any.required': messages.role.fields.name.required,
+        'string.base': messages.role.fields.name.base,
+        'string.empty': messages.role.fields.name.empty
       }),
-      permissions: joi.array().required().min(1).messages({
-        'any.required': `Permisos son requeridos.`,
-        'array.min': `Debe ingresar al menos un permiso.`,
-        'array.base': `Permisos deben ser enviados en formato válido.`,
+      permissions: joi.array().items(joi.number().positive()).required().min(1).messages({
+        'any.required': messages.role.fields.permissions.required,
+        'array.min': messages.role.fields.permissions.array_min,
+        'array.base': messages.role.fields.permissions.base,
+        'number.base': messages.role.fields.permissions.number,
+        'number.positive': messages.role.fields.permissions.positive,
       }),
+    }).unknown(false).messages({
+      'object.unknown': 'Una de las claves proporcionadas no está permitida',
     });
     return schema.validate(data);
   },
@@ -21,29 +26,31 @@ module.exports = {
   findRoleValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({
-        'any.required': `Identificador es requerido`,
-        'number.base': `Identificador debe ser un número válido`,
-        'number.positive': `Identificador debe ser un número positivo`,
+        'any.required': messages.role.fields.id.required,
+        'number.base': messages.role.fields.id.base,
+        'number.positive': messages.role.fields.id.positive,
       })
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
 
   updateRoleValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({
-        'any.required': `Identificador es requerido`,
-        'number.base': `Identificador debe ser un número válido`,
-        'number.positive': `Identificador debe ser un número positivo`,
+        'any.required': messages.role.fields.id.required,
+        'number.base': messages.role.fields.id.base,
+        'number.positive': messages.role.fields.id.positive,
       }),
       name: joi.string().empty(' ').messages({
-        'string.base': `Nombre debe ser un texto válido`,
+        'string.base': messages.role.fields.name.base,
       }),
-      permissions: joi.array().empty(' ').min(1).messages({
-        'array.min': `Debe ingresar al menos un permiso.`,
-        'array.base': `Permisos deben ser enviados en formato válido.`,
+      permissions: joi.array().items(joi.number().positive()).empty(' ').min(1).messages({
+        'array.min': messages.role.fields.permissions.array_min,
+        'array.base': messages.role.fields.permissions.base,
+        'number.base': messages.role.fields.permissions.number,
+        'number.positive': messages.role.fields.permissions.positive,
       }),
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
 

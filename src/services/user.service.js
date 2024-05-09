@@ -1,8 +1,9 @@
-const { User, Role,Permission } = require('@models/index.js');
+const { User, Role,Permission, UserRoles, sequelize } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const { paginationValidation, getPageData } = require('@utils/pagination.util');
+const messages = require('../utils/messages.utils');
 
 
 module.exports = {
@@ -16,8 +17,60 @@ module.exports = {
    * @returns The `allUsers` function returns an object with different properties based on the outcome
    * of the database query and pagination.
    */
+  /* eslint-disable radix */
+  /* eslint-disable consistent-return */
   async allUsers(query) {
     try {
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await User.findAll({
+          where: {
+            id: {
+              [Op.ne]: 1
+            },
+            status: true
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status', 'password'],
+          },
+          include: [
+            {
+              model: UserRoles,
+              include: [
+                {
+                  model: Role,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  },
+                  include: {
+                    model: Permission,
+                    as: 'permissions',
+                    attributes: {
+                      exclude: ['group','createdAt','updatedAt']
+                    },
+                    through: {
+                      attributes: {
+                        exclude: [
+                          'id',
+                          'createdAt',
+                          'updatedAt',
+                          'roleId',
+                          'permissionId',
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        return {
+          error: false,
+          message: messages.user.success.all,
+          data,
+        }
+      }
 
       // Pagination
       const { limit, offset } = paginationValidation(query.page,query.size);
@@ -37,44 +90,49 @@ module.exports = {
         },
         include: [
           {
-            model: Role,
-            attributes: {
-              exclude: ['createdAt','updatedAt', 'status']
-            },
-            include: {
-              model: Permission,
-              as: 'permissions',
-              attributes: {
-                exclude: ['group','createdAt','updatedAt']
-              },
-              through: {
+            model: UserRoles,
+            include: [
+              {
+                model: Role,
                 attributes: {
-                  exclude: [
-                    'id',
-                    'createdAt',
-                    'updatedAt',
-                    'roleId',
-                    'permissionId',
-                  ]
+                  exclude: ['createdAt','updatedAt','status']
+                },
+                include: {
+                  model: Permission,
+                  as: 'permissions',
+                  attributes: {
+                    exclude: ['group','createdAt','updatedAt']
+                  },
+                  through: {
+                    attributes: {
+                      exclude: [
+                        'id',
+                        'createdAt',
+                        'updatedAt',
+                        'roleId',
+                        'permissionId',
+                      ]
+                    }
+                  }
                 }
               }
-            }
+            ]
           }
         ]
       });
 
-      const dataResponse = getPageData(data, query.page, limit);
+    const dataResponse = getPageData(data, query.page, limit);
 
       return {
         error: false,
-        message: 'Lista de Usuarios',
+        message: messages.user.success.all,
         ...dataResponse
       };
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
         statusCode: 500
       }
@@ -94,9 +152,9 @@ module.exports = {
   async findUser(id) {
     try {
       
-      if(+id === 1) {
+      if(parseInt(id) === 1) {
         return {
-          message: `Usuario no encontrado`,
+          message: messages.user.errors.not_found,
           error: true,
           statusCode: 404
         }
@@ -112,35 +170,40 @@ module.exports = {
         },
         include: [
           {
-            model: Role,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Permission,
-              as: 'permissions',
-              attributes: {
-                exclude: ['group','createdAt','updatedAt']
-              },
-              through: {
+            model: UserRoles,
+            include: [
+              {
+                model: Role,
                 attributes: {
-                  exclude: [
-                    'id',
-                    'createdAt',
-                    'updatedAt',
-                    'roleId',
-                    'permissionId',
-                  ]
+                  exclude: ['createdAt','updatedAt','status']
+                },
+                include: {
+                  model: Permission,
+                  as: 'permissions',
+                  attributes: {
+                    exclude: ['group','createdAt','updatedAt']
+                  },
+                  through: {
+                    attributes: {
+                      exclude: [
+                        'id',
+                        'createdAt',
+                        'updatedAt',
+                        'roleId',
+                        'permissionId',
+                      ]
+                    }
+                  }
                 }
               }
-            }
+            ]
           }
         ]
       });
 
       if(!data) {
         return {
-          message: `Usuario no encontrado`,
+          message: messages.user.errors.not_found,
           error: true,
           statusCode: 404,
         }
@@ -148,14 +211,14 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Usuario encontrado',
+        message: messages.user.success.found,
         data
       };
 
     } catch (error) {
       logger.error(error);
       return {
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
         statusCode: 500
       }
@@ -172,18 +235,167 @@ module.exports = {
    * @returns The function `createUser` returns an object with different properties based on the
    * outcome of the user creation process. Here are the possible return values:
    */
+  /* eslint-disable no-param-reassign */
+  /* eslint-disable no-restricted-syntax */
+  /* eslint-disable no-await-in-loop */
   async createUser(body,transaction) {
     try {
+
+      // Destructuring data
+      const { roles, ...resBody } = body;
+
+      // this is when you try to create a user directly
+      if(!transaction) {  
+        transaction = await sequelize.transaction();
+        // username Validation
+        const usernameExist = await User.findOne({
+          where: {
+            username: resBody.username,
+            status: true,
+          }
+        });
+        if(usernameExist) {
+          await transaction.rollback();
+          return {
+            message: messages.user.errors.in_use.username,
+            error: true,
+            statusCode: 400
+          }
+        };
+        // Email Validation
+        const emailExist = await User.findOne({
+          where: {
+            email: resBody.email,
+            status: true,
+          }
+        });
+        if(emailExist) {
+          await transaction.rollback();
+          return {
+            message: messages.user.errors.in_use.email,
+            error: true,
+            statusCode: 400
+          }
+        };
+
+        // Role Validation
+        for (const iterator of roles) {
+          const roleExist = await Role.findOne({
+            where: {
+              id: iterator,
+              status: true
+            }
+          });
+          if(!roleExist) {
+            await transaction.rollback();
+            return {
+              message: messages.role.errors.not_found,
+              error: true,
+              statusCode: 404
+            }
+          };
+        }
+
+        // Hash Password Validation
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(body.password, salt);
+        
+        // Create User
+        const data = await User.create(
+          {
+            ...resBody,
+            password: hashedPassword
+          }, 
+          {
+            transaction 
+          }
+        );
+
+        if(!data) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.user.errors.service.create,
+            statusCode: 400
+          }
+        };
+
+        // associate role with the user recently created
+        for (const iterator of roles) {
+          const userRolesData = await UserRoles.create({
+            userId: data.id,
+            roleId: iterator
+          },{transaction});
+          if(!userRolesData) {
+            await transaction.rollback();
+            return {
+              error: true,
+              message: 'Usuario no creado',
+              statusCode: 400
+            }
+          }
+        }
+
+        await transaction.commit();
+
+        const newData = await User.findOne({
+          where: {
+            id: data.id,
+            status: true
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','password'],
+          },
+          include: [
+            {
+              model: UserRoles,
+              include: [
+                {
+                  model: Role,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  },
+                  include: {
+                    model: Permission,
+                    as: 'permissions',
+                    attributes: {
+                      exclude: ['group','createdAt','updatedAt']
+                    },
+                    through: {
+                      attributes: {
+                        exclude: [
+                          'id',
+                          'createdAt',
+                          'updatedAt',
+                          'roleId',
+                          'permissionId',
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        return {
+          error: false,
+          message: messages.user.success.create,
+          data:newData
+        };
+      }
+
       // username Validation
       const usernameExist = await User.findOne({
         where: {
-          username: body.username,
+          username: resBody.username,
           status: true,
         }
       });
       if(usernameExist) {
         return {
-          message: `Nombre de Usuario está en uso`,
+          message: messages.user.errors.in_use.username,
           error: true,
           statusCode: 400
         }
@@ -191,32 +403,34 @@ module.exports = {
       // Email Validation
       const emailExist = await User.findOne({
         where: {
-          email: body.email,
+          email: resBody.email,
           status: true,
         }
       });
       if(emailExist) {
         return {
-          message: `Correo está en uso`,
+          message: messages.user.errors.in_use.email,
           error: true,
           statusCode: 400
         }
       };
 
       // Role Validation
-      const roleExist = await Role.findOne({
-        where: {
-          id: body.roleId,
-          status: true
-        }
-      });
-      if(!roleExist) {
-        return {
-          message: `Rol no encontrado`,
-          error: true,
-          statusCode: 404
-        }
-      };
+      for (const iterator of roles) {
+        const roleExist = await Role.findOne({
+          where: {
+            id: iterator,
+            status: true
+          }
+        });
+        if(!roleExist) {
+          return {
+            message: messages.role.errors.not_found,
+            error: true,
+            statusCode: 404
+          }
+        };
+      }
 
       // Hash Password Validation
       const salt = await bcrypt.genSalt(10);
@@ -225,7 +439,7 @@ module.exports = {
       // Create User
       const data = await User.create(
         {
-          ...body,
+          ...resBody,
           password: hashedPassword
         }, 
         {
@@ -236,14 +450,29 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: `Usuario no creado`,
+          message: messages.user.errors.service.create,
           statusCode: 400
         }
       };
 
+      // associate role with the user recently created
+      for (const iterator of roles) {
+        const userRolesData = await UserRoles.create({
+          userId: data.id,
+          roleId: iterator
+        },{transaction});
+        if(!userRolesData) {
+          return {
+            error: true,
+            message: 'Usuario no creado',
+            statusCode: 400
+          }
+        }
+      }
+
       return {
         error: false,
-        message: 'Usuario creado',
+        message: messages.user.success.create,
         data
       };
     } catch (error) {
@@ -275,6 +504,11 @@ module.exports = {
   async updateUser(id, body, transaction) {
     try {
 
+      // variables 
+      const userRolesExist = []; // i have declared this variable  just for manage what rol i need to change.
+      // Destructuring data
+      const {roles, ...resBody} = body;
+
       // User Exist
       const userExist = await User.findOne({
         where: {
@@ -300,11 +534,171 @@ module.exports = {
         }
       };
       
+      // this is when you try to create a user directly
+      if(!transaction) {
+        transaction = await sequelize.transaction();
+        // Username Validation
+        if(resBody.username) {
+          const usernameExist = await User.findOne({
+            where: {
+              username: resBody.username,
+              status: true,
+              id: {
+                [Op.ne]: id
+              }
+            }
+          });
+          if(usernameExist) {
+            await transaction.rollback();
+            return {
+              message: `Nombre de Usuario está en uso`,
+              error: true,
+              statusCode: 400
+            }
+          };
+        };
+
+        // Email Validation
+        if(resBody.email) {
+          const emailExist = await User.findOne({
+            where: {
+              email: resBody.email,
+              status: true,
+              id: {
+                [Op.ne]: id
+              }
+            }
+          });
+          if(emailExist) {
+            await transaction.rollback();
+            return {
+              message: `Correo está en uso`,
+              error: true,
+              statusCode: 400
+            }
+          };
+        };
+
+        // Roles Validatrion
+        if(roles) {
+          for (const iterator of roles) {
+            const roleResponse = await Role.findOne({
+              where: {
+                id: iterator,
+                status: true
+              }
+            });
+            if(!roleResponse) {
+              await transaction.rollback();
+              return {
+                message: messages.role.errors.not_found,
+                error: true,
+                statusCode: 404
+              }
+            };
+            userRolesExist.push(roleResponse.id);
+          }
+        };
+
+        // Update User
+        const data = await User.update(resBody, {
+          where: {
+            id
+          },
+          returning: true,
+          transaction
+        });
+
+        if(!data) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: `Usuario no actualizado`,
+            statusCode: 400
+          }
+        };
+        
+        // associate role with the user recently created
+        /* eslint-disable no-plusplus */
+        if(roles) {
+          for (let i=0; i<roles.length; i++) {
+            const userRolesData = await UserRoles.update({
+              userId: data.id,
+              roleId: roles[i]
+            },{
+              where: {
+                id: userRolesExist[i]
+              },
+              transaction
+            });
+            if(!userRolesData) {
+              logger.error(`There was an error trying to update the role: ${roles[i]} in UserRoles table for this user: ${data.id}`);
+              await transaction.rollback();
+              return {
+                error: true,
+                message: 'Usuario no creado',
+                statusCode: 400
+              }
+            }
+          }
+        }
+        
+        await transaction.commit();
+
+        // Getting User Updated
+        const newData = await User.findOne({
+          where: {
+            id: data.id,
+            status: true
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','password'],
+          },
+          include: [
+            {
+              model: UserRoles,
+              include: [
+                {
+                  model: Role,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  },
+                  include: {
+                    model: Permission,
+                    as: 'permissions',
+                    attributes: {
+                      exclude: ['group','createdAt','updatedAt']
+                    },
+                    through: {
+                      attributes: {
+                        exclude: [
+                          'id',
+                          'createdAt',
+                          'updatedAt',
+                          'roleId',
+                          'permissionId',
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        return {
+          error: false,
+          message: 'Usuario actualizado',
+          data: newData
+        };
+      }
+
       // Username Validation
-      if(body.username) {
+      if(resBody.username) {
         const usernameExist = await User.findOne({
           where: {
-            username: body.username,
+            username: resBody.username,
             status: true,
             id: {
               [Op.ne]: id
@@ -321,7 +715,7 @@ module.exports = {
       };
 
       // Email Validation
-      if(body.email) {
+      if(resBody.email) {
         const emailExist = await User.findOne({
           where: {
             email: body.email,
@@ -341,23 +735,26 @@ module.exports = {
       };
 
       // RoleId Validatrion
-      if(body.roleId) {
-        const roleExist = await Role.findOne({
-          where: {
-            id: body.roleId,
-            status: true
-          }
-        });
-        if(!roleExist) {
-          return {
-            message: `Rol no encontrado`,
-            error: true,
-            statusCode: 404
-          }
-        };
+      if(roles) {
+        for (const iterator of roles) {
+          const roleResponse = await Role.findOne({
+            where: {
+              id: iterator,
+              status: true
+            }
+          });
+          if(!roleResponse) {
+            return {
+              message: messages.role.errors.not_found,
+              error: true,
+              statusCode: 404
+            }
+          };
+          userRolesExist.push(roleResponse.id);
+        }
       };
 
-      const data = await User.update(body, {
+      const data = await User.update(resBody, {
         where: {
           id
         },
@@ -373,6 +770,28 @@ module.exports = {
         }
       };
 
+      if(roles) {
+        for (let i=0; i<roles.length; i++) {
+          const userRolesData = await UserRoles.update({
+            userId: data.id,
+            roleId: roles[i]
+          },{
+            where: {
+              id: userRolesExist[i]
+            },
+            transaction
+          });
+          if(!userRolesData) {
+            logger.error(`There was an error trying to update the role: ${roles[i]} in UserRoles table for this user: ${data.id}`);
+            return {
+              error: true,
+              message: 'Usuario no creado',
+              statusCode: 400
+            }
+          }
+        }
+      }
+
       return {
         error: false,
         message: 'Usuario actualizado',
@@ -380,7 +799,7 @@ module.exports = {
       };
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in User services: ${error}`);
       return {
         message: `There was an error in User services: ${error}`,
         error: true,
@@ -402,6 +821,65 @@ module.exports = {
    */
   async deleteUser(id, transaction) {
     try {
+
+      if(!transaction) {
+        transaction = await sequelize.transaction();
+
+        // User Exist
+        const userExist = await User.findOne({
+          where: {
+            id
+          }
+        });
+        if(!userExist) {
+          await transaction.rollback();
+          return {
+            message: `Usuario no encontrado`,
+            error: true,
+            statusCode: 404
+          }
+        };
+
+        const data = await User.update(
+          {
+            status: false
+          },
+          {
+            where: {
+              id:userExist.id
+            },
+            transaction
+          }
+        );
+
+        if (!data) {
+          await transaction.rollback();
+          return {
+            message: `Usuario no fue eliminado`,
+            error: true,
+            statusCode: 400
+          };
+        };
+
+        // Delete the roles associated to the user's Tutor
+        const userRolesData = await UserRoles.findAll({
+          where: { userId: id }
+        });
+        
+        for (const iterator of userRolesData) {
+          await UserRoles.destroy({
+            where: {
+              id: iterator.id
+            },
+            transaction
+          });
+        }
+
+        return {
+          error: false,
+          message: 'Usuario eliminado',
+        }
+      }
       
       // User Exist
       const userExist = await User.findOne({
@@ -437,13 +915,27 @@ module.exports = {
         };
       };
 
+      // Delete the roles associated to the user's Tutor
+      const userRolesData = await UserRoles.findAll({
+        where: { userId: id }
+      });
+      
+      for (const iterator of userRolesData) {
+        await UserRoles.destroy({
+          where: {
+            id: iterator.id
+          },
+          transaction
+        });
+      }
+
       return {
         error: false,
         message: 'Usuario eliminado',
       }
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`There was an error in User services: ${error}`);
       return {
         message: `There was an error in User services: ${error}`,
         error: true,
@@ -452,3 +944,5 @@ module.exports = {
     }
   }
 }
+
+

@@ -1,4 +1,5 @@
 const joi = require('joi');
+const messages = require('@utils/messages.utils');
 
 module.exports = {
 
@@ -14,17 +15,17 @@ module.exports = {
         )
       )
       .messages({
-        'any.required': 'Cédula es requerida',
-        'string.pattern.base': 'Cédula debe ser válida',
+        'any.required': messages.tutor.fields.identificationNumber.required,
+        'string.pattern.base': messages.tutor.fields.identificationNumber.pattern,
       }),
       phoneNumber: joi.number().integer().required().messages({
-        'any.required': 'Teléfono es requerido',
-        'number.base': 'Teléfono debe tener números naturales válidos',
+        'any.required': messages.tutor.fields.phoneNumber.required,
+        'number.base': messages.tutor.fields.phoneNumber.base,
       }),
       telephone: joi.number().integer().empty(' ').messages({
-        'number.base': 'Teléfono convencional debe tener números naturales válidos',
+        'number.base': messages.tutor.fields.phoneNumber.base,
       }),
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
   
@@ -39,15 +40,15 @@ module.exports = {
         )
       )
       .messages({
-        'string.pattern.base': 'Cédula debe ser válida',
+        'string.pattern.base': messages.tutor.fields.identificationNumber.pattern,
       }),
       phoneNumber: joi.number().integer().empty(' ').messages({
-        'number.base': 'Teléfono debe tener números naturales válidos',
+        'number.base': messages.tutor.fields.phoneNumber.base,
       }),
       telephone: joi.number().integer().empty(' ').messages({
-        'number.base': 'Teléfono convencional debe tener números naturales válidos',
+        'number.base': messages.tutor.fields.phoneNumber.base,
       }),
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
 

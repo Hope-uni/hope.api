@@ -1,4 +1,5 @@
 const joi = require('joi');
+const { messages } = require('@utils/index');
 
 module.exports = {
 
@@ -14,14 +15,14 @@ module.exports = {
         )
       )
       .messages({
-        'any.required': 'Cédula es requerida',
-        'string.pattern.base': 'Cédula debe ser válida',
+        'any.required': messages.therapist.fields.identificationNumber.required,
+        'string.pattern.base': messages.therapist.fields.identificationNumber.pattern,
       }),
       phoneNumber: joi.number().integer().required().messages({
-        'any.required': 'Teléfono es requerido',
-        'number.base': 'Teléfono debe tener números naturales válidos',
+        'any.required': messages.therapist.fields.phoneNumber.required,
+        'number.base': messages.therapist.fields.phoneNumber.base,
       }),
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
   
@@ -36,12 +37,12 @@ module.exports = {
         )
       )
       .messages({
-        'string.pattern.base': 'Cédula debe ser válida',
+        'string.pattern.base': messages.therapist.fields.identificationNumber.pattern,
       }),
       phoneNumber: joi.number().integer().empty(' ').messages({
-        'number.base': 'Teléfono debe tener números naturales válidos',
+        'number.base': messages.therapist.fields.phoneNumber.base,
       }),
-    });
+    }).unknown(false);
     return schema.validate(data);
   },
 

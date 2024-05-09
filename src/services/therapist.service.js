@@ -1,11 +1,7 @@
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
-const { Therapist, Person, User, Role, Permission ,sequelize } = require('@models/index.js');
-const { paginationValidation, getPageData } = require('@utils/pagination.util');
-const { 
-  createUserPerson,
-  updateUserPerson,
-} = require('@utils/user-person.util');
+const { TutorTherapist, Person, User, Role, Permission, UserRoles ,sequelize } = require('@models/index.js');
+const { pagination, userPerson, messages, dates } = require('@utils/index');
 const { 
   deleteUser
 } = require('./user.service');
@@ -24,13 +20,87 @@ module.exports = {
    * - Other properties include the paginated data from the database query, such as `count`, `rows`,
    * and pagination information like `page` and `totalPages`.
    */
+  /* eslint-disable radix */
+  /* eslint-disable consistent-return */
+  /* eslint-disable no-plusplus */
   async all(query) {
     try {
+
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await TutorTherapist.findAll({
+          where: {
+            status: true,
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: User,
+              where: {
+                status: true,
+              },
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 3,
+                    userId: {
+                      [Op.col]: 'User.id'
+                    }
+                  },
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                      include: {
+                        model: Permission,
+                        as: 'permissions',
+                        attributes: {
+                          exclude: ['group','createdAt','updatedAt']
+                        },
+                        through: {
+                          attributes: {
+                            exclude: [
+                              'id',
+                              'createdAt',
+                              'updatedAt',
+                              'roleId',
+                              'permissionId',
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+        });
+
+        return {
+          error: false,
+          message: messages.therapist.success.all,
+          data: dates.getAllAges(data), // getAllAges method is just for get the age from the birthday
+        }
+      }
       // Pagination
-      const { limit, offset } = paginationValidation(query.page, query.size);
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
 
-      const data = await Therapist.findAndCountAll({
+      const data = await TutorTherapist.findAndCountAll({
         limit,
         offset,
         distinct: true,
@@ -44,58 +114,75 @@ module.exports = {
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt']
-            }
+              exclude: ['createdAt','updatedAt','status']
+            },
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
+                model: UserRoles,
+                where: {
+                  roleId: 3,
+                  userId: {
+                    [Op.col]: 'User.id'
+                  }
                 },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
         ]
       });
 
-      const dataResponse = getPageData(data, query.page, limit);
+      // Add therapist's age
+      data.rows = dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
 
       return {
         error: false,
-        message: 'Lista de Terapeutas',
+        message: messages.therapist.success.all,
         ...dataResponse
       }
 
     } catch (error) {
-      logger.error(`There was an error in Therapiist services: ${error}`);
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist services: ${error}`,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
       }
     }
   },
@@ -124,49 +211,57 @@ module.exports = {
   async findOne(id) {
     try {
       
-      const data = await Therapist.findOne({
+      const data = await TutorTherapist.findOne({
         where: {
           id
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','userId','personId']
         },
         include: [
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt']
-            }
+              exclude: ['createdAt','updatedAt','status']
+            },
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
@@ -176,22 +271,22 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: 'Terapeuta no encontrado',
+          message: messages.therapist.errors.not_found,
           statusCode: 404
         }
       };
 
       return {
         error: false,
-        message: 'Terapeuta encontrado',
-        data  
+        message: messages.therapist.success.found,
+        data: dates.getAge(data) // getAge method is just for get the age from the birthday  
       };
 
     } catch (error) {
-      logger.error(`There was an error in Therapiist services: ${error}`);
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Therapist services: ${error}`,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -219,7 +314,7 @@ module.exports = {
       
 
       // IdentificationNumber validation
-      const identificationNumberExist = await Therapist.findOne({
+      const identificationNumberExist = await TutorTherapist.findOne({
         where: {
           identificationNumber,
           status: true
@@ -229,13 +324,13 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'El número de identificación ya está en uso',
+          message: messages.therapist.errors.in_use.identificationNumber,
           statusCode: 400
         };
       };
 
       // Phone number validation
-      const phoneNumberExist = await Therapist.findOne({
+      const phoneNumberExist = await TutorTherapist.findOne({
         where: {
           phoneNumber,
           status: true
@@ -245,13 +340,25 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'El número de teléfono ya está en uso',
+          message: messages.therapist.errors.in_use.phoneNumber,
           statusCode: 400
         };
       };
+      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
+      for (const iterator of resBody.roles) {
+        if(iterator !== 3){
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.therapist.errors.service.not_role,
+            statusCode: 400
+          }
+        }
+      }
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message, data  } = await createUserPerson(resBody);
+      const { error:userPersonError, statusCode, message = messages.therapist.errors.service.create, data  } = await userPerson.createUserPerson(resBody,transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -261,17 +368,17 @@ module.exports = {
         };
       };
 
-      const therapistData = await Therapist.create({
+      const therapistData = await TutorTherapist.create({
         identificationNumber,
         phoneNumber,
-        idPerson: data.idPerson,
-        idUser: data.idUser
+        personId: data.personId,
+        userId: data.userId
       },{transaction});
       if(!therapistData) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Terapeuta no creado',
+          message: messages.therapist.errors.service.create,
           statusCode: 400
         };
       };
@@ -280,20 +387,19 @@ module.exports = {
       await transaction.commit();
 
       // find Therapist
-      const newData = await Therapist.findOne({
+      const newData = await TutorTherapist.findOne({
         where: {
-          id: therapistData.id,
-          status: true
+          id: therapistData.id
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','userId','personId']
         },
         include: [
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt']
-            }
+              exclude: ['createdAt','updatedAt','status']
+            },
           },
           {
             model: User,
@@ -302,28 +408,33 @@ module.exports = {
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
@@ -332,16 +443,16 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Terapeuta creado',
-        data: newData
+        message: messages.therapist.success.create,
+        data: dates.getAge(newData), // newData
       }
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Therapiist services: ${error}`);
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Therapist services: ${error}`,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -368,17 +479,34 @@ module.exports = {
     try {
 
       // validate if therapist exist
-      const therapistExist = await Therapist.findOne({
+      const therapistExist = await TutorTherapist.findOne({
         where: {
           id,
           status: true
-        }
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true
+            },
+            include: {
+              model: UserRoles,
+              where: {
+                roleId: 3,
+                userId: {
+                  [Op.col]: 'User.id'
+                }
+              }
+            }
+          }
+        ]
       });
       if(!therapistExist) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Terapeuta no encontrado',
+          message: messages.therapist.errors.not_found,
           statusCode: 404
         }
       };
@@ -390,19 +518,10 @@ module.exports = {
         ...resBody
       } = body;
 
-      // validate if user and person is correct
-      if(therapistExist.idUser !== resBody.idUser || therapistExist.idPerson !== resBody.idPerson) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'Identificador de usuario o identificador de persona no son correctos',
-          statusCode: 400
-        };
-      }
 
       // identification number validation
       if(identificationNumber) {
-        const identificationNumberExist = await Therapist.findOne({
+        const identificationNumberExist = await TutorTherapist.findOne({
           where: {
             identificationNumber,
             status: true,
@@ -415,7 +534,7 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de identificación ya está en uso',
+            message: messages.therapist.errors.in_use.identificationNumber,
             statusCode: 400
           };
         };
@@ -423,7 +542,7 @@ module.exports = {
 
       // phone number validation
       if(phoneNumber) {
-        const phoneNumberExist = await Therapist.findOne({
+        const phoneNumberExist = await TutorTherapist.findOne({
           where: {
             phoneNumber,
             status: true,
@@ -436,50 +555,58 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de teléfono ya está en uso',
+            message: messages.therapist.errors.in_use.phoneNumber,
             statusCode: 400
           };
         };
       };
 
       // User and Person update
-      const { error:userPersonError, statusCode, message = 'Terapeuta no actualizado'  } = await updateUserPerson(resBody, transaction);
-      if(userPersonError) {
-        await transaction.rollback();
-        return {
-          error: userPersonError,
-          message,
-          statusCode
+      if(resBody) {
+        const { error:userPersonError, statusCode, message=messages.therapist.errors.service.update  } = await userPerson.updateUserPerson({
+          ...resBody,
+          personId: therapistExist.personId,
+          userId: therapistExist.userId
+        }, transaction);
+        if(userPersonError) {
+          await transaction.rollback();
+          return {
+            error: userPersonError,
+            message,
+            statusCode
+          };
         };
-      };
+      }
 
       // Update Therapist
-      const updateTherapistResponse = await Therapist.update(
-        {
-          identificationNumber,
-          phoneNumber
-        },
-        {
-          where: {
-            id
+      if(identificationNumber || phoneNumber) {
+        const updateTherapistResponse = await TutorTherapist.update(
+          {
+            identificationNumber,
+            phoneNumber
           },
-          transaction
-        }
-      );
-      if(!updateTherapistResponse) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'Terapeuta no actualizado',
-          statusCode: 400
+          {
+            where: {
+              id
+            },
+            transaction
+          }
+        );
+        if(!updateTherapistResponse) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.therapist.errors.service.update,
+            statusCode: 400
+          };
         };
-      };
+      }
 
       // commit changes
       await transaction.commit();
 
       // Get Therapist data
-      const data = await Therapist.findOne({
+      const data = await TutorTherapist.findOne({
         where: {id},
         attributes: {
           exclude: ['createdAt','updatedAt','status']
@@ -488,8 +615,8 @@ module.exports = {
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt']
-            }
+              exclude: ['createdAt','updatedAt','status']
+            },
           },
           {
             model: User,
@@ -498,28 +625,33 @@ module.exports = {
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
@@ -528,15 +660,15 @@ module.exports = {
     
       return {
         error: false,
-        message: 'Terapeuta actualizado',
-        data
+        message: messages.therapist.success.update,
+        data: dates.getAge(data) // getAge method is just for get the age from the birthday
       };
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Therapiist services: ${error}`);
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Therapist services: ${error}`,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -556,7 +688,7 @@ module.exports = {
     try {
       
       // validate if therapist exist
-      const therapistExist = await Therapist.findOne({
+      const therapistExist = await TutorTherapist.findOne({
         where: {
           id,
           status: true
@@ -566,24 +698,24 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Terapeuta no encontrado',
+          message: messages.therapist.errors.not_found,
           statusCode: 404
         }
       };
 
       // update User
-      const { error:userError, statusCode } = await deleteUser(therapistExist.idUser, transaction);
+      const { error:userError, statusCode } = await deleteUser(therapistExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
-          message: 'Terapeuta no fue eliminado',
+          message: messages.therapist.errors.service.delete,
           statusCode
         }
       };
 
       // update transaction
-      const updateTherapistResponse = await Therapist.update(
+      const updateTherapistResponse = await TutorTherapist.update(
         {
           status: false
         },
@@ -598,7 +730,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Terapeuta no fue eliminado',
+          message: messages.therapist.errors.service.delete,
           statusCode: 400
         };
       };
@@ -608,15 +740,15 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Terapeuta eliminado',
+        message: messages.therapist.success.delete,
       }
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Therapiist services: ${error}`);
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Therapist services: ${error}`,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }

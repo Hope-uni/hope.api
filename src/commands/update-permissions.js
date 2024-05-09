@@ -4,6 +4,9 @@ const { Permission } = require('@models/index');
 const modules = {
   role: "roles",
   user: "usuarios",
+  therapist: "terapeutas",
+  tutor: "tutores",
+  patient: "pacientes",
 }
 
 const permission = {

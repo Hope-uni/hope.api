@@ -1,0 +1,21 @@
+const router = require('express').Router();
+const {
+  all,
+  createPatient,
+  findPatient,
+  updatePatient,
+  removePatient
+} = require('@controllers/patient.controller');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
+
+
+router.get('/', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['listar pacientes']), all);
+router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['buscar pacientes']), findPatient);
+
+router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear pacientes']), createPatient);
+
+router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar pacientes']), updatePatient);
+
+router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar pacientes']), removePatient);
+
+module.exports = router;

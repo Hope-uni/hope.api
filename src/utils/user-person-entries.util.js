@@ -11,20 +11,22 @@ module.exports = {
       username,
       password,
       email,
-      roleId,
+      roles,
       firstName,
       secondName,
       surname,
       secondSurname,
       imageProfile,
       address,
+      birthday,
+      gender
     } = data;
 
     const { error:userError } = createUserValidation({
       username,
       password,
       email,
-      roleId
+      roles
     });
     if(userError) {
       return {
@@ -38,7 +40,9 @@ module.exports = {
       surname,
       secondSurname,
       imageProfile,
-      address
+      address,
+      birthday,
+      gender
     });
     if(personError) {
       return {
@@ -56,23 +60,24 @@ module.exports = {
     const {
       username,
       email,
-      roleId,
+      roles,
       firstName,
       secondName,
       surname,
       secondSurname,
       imageProfile,
       address,
-      idUser,
-      idPerson
+      userId,
+      personId,
+      birthday,
+      gender
     } = data;
 
-    if(idUser || username || email || roleId) {
+    if(userId || username || email || roles) {
       const { error:userError } = updateUserValidation({
-        id:idUser,
         username,
         email,
-        roleId
+        roles
       });
       if(userError) {
         return {
@@ -81,15 +86,16 @@ module.exports = {
       };
     }
 
-    if(idPerson || firstName || secondName || surname || secondSurname || imageProfile || address) {
+    if(personId || firstName || secondName || surname || secondSurname || imageProfile || address) {
       const { error:personError } = updatePersonValidation({
-        id:idPerson,
         firstName,
         secondName,
         surname,
         secondSurname,
         imageProfile,
-        address
+        address,
+        birthday,
+        gender
       });
       if(personError) {
         return {

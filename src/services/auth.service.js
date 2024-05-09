@@ -1,4 +1,4 @@
-const { User, Role, Permission, AuthToken, sequelize } = require('@models/index.js');
+const { User, Role, Permission, AuthToken, UserRoles, sequelize } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
@@ -6,6 +6,7 @@ const { secretKey, domain, userEmail } = require('@config/variables.config');
 const logger = require('@config/logger.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const { jwtAccessExpiration } = require('@config/variables.config');
+const { messages } = require('@utils/index');
 
 module.exports = {
 
@@ -25,6 +26,7 @@ module.exports = {
   async login(body) {
     const transaction = await sequelize.transaction();
     try {
+      
       // variables
       let userVerify;
 
@@ -37,11 +39,16 @@ module.exports = {
           },
           include: [
             {
-              model: Role,
+              model: UserRoles,
               include: [
                 {
-                  model: Permission,
-                  as: 'permissions'
+                  model: Role,
+                  include: [
+                    {
+                      model: Permission,
+                      as: 'permissions'
+                    }
+                  ]
                 }
               ]
             }
@@ -50,7 +57,7 @@ module.exports = {
         if(!userVerify) {
           return {
             error: true,
-            message: `El nombre de usuario ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+            message: messages.auth.errors.not_found.username,
             statusCode: 404
           }
         };
@@ -65,11 +72,16 @@ module.exports = {
           },
           include: [
             {
-              model: Role,
+              model: UserRoles,
               include: [
                 {
-                  model: Permission,
-                  as: 'permissions'
+                  model: Role,
+                  include: [
+                    {
+                      model: Permission,
+                      as: 'permissions'
+                    }
+                  ]
                 }
               ]
             }
@@ -78,18 +90,18 @@ module.exports = {
         if(!userVerify) {
           return {
             error: true,
-            message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+            message: messages.auth.errors.not_found.email,
             statusCode: 404
           }
         };
-      }
+      };
       
       // Password Match Validation
       const passwordValid = await bcrypt.compare(body.password, userVerify.password);
       if(!passwordValid) {
         return {
           error: true,
-          message: `Usuario o contraseña incorrectos`,
+          message: messages.auth.errors.service.login.password_not_match,
           statusCode: 400
         }
       };
@@ -113,20 +125,30 @@ module.exports = {
       // Generate Token  with JWT
       /* eslint-disable radix */
       /* eslint-disable prefer-const */
+      /* eslint-disable no-unused-vars */
       let accessToken;
-
-      accessToken = jwt.sign(
-        {
-          id: userVerify.id,
-          email: userVerify.email
-        },
-        secretKey,
-        {
-          expiresIn: `${parseInt(jwtAccessExpiration)}d`
+    
+      const getSuperAdmin = userVerify.UserRoles.map((element ) => {
+        if(element.Role.name === 'Superadmin') {
+          return element.Role.name;
         }
-      );
+        return '';
+      });
 
-      if(userVerify.Role.name === 'Superadmin') {
+      if(getSuperAdmin[0] !== 'Superadmin') {
+        accessToken = jwt.sign(
+          {
+            id: userVerify.id,
+            email: userVerify.email
+          },
+          secretKey,
+          {
+            expiresIn: `${parseInt(jwtAccessExpiration)}d`
+          }
+        );
+      }
+
+      if(getSuperAdmin[0] === 'Superadmin') {
         accessToken = jwt.sign(
           {
             id: userVerify.id,
@@ -142,7 +164,7 @@ module.exports = {
       if(!accessToken) {
         return {
           error: true,
-          message: `Hubo un error al momento de iniciar sesión`,
+          message: messages.auth.errors.service.login.generate_token_error,
           statusCode: 400
         }
       };
@@ -169,21 +191,17 @@ module.exports = {
 
       return {
         error: false,
-        message: `Inicio de sesión existoso!`,
-        data: [
-          {
-            accessToken,
-          },
-          {
-            refreshToken: authtokenReponse.token
-          }
-        ]
+        message: messages.auth.success.login,
+        data: {
+          accessToken,
+          refreshToken: authtokenReponse.token,
+        },
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(` ${messages.auth.errors.service.login.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in login services: ${error}`,
+        message: ` ${messages.auth.errors.service.login.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -203,21 +221,44 @@ module.exports = {
    */
   async forgotPassword(body) {
     try {
+      // variables
+      let userData;
+
       // Verify Email
-      const userData = await User.findOne({
-        where: {
-          email: body.email,
-          status: true
-        }
-      });
-      if(!userData) {
-        return {
-          error: true,
-          message: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
-          statusCode: 404
-        }
+      if(body.email) {
+        userData = await User.findOne({
+          where: {
+            email: body.email,
+            status: true
+          }
+        });
+        if(!userData) {
+          return {
+            error: true,
+            message: messages.auth.errors.not_found.email,
+            statusCode: 404
+          }
+        };
       };
 
+      // verify username
+      if(body.username) {
+        userData = await User.findOne({
+          where: {
+            username: body.username,
+            status: true
+          }
+        });
+        if(!userData) {
+          return {
+            error: true,
+            message: messages.auth.errors.not_found.username,
+            statusCode: 404
+          }
+        };
+      };
+
+      // Creating Payload
       const payload = {
         id: userData.id,
         email: userData.email
@@ -252,20 +293,20 @@ module.exports = {
       if(send === null) {
         return {
           error: true,
-          message: `Hubo un error a enviar el correo para restaurar la contraseña`,
+          message: messages.auth.errors.service.forgot_password.send_email,
           statusCode: 400
         }
       };
 
       return {
         error: false,
-        message: `Correo enviado satisfactoriamente`
+        message: messages.auth.success.forgot_password
       };
     } catch (error) {
-      logger.error(`There was an error in forgotPassword services: ${error}`);
+      logger.error(`${messages.auth.errors.service.forgot_password.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in forgotPassword services: ${error}`,
+        message: `${messages.auth.errors.service.forgot_password.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -305,21 +346,21 @@ module.exports = {
       if(!userUpdate) {
         return {
           error: true,
-          message: `Hubo un error al momento de restaurar la contraseña`,
+          message: messages.auth.errors.service.reset_password.update_password,
           statusCode: 400
         }
       };
 
       return {
         error: false,
-        message: `Contraseña restaurada`
+        message: messages.auth.success.reset_password
       }
 
     } catch (error) {
-      logger.error(`There was an error in resetPassword services: ${error}`);
+      logger.error(`${messages.auth.errors.service.reset_password.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in resetPassword services: ${error}`,
+        message: `${messages.auth.errors.service.reset_password.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -341,7 +382,7 @@ module.exports = {
       // Payload Validation
       if (!payload) {
         return {
-          message: `Payload esta vacio`,
+          message: messages.auth.errors.service.me.payload_empty,
           error: true,
           statusCode: 400
         };
@@ -357,43 +398,48 @@ module.exports = {
         },
         include: [
           {
-            model: Role,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Permission,
-              as: 'permissions',
-              attributes: {
-                exclude: ['group','createdAt','updatedAt']
-              },
-              through: {
+            model: UserRoles,
+            include: [
+              {
+                model: Role,
                 attributes: {
-                  exclude: [
-                    'id',
-                    'createdAt',
-                    'updatedAt',
-                    'roleId',
-                    'permissionId',
-                  ]
+                  exclude: ['createdAt','updatedAt','status']
+                },
+                include: {
+                  model: Permission,
+                  as: 'permissions',
+                  attributes: {
+                    exclude: ['group','createdAt','updatedAt']
+                  },
+                  through: {
+                    attributes: {
+                      exclude: [
+                        'id',
+                        'createdAt',
+                        'updatedAt',
+                        'roleId',
+                        'permissionId',
+                      ]
+                    }
+                  }
                 }
               }
-            }
+            ]
           }
         ]
       });
 
       return {
         error: false,
-        message: `Información de usuario`,
+        message: messages.auth.success.me,
         data
       }
 
     } catch (error) {
-      logger.error(`There was an error in Me services: ${error}`);
+      logger.error(`${messages.auth.errors.service.me.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Me services: ${error}`,
+        message: `${messages.auth.errors.service.me.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -414,7 +460,7 @@ module.exports = {
     if(refreshToken === null) {
       return {
         error: true,
-        message: `El token de actualización está vacío`,
+        message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
         statusCode: 400
       }
     };
@@ -424,7 +470,7 @@ module.exports = {
       const refreshTokenValid = jwt.verify(refreshToken, secretKey);
       if(!refreshTokenValid) {
         return {
-          message: `Token Inválido`,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
           error: true,
           statusCode: 401
         };
@@ -440,8 +486,8 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: `Inicio de sesión es requerido`,
-          statusCode: 403
+          message: messages.auth.errors.service.login.login_required,
+          statusCode: 401
         }
       };
 
@@ -460,7 +506,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: `Token no actualizado`,
+          message: messages.auth.errors.service.refresh_auth.update_token,
           statusCode: 400
         }
       };
@@ -498,22 +544,25 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Token actualizado',
-        data: [
-          {
+        message: messages.auth.success.refresh_auth,
+        data:{
             accessToken: newAccessToken,
-          },
-          {
             refreshToken: authtokenResponse.token
           }
-        ]
       };
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.auth.errors.service.refresh_auth.base}: ${error}`);
+      if(error.message === 'invalid signature') {
+        return {
+          error: true,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
+          statusCode: 401
+        }
+      }
       return {
         error: true,
-        message: `There was an error in refreshAuth services: ${error}`,
+        message: `${messages.auth.errors.service.refresh_auth.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -538,7 +587,7 @@ module.exports = {
       if(refreshToken === null) {
         return {
           error: true,
-          message: `El token de actualización está vacío`,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
           statusCode: 400
         }
       };
@@ -547,7 +596,7 @@ module.exports = {
       const refreshTokenValid = jwt.verify(refreshToken, secretKey);
       if(!refreshTokenValid) {
         return {
-          message: `Token Inválido`,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
           error: true,
           statusCode: 401
         };
@@ -563,7 +612,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: `Inicio de sesión es requerido`,
+          message:  messages.auth.errors.service.login.login_required,
           statusCode: 401
         }
       };
@@ -581,14 +630,14 @@ module.exports = {
 
       return {
         error: false,
-        message: `Refresh token eliminado`
+        message:  messages.auth.success.refresh_token
       }
 
     } catch (error) {
       logger.error(error);
       return {
         error: true,
-        message: `Refresh token was not removed: ${error}`,
+        message: `${messages.auth.errors.service.refresh_auth.remove_token}: ${error}`,
         statusCode: 500
       }
     }

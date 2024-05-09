@@ -1,24 +1,95 @@
-const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
-const { Tutor, User, Person, Permission, Role, sequelize } = require('@models/index.js');
-const { paginationValidation, getPageData } = require('@utils/pagination.util');
-const { 
-  createUserPerson,
-  updateUserPerson
-} = require('@utils/user-person.util');
+const logger = require('@config/logger.config');
+const { TutorTherapist, User, Person, Permission, Role, UserRoles, sequelize } = require('@models/index.js');
+const { pagination, messages, userPerson, dates } = require('@utils/index');
+
 const { 
   deleteUser
 } = require('./user.service');
 
 module.exports = {
-
+  /* eslint-disable radix */
+  /* eslint-disable consistent-return */
+  /* eslint-disable no-restricted-syntax */
+  /* eslint-disable no-plusplus */
   async all(query) {
     try {
+
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await TutorTherapist.findAll({
+          where: {
+            status: true
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','personId','userId']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: User,
+              where: {
+                status: true,
+              },
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 5,
+                    userId: {
+                      [Op.col]: 'User.id'
+                    }
+                  },
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                      include: {
+                        model: Permission,
+                        as: 'permissions',
+                        attributes: {
+                          exclude: ['group','createdAt','updatedAt']
+                        },
+                        through: {
+                          attributes: {
+                            exclude: [
+                              'id',
+                              'createdAt',
+                              'updatedAt',
+                              'roleId',
+                              'permissionId',
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        return {
+          error: false,
+          message: messages.tutor.success.all,
+          data: dates.getAllAges(data), // getAllAges method is just for get the age from the birthday
+        }
+      }
     
       // Pagination
-      const { limit, offset } = paginationValidation(query.page, query.size);
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
-      const data = await Tutor.findAndCountAll({
+      const data = await TutorTherapist.findAndCountAll({
         limit,
         offset,
         distinct: true,
@@ -26,7 +97,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status', 'personId','userId']
         },
         include: [
           {
@@ -37,52 +108,69 @@ module.exports = {
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
+                model: UserRoles,
+                where: {
+                  roleId: 5,
+                  userId: {
+                    [Op.col]: 'User.id'
+                  }
                 },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
         ]
       });
 
-      const dataResponse = getPageData(data, query.page, limit);
+      // Add tutor's age
+      data.rows = dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
 
       return {
         error: false,
-        message: 'Lista de Tutores',
+        message: messages.tutor.success.all,
         ...dataResponse
       }
 
     } catch (error) {
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in utor services: ${error}`,
+        message: `${messages.tutor.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -92,13 +180,13 @@ module.exports = {
   async findOne(id) {
     try {
       
-      const data = await Tutor.findOne({
+      const data = await TutorTherapist.findOne({
         where: {
           id,
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','userId','personId']
         },
         include: [
           {
@@ -109,33 +197,44 @@ module.exports = {
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
+                model: UserRoles,
+                where: {
+                  roleId: 5
                 },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
@@ -145,22 +244,22 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: `Tutor no encontrado`,
+          message: messages.tutor.errors.not_found,
           statusCode: 404,
         }
       };
 
       return {
         error: false,
-        message: 'Tutor encontrado',
-        data
+        message: messages.tutor.success.found,
+        data: dates.getAge(data) // getAge method is just for get the age from the birthday
       }
 
     } catch (error) {
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in utor services: ${error}`,
+        message: `${messages.tutor.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -175,7 +274,7 @@ module.exports = {
       const { identificationNumber, phoneNumber, telephone, ...resBody } = body;
 
       // IdentificationNumber validation
-      const identificationNumberExist = await Tutor.findOne({
+      const identificationNumberExist = await TutorTherapist.findOne({
         where: {
           identificationNumber,
           status: true
@@ -185,13 +284,13 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'El número de identificación ya está en uso',
+          message: messages.tutor.errors.in_use.identificationNumber,
           statusCode: 400
         };
       };
 
       // Phone number validation
-      const phoneNumberExist = await Tutor.findOne({
+      const phoneNumberExist = await TutorTherapist.findOne({
         where: {
           phoneNumber,
           status: true
@@ -201,14 +300,14 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'El número de teléfono ya está en uso',
+          message: messages.tutor.errors.in_use.phoneNumber,
           statusCode: 400
         };
       };
 
       // Telephone validation
       if(telephone) {
-        const telephoneExist = await Tutor.findOne({
+        const telephoneExist = await TutorTherapist.findOne({
           where: {
             telephone,
             status: true
@@ -218,14 +317,27 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de teléfono convencional ya está en uso',
+            message: messages.tutor.errors.in_use.phoneNumber,
             statusCode: 400
           };
         };
       }
 
+      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
+      for (const iterator of resBody.roles) {
+        if(iterator !== 5){
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.tutor.errors.service.not_role,
+            statusCode: 400
+          }
+        }
+      }
+
       // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, data } = await createUserPerson(resBody);
+      const { error:userPersonError, message, statusCode, data } = await userPerson.createUserPerson(resBody, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -236,18 +348,18 @@ module.exports = {
       }
 
       // create Tutor
-      const tutorResponse = await Tutor.create({
+      const tutorResponse = await TutorTherapist.create({
         identificationNumber,
         phoneNumber,
         telephone,
-        idPerson: data.idPerson,
-        idUser: data.idUser,
+        personId: data.personId,
+        userId: data.userId,
       },{transaction});
       if(!tutorResponse) {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no creado',
+          message: messages.tutor.errors.service.create,
           statusCode: 400
         };
       };
@@ -256,13 +368,13 @@ module.exports = {
       await transaction.commit();
 
       // find Tutor
-      const newData = await Tutor.findOne({
+      const newData = await TutorTherapist.findOne({
         where: {
-          id: tutorResponse.id,
+          id:tutorResponse.id,
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','userId','personId']
         },
         include: [
           {
@@ -273,33 +385,41 @@ module.exports = {
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
@@ -308,15 +428,15 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Tutor creado',
-        data: newData
+        message: messages.tutor.success.create,
+        data: dates.getAge(newData) // getAge method is just for get the age from the birthday
       };
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `${messages.tutor.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -326,16 +446,34 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
       // validate if tutor exist
-      const tutorExist = await Tutor.findOne({
+      const tutorExist = await TutorTherapist.findOne({
         where: {
           id,
           status: true
-        }
-      });
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true
+            },
+            include: {
+              model: UserRoles,
+              where: {
+                roleId: 5,
+                userId: {
+                  [Op.col]: 'User.id'
+                }
+              }
+            }
+          }
+        ]
+      },{transaction});
       if(!tutorExist) {
+        await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no encontrado',
+          message: messages.tutor.errors.not_found,
           statusCode: 404,
         }
       };
@@ -348,19 +486,9 @@ module.exports = {
         ...resData
       } = body;
 
-      // validate if user and person is correct
-      if(tutorExist.idUser !== resData.idUser || tutorExist.idPerson !== resData.idPerson) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'Identificador de usuario o identificador de persona no son correctos',
-          statusCode: 400
-        };
-      }
-
       // identification number validation
       if(identificationNumber) {
-        const identificationNumberExist = await Tutor.findOne({
+        const identificationNumberExist = await TutorTherapist.findOne({
           where: {
             identificationNumber,
             status: true,
@@ -373,14 +501,14 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de identificación ya está en uso',
+            message: messages.tutor.errors.in_use.identificationNumber,
             statusCode: 400
           };
         };
       }
       // phone number validation
       if(phoneNumber) {
-        const phoneNumberExist = await Tutor.findOne({
+        const phoneNumberExist = await TutorTherapist.findOne({
           where: {
             phoneNumber,
             status: true,
@@ -393,14 +521,14 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de teléfono ya está en uso',
+            message: messages.tutor.errors.in_use.phoneNumber,
             statusCode: 400
           };
         };
       }
       // telephone validation
       if(telephone) {
-        const telephoneExist = await Tutor.findOne({
+        const telephoneExist = await TutorTherapist.findOne({
           where: {
             telephone,
             status: true,
@@ -413,58 +541,66 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: 'El número de teléfono convencional ya está en uso',
+            message: messages.tutor.errors.in_use.phoneNumber,
             statusCode: 400
           };
         };
       }
 
       // Validate and update User and Person
-      const { error:userPersonError, statusCode, message } = await updateUserPerson(resData);
-      if(userPersonError) {
-        await transaction.rollback();
-        return {
-          error: userPersonError,
-          message,
-          statusCode
+      if(resData) {
+        const { error:userPersonError, statusCode, message = messages.tutor.errors.service.update } = await userPerson.updateUserPerson({
+          ...resData,
+          personId: tutorExist.personId,
+          userId: tutorExist.userId,
+        }, transaction);
+        if(userPersonError) {
+          await transaction.rollback();
+          return {
+            error: userPersonError,
+            message,
+            statusCode
+          };
         };
-      };
+      }
 
 
       // update transaction
-      const updateTutorResponse = await Tutor.update(
-        {
-          identificationNumber,
-          phoneNumber,
-          telephone
-        },
-        {
-          where: {
-            id
+      if(identificationNumber || phoneNumber || telephone) {
+        const updateTutorResponse = await TutorTherapist.update(
+          {
+            identificationNumber,
+            phoneNumber,
+            telephone
           },
-          transaction
-        }
-      );
-      if(!updateTutorResponse) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'Tutor no actualizado',
-          statusCode: 400
+          {
+            where: {
+              id
+            },
+            transaction
+          }
+        );
+        if(!updateTutorResponse) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.tutor.errors.service.update,
+            statusCode: 400
+          };
         };
-      };
+      }
 
       // Commit Transaction 
       await transaction.commit();
 
       // find Tutor
-      const newData = await Tutor.findOne({
+      const newData = await TutorTherapist.findOne({
         where: {
           id,
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','userId','personId']
         },
         include: [
           {
@@ -480,45 +616,55 @@ module.exports = {
             },
             include: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
+                model: UserRoles,
+                where: {
+                  roleId: 5
                 },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
+                include: [
+                  {
+                    model: Role,
                     attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                    include: {
+                      model: Permission,
+                      as: 'permissions',
+                      attributes: {
+                        exclude: ['group','createdAt','updatedAt']
+                      },
+                      through: {
+                        attributes: {
+                          exclude: [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'roleId',
+                            'permissionId',
+                          ]
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           }
         ]
       });
 
+
+
       return {
         error: false,
-        message: 'Tutor actualizado',
-        data: newData
+        message: messages.tutor.success.update,
+        data: dates.getAge(newData) // getAge method is just for get the age from the birthday
       }
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `${messages.tutor.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }
@@ -528,33 +674,34 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
       // validate if tutor exist
-      const tutorExist = await Tutor.findOne({
+      const tutorExist = await TutorTherapist.findOne({
         where: {
           id,
           status: true
         }
       });
       if(!tutorExist) {
+        await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no encontrado',
+          message: messages.tutor.errors.not_found,
           statusCode: 404,
         }
       };
 
       // remove User
-      const { error:userError, statusCode } = await deleteUser(tutorExist.idUser, transaction);
+      const { error:userError, statusCode } = await deleteUser(tutorExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
-          message: 'Tutor no fue eliminado',
+          message: messages.tutor.errors.service.delete,
           statusCode
         }
       };
 
       // update transaction
-      const updateTutorResponse = await Tutor.update(
+      const updateTutorResponse = await TutorTherapist.update(
         {
           status: false
         },
@@ -569,7 +716,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: 'Tutor no fue eliminado',
+          message: messages.tutor.errors.service.delete,
           statusCode: 400
         };
       };
@@ -579,14 +726,14 @@ module.exports = {
 
       return {
         error: false,
-        message: 'Tutor eliminado',
+        message: messages.tutor.success.delete,
       }
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in Tutor services: ${error}`);
+      logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `There was an error in Tutor services: ${error}`,
+        message: `${messages.tutor.errors.service.base}: ${error}`,
         statusCode: 500
       }
     }

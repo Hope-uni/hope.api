@@ -1,0 +1,279 @@
+
+const messages = {
+  // Auth Module
+  auth: {
+    fields: {
+      username_email: 'Nombre de usuario o correo es necesario para iniciar sesión',
+      username: {
+        required: `Nombre de usuario es requerido`,
+        base: `Nombre de usuario debe ser un texto válido`,
+        empty: `Nombre de usuario no debe estar vacío`
+      },
+      email: {
+        required: `Correo es requerido`,
+        format: `Correo debe ser válido`,
+      },
+      password: {
+        required: `Contraseña es requerida`,
+        base: `Contraseña debe ser un texto válido`,
+        empty: `Contraseña no debe estar vacía`,
+        pattern: `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
+        not_match: `Contraseñas no coinciden`
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador del modulo Auth`,
+      service: {
+        login: {
+          base: `Hubo un error en el servicio "Inicio de Sesión" del modulo Auth`,
+          password_not_match: `Usuario o contraseña incorrectos`,
+          generate_token_error: `Hubo un error al momento de iniciar sesión`,
+          login_required: `Inicio de sesión es requerido`,
+        },
+        forgot_password: {
+          base: `Hubo un error en el servicio "Olvidó Contraseña" del modulo Auth`,
+          send_email: `Hubo un error a enviar el correo para restaurar la contraseña`,
+        },
+        reset_password: {
+          base: `Hubo un error en el servicio "Cambiar Contraseña" del modulo Auth`,
+          update_password: `Hubo un error al momento de restaurar la contraseña`,
+        },
+        me: {
+          base: `Hubo un error en el servicio "Mi Perfil" del modulo Auth`,
+          payload_empty: `Payload esta vacio`
+        },
+        refresh_auth: {
+          base: `Hubo un error en el servicio "Refrescar Token" del modulo Auth`,
+          token_invalid: {
+            base: `Token no válido`,
+            empty: `El token de actualización está vacío`
+          },
+          update_token: `Token no actualizado`,
+          remove_token: `Token no Eliminado`
+        },
+      },
+      not_found: {
+        token: `Token no encontrado`,
+        username: `El nombre de usuario ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+        email: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+      }
+    },
+    success: {
+      login: `Inicio de sesión existoso!`,
+      forgot_password: `Correo enviado satisfactoriamente`,
+      reset_password: `Contraseña restaurada satisfactoriamente`,
+      me: `Información del usuario`,
+      refresh_auth: `Token actualizado satisfactoriamente`,
+      refresh_token: `Refresh token eliminado`,
+    }
+  },
+
+  // Therapist Module
+  therapist: {
+    fields: {
+      identificationNumber: {
+        required: `Cédula es requerida`,
+        pattern: `Cédula debe ser válida`,
+      },
+      phoneNumber: {
+        required: `Teléfono es requerido`,
+        base: `Teléfono debe tener números naturales válidos`,
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de terapeuta`,
+      service: {
+        base: `Hubo un error en el servicio de terapeuta`,
+        create: `Terapeuta no creado`,
+        update: `Terapeuta no actualizado`,
+        delete: `Terapeuta no fue eliminado`,
+        not_role: `El rol que está asignando a este usuario es erroneo, ya que esta tratando de registrar un Tutor`,
+      },
+      not_found: `Terapeuta no encontrado`,
+      in_use: {
+        identificationNumber: `Cédula ya está en uso`,
+        phoneNumber: `El numero de teléfono ya está en uso`
+      }
+    },
+    success:{
+      all: `Lista de Terapeutas`,
+      found: `Terapeuta encontrado`,
+      create: `Terapeuta creado`,
+      update: `Terapeuta actualizado`,
+      delete: `Terapeuta eliminado`
+    }
+  },
+
+  // Tutor Module
+  tutor: {
+    fields: {
+      id: {
+        required: `Identificador del Tutor es requerido`,
+        base: `Identificador del Tutor debe ser un número válido`,
+        positive: `Identificador del Tutor debe ser un número positivo`
+      },
+      identificationNumber: {
+        required: `Cédula es requerida`,
+        pattern: `Cédula debe ser válida`,
+      },
+      phoneNumber: {
+        required: `Teléfono es requerido`,
+        base: `Teléfono debe tener números naturales válidos`,
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de tutor`,
+      service: {
+        base: `Hubo un error en el servicio de tutor`,
+        create: `Tutor no creado`,
+        update: `Tutor no actualizado`,
+        delete: `Tutor no fue eliminado`,
+        not_role: `El rol que está asignando a este usuario es erroneo, ya que esta tratando de registrar un Tutor`,
+      },
+      not_found: `Tutor no encontrado`,
+      in_use: {
+        identificationNumber: `Cédula ya está en uso`,
+        phoneNumber: `El numero de teléfono ya está en uso`
+      }
+    },
+    success: {
+      all: `Lista de Tutores`,
+      found: `Tutor encontrado`,
+      create: `Tutor creado`,
+      update: `Tutor actualizado`,
+      delete: `Tutor eliminado`
+    }
+  },
+
+  // Patient Module
+  patient: {
+    fields: {
+      id: {
+        required: `Identificador del Paciente es requerido`,
+        base: `Identificador del Paciente debe ser un número válido`,
+        positive: `Identificador del Paciente debe ser un número positivo`
+      },
+      age: {
+        required: `Edad es requerida`,
+        base: `Edad debe ser un numero válido`,
+        positive: `Edad debe ser un número positivo mayor a cero`
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de paciente`,
+      service: {
+        base: `Hubo un error en el servicio de paciente`,
+        create: `Paciente no creado`,
+        update: `Paciente no actualizado`,
+        delete: `Paciente no fue eliminado`
+      },
+      not_found: `Paciente no encontrado`,
+      in_use: {
+        identificationNumber: `Cédula ya está en uso`,
+        phoneNumber: `El numero de teléfono ya está en uso`
+      }
+    },
+    success: {
+      all: `Lista de Pacientes`,
+      found: `Paciente encontrado`,
+      create: `Paciente creado`,
+      update: `Paciente actualizado`,
+      delete: `Paciente eliminado`
+    }
+  },
+
+  // User Module
+  user: {
+    fields: {
+      id: {
+        required: `Identificador es requerido`,
+        base: `Identificador debe ser un número válido`,
+        positive: `Identificador debe ser un número positivo`
+      },
+      username: {
+        required: `Nombre de usuario es requerido`,
+        base: `Nombre de usuario debe ser un texto válido`,
+        empty: `Nombre de usuario no debe estar vacío`
+      },
+      email: {
+        required: `Correo es requerido`,
+        format: `Correo debe ser válido`,
+      },
+      password: {
+        required: `Contraseña es requerida`,
+        base: `Contraseña debe ser un texto válido`,
+        empty: `Contraseña no debe estar vacía`,
+        pattern: `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
+        not_match: `Contraseñas no coinciden`
+      },
+      roleId: {
+        required: `Rol es requerido`,
+        base: `Identificador del rol debe ser un número válido`,
+        positive: `Identificador del rol debe ser un número positivo`
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de usuario`,
+      service: {
+        base: `Hubo un error en el servicio de usuario`,
+        create: `Usuario no creado`,
+        update: `Usuario no actualizado`,
+        delete: `Usuario no fue eliminado`
+      },
+      not_found: `Usuario no encontrado`,
+      in_use: {
+        username: `Nombre de usuario ya está en uso`,
+        email: `Correo ya está en uso`,
+      }
+    },
+    success: {
+      all: `Lista de Usuarios`,
+      found: `Usuario encontrado`,
+      create: `Usuario creado`,
+      update: `Usuario actualizado`,
+      delete: `Usuario eliminado`
+    }
+  },
+
+  role: {
+    fields: {
+      id: {
+        required: `Identificador es requerido`,
+        base: `Identificador debe ser un número válido`,
+        positive: `Identificador debe ser un número positivo`
+      },
+      name: {
+        required: `Nombre de rol es requerido`,
+        base: `Nombre de rol debe ser un texto válido`,
+        empty: `Nombre de rol no debe estar vacío`
+      },
+      permissions: {
+        required: `Permisos es requerido`,
+        base: `Permisos deben ser enviados en formato válido.`,
+        array_min: `Debe ingresar al menos un permiso.`,
+        number: `Permisos deben ser un número válido`,
+        positive: `Permisos deben ser un número positivo`
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de rol`,
+      service: {
+        base: `Hubo un error en el servicio de rol`,
+        create: `Rol no creado`,
+        update: `Rol no actualizado`,
+        delete: `Rol no fue eliminado`
+      },
+      not_found: `Rol no encontrado`,
+      in_use: {
+        name: `Nombre de rol ya está en uso`
+      }
+    },
+    success: {
+      all: `Lista de Roles`,
+      found: `Rol encontrado`,
+    }
+  }
+
+}
+
+module.exports = messages;

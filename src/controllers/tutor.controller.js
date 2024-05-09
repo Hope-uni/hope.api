@@ -6,15 +6,8 @@ const {
   update,
   removeTutor
 } = require('@services/tutor.service');
-const { findOneValidation } = require('@validations/index.validation');
-const {
-  createTutorValidation,
-  updateTutorValidation
-} = require('@validations/tutor.validation');
-const {
-  userPersonCreateValidation,
-  userPersonUpdateValidation
-} = require('@utils/user-person-entries.util');
+const { messages, userPersonEntries } = require('@utils/index');
+const { tutorEntry, idEntry } = require('@validations/index');
 
 
 module.exports = {
@@ -42,11 +35,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Tutor controller: ${error}`);
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Tutor controller: ${error}`
+        message: `${messages.tutor.errors.controller}: ${error}`
       }); 
     }
   },
@@ -57,7 +50,7 @@ module.exports = {
     try {
       
       // Joi validation
-      const { error } = findOneValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({ 
         error: true,
         statusCode: 400,
@@ -81,11 +74,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Tutor controller: ${error}`);
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Tutor controller: ${error}`
+        message: `${messages.tutor.errors.controller}: ${error}`
       }); 
     }
   },
@@ -98,7 +91,7 @@ module.exports = {
       const { phoneNumber, telephone, identificationNumber, ...resBody } = req.body;
       
       // User and Person joi validation
-      const { error:customError } = userPersonCreateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
       if(customError) return res.status(400).json({ 
         error: true,
         statusCode: 400,
@@ -106,7 +99,7 @@ module.exports = {
       });
       
       // Tutor joi validation
-      const { error } = createTutorValidation({ phoneNumber, telephone, identificationNumber });
+      const { error } = tutorEntry.createTutorValidation({ phoneNumber, telephone, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -130,11 +123,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Tutor controller: ${error}`);
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Tutor controller: ${error}`
+        message: `${messages.tutor.errors.controller}: ${error}`
       }); 
     }
   },
@@ -145,9 +138,10 @@ module.exports = {
     try {
       // destructuring obejct
       const { phoneNumber, identificationNumber, telephone,...resBody } = req.body;
+    
       
       // User and person joi validation
-      const { error:customError } = userPersonUpdateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
       if(customError) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -155,7 +149,7 @@ module.exports = {
       });
       
       // Joi validation
-      const { error } = updateTutorValidation({ phoneNumber, identificationNumber, telephone});
+      const { error } = tutorEntry.updateTutorValidation({ phoneNumber, identificationNumber, telephone});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, statusCode, message, data } = await update(req.params.id,req.body);
@@ -175,11 +169,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Tutor controller: ${error}`);
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Tutor controller: ${error}`
+        message: `${messages.tutor.errors.controller}: ${error}`
       }); 
     }
   },
@@ -191,7 +185,7 @@ module.exports = {
     try {
 
       // joi validation
-      const { error } = findOneValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -214,11 +208,11 @@ module.exports = {
       });
       
     } catch (error) {
-      logger.error(`There was an error in Tutor controller: ${error}`);
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Tutor controller: ${error}`
+        message: `${messages.tutor.errors.controller}: ${error}`
       }); 
     }
   },

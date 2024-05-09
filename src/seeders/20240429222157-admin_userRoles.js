@@ -1,22 +1,29 @@
-const bcrypt = require('bcrypt');
 const logger = require('../config/logger.config');
-const { userCode } = require('../config/variables.config');
+const { Role, User } = require('../models/index');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface) {
+  async up (queryInterface,) {
     const transaction = await queryInterface.sequelize.transaction();
     const date = new Date();
-    // Password hash
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(userCode, salt);
-    try { 
-      await queryInterface.bulkInsert('Users',[
-        {
+    try {
+
+      const roleInfo = await Role.findOne({
+        where: {
+          id:1 
+        },
+      });
+
+      const userInfo = await User.findOne({
+        where: {
           username: 'hope',
-          password: hashPassword,
-          email: 'superadmin@hope.com',
-          status: true,
+        },
+      })
+
+      await queryInterface.bulkInsert('UserRoles',[
+        {
+          userId: userInfo.id,
+          roleId: roleInfo.id,
           createdAt: new Date(
             date.toDateString(
               date.getYear(),
@@ -38,28 +45,29 @@ module.exports = {
             )
           ),
         }
-      ],{ transaction });
+      ], {transaction});
 
       await transaction.commit();
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in user seed: ${error}`);
+      logger.error(`There was an error in userRoles seed: ${error}`);
       throw error;
     }
+
   },
 
   async down (queryInterface) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       
-      await queryInterface.bulkDelete('Users',{ username: 'hope' },{ transaction });
+      await queryInterface.bulkDelete('UserRoles',{ roleId: 1 },{ transaction });
 
       await transaction.commit();
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`There was an error in user seed: ${error}`);
+      logger.error(`There was an error in userRoles seed: ${error}`);
       throw error;
     }
   }

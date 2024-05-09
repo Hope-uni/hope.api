@@ -1,4 +1,6 @@
 const logger = require('@config/logger.config');
+const { messages, userPersonEntries } = require('@utils/index');
+const { therapistEntry, idEntry } = require('@validations/index');
 const {
   all,
   findOne,
@@ -6,17 +8,6 @@ const {
   update,
   removeTherapist
 } = require('@services/therapist.service');
-const {
-  findOneValidation
-} = require('@validations/index.validation');
-const {
-  createTherapistValidation,
-  updateTherapistValidation
-} = require('@validations/therapist.validation');
-const {
-  userPersonCreateValidation,
-  userPersonUpdateValidation
-} = require('@utils/user-person-entries.util');
 
 module.exports = {
 
@@ -44,11 +35,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Therapist controller: ${error}`);
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist controller: ${error}`
+        message: `${messages.therapist.errors.controller}: ${error}`
       }); 
     }
   },
@@ -59,7 +50,7 @@ module.exports = {
   async findTherapist(req,res) {
     try {
       
-      const { error } = findOneValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -83,11 +74,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Therapist controller: ${error}`);
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist controller: ${error}`
+        message: `${messages.therapist.errors.controller}: ${error}`
       }); 
     }
   },
@@ -101,7 +92,7 @@ module.exports = {
       const { phoneNumber, identificationNumber, ...resBody } = req.body;
 
       // User and Person joi validation
-      const { error:customError } = userPersonCreateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
       if(customError) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -109,7 +100,7 @@ module.exports = {
       });
 
       // Therapist joi validation
-      const { error } = createTherapistValidation({ phoneNumber, identificationNumber });
+      const { error } = therapistEntry.createTherapistValidation({ phoneNumber, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -133,11 +124,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Therapist controller: ${error}`);
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist controller: ${error}`
+        message: `${messages.therapist.errors.controller}: ${error}`
       }); 
     }
   },
@@ -150,8 +141,12 @@ module.exports = {
       // destructuring obejct
       const { phoneNumber, identificationNumber,...resBody } = req.body;
 
+      // Joi id param validation
+      const { error:idError } = idEntry.findOneValidation({id:req.params.id});
+      if(idError) return res.status(400).json({ error: idError.details[0].message });
+
       // User and Person joi validation
-      const { error:customError } = userPersonUpdateValidation(resBody);
+      const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
       if(customError) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -159,7 +154,7 @@ module.exports = {
       });
 
       // Therapist joi validation
-      const { error } = updateTherapistValidation({ id:req.params.id, phoneNumber, identificationNumber });
+      const { error } = therapistEntry.updateTherapistValidation({ phoneNumber, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -183,11 +178,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Therapist controller: ${error}`);
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist controller: ${error}`
+        message: `${messages.therapist.errors.controller}: ${error}`
       }); 
     }
   },
@@ -200,7 +195,7 @@ module.exports = {
     try {
       
       // joi validation
-      const { error } = findOneValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, statusCode, message } = await removeTherapist(req.params.id);
@@ -219,11 +214,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(`There was an error in Therapist controller: ${error}`);
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in Therapist controller: ${error}`
+        message: `${messages.therapist.errors.controller}: ${error}`
       }); 
     }
   },

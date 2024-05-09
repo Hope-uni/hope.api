@@ -7,7 +7,8 @@
     "start": "node app.js",
     "build": "(cd src && npx sequelize-cli db:migrate)",
     "dev": "nodemon app.js",
-    "import-permissions": "node ./src/commands/update-permissions.js"
+    "import-permissions": "node ./src/commands/update-permissions.js",
+    "import-roles-permissions": "node ./src/commands/update-roles-permissions.js"
   },
   "_moduleAliases": {
     "@root": "<rootDir>/$1",

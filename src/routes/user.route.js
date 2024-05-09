@@ -9,14 +9,14 @@ const {
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin'],['listar usuarios']), verifyToken, all);
+router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar usuarios']), verifyToken, all);
 
-router.get('/:id', verifyToken, rolePermissions(['Superadmin'],['buscar usuarios']), findUser);
+router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['buscar usuarios']), findUser);
 
-router.post('/', verifyToken, rolePermissions(['Superadmin'],['crear usuarios']) ,create);
+router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear usuarios']) ,create);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin'],['actualizar usuarios']), update);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar usuarios']), update);
 
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin'],['borrar usuarios']), removeUser);
+router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar usuarios']), removeUser);
 
 module.exports = router;

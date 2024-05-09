@@ -1,21 +1,21 @@
 const joi = require('joi');
-
+const { messages } = require('@utils/index');
 
 module.exports = {
 
   loginValidation(data) {
     const schema = joi.object().keys({
       username: joi.string().empty(' ').messages({
-        'string.base': `Nombre de usuario debe ser un texto válido`,
-        'string.empty': `Nombre de usuario no debe estar vacío`
+        'string.base': messages.auth.fields.username.base,
+        'string.empty': messages.auth.fields.username.empty,
       }),
       email: joi.string().email().empty(' ').messages({
-        'string.email': `Correo debe ser válido`,
+        'string.email': messages.auth.fields.email.format
       }),
       password: joi.string().required().messages({
-        'any.required': `Contraseña es requerida`,
-        'string.base': `Contraseña debe ser un texto válido`,
-        'string.empty': `Contraseña no debe estar vacía`
+        'any.required': messages.auth.fields.password.required,
+        'string.base': messages.auth.fields.password.base,
+        'string.empty': messages.auth.fields.password.empty
       })
     });
     return schema.validate(data);
@@ -24,9 +24,12 @@ module.exports = {
 
   forgotPasswordValidation(data) {
     const schema = joi.object().keys({
-      email: joi.string().email().required().messages({
-        'any.required': `Correo es requerido`,
-        'string.email': `Correo debe ser válido`,
+      email: joi.string().email().empty(' ').messages({
+        'string.email': messages.auth.fields.email.format
+      }),
+      username: joi.string().empty(' ').messages({
+        'string.base': messages.auth.fields.username.base,
+        'string.empty': messages.auth.fields.username.empty,
       }),
     });
     return schema.validate(data);
@@ -36,17 +39,17 @@ module.exports = {
   resetPasswordValidation(data) {
     const schema = joi.object().keys({
       password: joi.string().required().pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
-        'any.required': `Contraseña es requerida`,
-        'string.base': `Contraseña debe ser un texto válido`,
-        'string.empty': `Contraseña no debe estar vacía`,
-        'string.pattern.base': `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`
+        'any.required': messages.auth.fields.password.required,
+        'string.base': messages.auth.fields.password.base,
+        'string.empty': messages.auth.fields.password.empty,
+        'string.pattern.base': messages.auth.fields.password.pattern
       }),
       confirmPassword: joi
         .any()
         .valid(joi.ref('password'))
         .required()
         .messages({
-          'any.only': `Contraseñas no coinciden`,
+          'any.only': messages.auth.fields.password.not_match
         })
     });
     return schema.validate(data);
