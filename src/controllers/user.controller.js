@@ -4,12 +4,15 @@ const {
   findUser,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  addRoleUser,
+  removeRoleUser,
 } = require('@services/user.service');
 const {
   idEntry,
   userEntry
-} = require('../validations/index');
+} = require('@validations/index');
+const messages = require('@utils/messages.utils');
 
 
 module.exports = {
@@ -37,11 +40,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User controller: ${error}`,
+        message: `${messages.user.errors.controller}: ${error}`,
       });
     }
   },
@@ -72,11 +75,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.controller}: ${error}`,
       });
     }
   },
@@ -106,11 +109,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.controller}: ${error}`,
       });
     }
   },
@@ -121,7 +124,7 @@ module.exports = {
   async update(req,res) {
     try {
       // Joi Validation
-      const { error } = userEntry.updateUserValidation({ id: req.params.id, ...req.body });
+      const { error } = userEntry.updateUserValidation({ ...req.body });
       if(error) return res.status(400).json({ error: error.details[0].message });
       
       const { error:dataError, statusCode, message, data} = await updateUser(req.params.id,req.body);
@@ -142,11 +145,11 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.controller}: ${error}`,
       });
     }
   },
@@ -174,12 +177,77 @@ module.exports = {
         message,
       });
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `There was an error in User services: ${error}`,
+        message: `${messages.user.errors.controller}: ${error}`,
       });
     }
   },
+
+  /* The `async addRolesUser(req, res)` function is responsible for handling the logic to add a role to
+  a user. Here's a breakdown of what it does: */
+  async addRolesUser(req,res) {
+    try {
+
+      const { error } = userEntry.roleUserValidation(req.body);
+      if(error) return res.status(400).json({ error: error.details[0].message });
+
+      const { error:dataError, statusCode, message, data } = await addRoleUser(req.body.userId,req.body.roleId);
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(200).json({
+        error: dataError,
+        statusCode: 200,
+        message,
+        data
+      });
+
+    } catch (error) {
+      logger.error(`${messages.user.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.user.errors.controller}: ${error}`,
+      });
+    }
+  },
+  
+  async removeRolesUser(req,res) {
+    try {
+      
+      const { error } = userEntry.roleUserValidation(req.body);
+      if(error) return res.status(400).json({ error: error.details[0].message });
+
+      const { error:dataError, statusCode, message } = await removeRoleUser(req.body.userId,req.body.roleId);
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(200).json({
+        error: dataError,
+        statusCode: 200,
+        message,
+      });
+    } catch (error) {
+      logger.error(`${messages.user.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.user.errors.controller}: ${error}`,
+      });
+    }
+  }
+
 }

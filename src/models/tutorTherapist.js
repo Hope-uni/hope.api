@@ -36,6 +36,17 @@ module.exports = (sequelize, DataTypes) => {
     TutorTherapist.belongsTo(models.User, {
       foreignKey: 'userId',
     });
+
+    TutorTherapist.hasMany(models.Patient, {
+      as: 'tutor',
+      foreignKey: 'tutorId'
+    });
+
+    TutorTherapist.hasMany(models.Patient, {
+      as: 'therapist',
+      foreignKey: 'therapistId'
+    });
+
   }
 
   return TutorTherapist;
