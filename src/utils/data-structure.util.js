@@ -156,10 +156,10 @@ module.exports = {
 
   // Patient 
 
- /* The `patientDataStructure(data)` function is responsible for creating a new data structure for
- patients by iterating over the input `data` array. It extracts specific information from each
- patient object in the array and organizes it into a new structure. Here's a breakdown of what it
- does: */
+  /* The `patientDataStructure(data)` function is responsible for creating a new data structure for
+  patients by iterating over the input `data` array. It extracts specific information from each
+  patient object in the array and organizes it into a new structure. Here's a breakdown of what it
+  does: */
   patientDataStructure(data) {
     // Variables
     const newData = [];
