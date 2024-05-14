@@ -149,7 +149,7 @@ module.exports = {
       });
       
       // Joi validation
-      const { error } = tutorEntry.updateTutorValidation({ phoneNumber, identificationNumber, telephone});
+      const { error } = tutorEntry.updateTutorValidation({id:req.params.id, phoneNumber, identificationNumber, telephone});
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, statusCode, message, data } = await update(req.params.id,req.body);

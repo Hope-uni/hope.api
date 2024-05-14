@@ -55,6 +55,7 @@ module.exports = {
           ]
         });
         if(!userVerify) {
+          await transaction.rollback();
           return {
             error: true,
             message: messages.auth.errors.not_found.username,
@@ -88,6 +89,7 @@ module.exports = {
           ]
         });
         if(!userVerify) {
+          await transaction.rollback();
           return {
             error: true,
             message: messages.auth.errors.not_found.email,
@@ -99,6 +101,7 @@ module.exports = {
       // Password Match Validation
       const passwordValid = await bcrypt.compare(body.password, userVerify.password);
       if(!passwordValid) {
+        await transaction.rollback();
         return {
           error: true,
           message: messages.auth.errors.service.login.password_not_match,
@@ -162,6 +165,7 @@ module.exports = {
       }
 
       if(!accessToken) {
+        await transaction.rollback();
         return {
           error: true,
           message: messages.auth.errors.service.login.generate_token_error,
@@ -198,6 +202,7 @@ module.exports = {
         },
       };
     } catch (error) {
+      await transaction.rollback();
       logger.error(` ${messages.auth.errors.service.login.base}: ${error}`);
       return {
         error: true,
@@ -458,6 +463,7 @@ module.exports = {
     const transaction = await sequelize.transaction();
     // validate if the parameter is empty
     if(refreshToken === null) {
+      await transaction.rollback();
       return {
         error: true,
         message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
@@ -469,6 +475,7 @@ module.exports = {
       // Validate if token is valid
       const refreshTokenValid = jwt.verify(refreshToken, secretKey);
       if(!refreshTokenValid) {
+        await transaction.rollback();
         return {
           message: messages.auth.errors.service.refresh_auth.token_invalid.base,
           error: true,
@@ -553,6 +560,7 @@ module.exports = {
 
     } catch (error) {
       logger.error(`${messages.auth.errors.service.refresh_auth.base}: ${error}`);
+      await transaction.rollback();
       if(error.message === 'invalid signature') {
         return {
           error: true,
@@ -585,6 +593,7 @@ module.exports = {
 
       // validate if the parameter is empty
       if(refreshToken === null) {
+        await transaction.rollback();
         return {
           error: true,
           message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
@@ -595,6 +604,7 @@ module.exports = {
       // Validate if token is valid
       const refreshTokenValid = jwt.verify(refreshToken, secretKey);
       if(!refreshTokenValid) {
+        await transaction.rollback();
         return {
           message: messages.auth.errors.service.refresh_auth.token_invalid.base,
           error: true,
@@ -634,7 +644,8 @@ module.exports = {
       }
 
     } catch (error) {
-      logger.error(error);
+      await transaction.rollback();
+      logger.error(`${messages.auth.errors.service.refresh_auth.remove_token}: ${error}`);
       return {
         error: true,
         message: `${messages.auth.errors.service.refresh_auth.remove_token}: ${error}`,

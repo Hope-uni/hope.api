@@ -141,10 +141,6 @@ module.exports = {
       // destructuring obejct
       const { phoneNumber, identificationNumber,...resBody } = req.body;
 
-      // Joi id param validation
-      const { error:idError } = idEntry.findOneValidation({id:req.params.id});
-      if(idError) return res.status(400).json({ error: idError.details[0].message });
-
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
       if(customError) return res.status(400).json({
@@ -154,7 +150,7 @@ module.exports = {
       });
 
       // Therapist joi validation
-      const { error } = therapistEntry.updateTherapistValidation({ phoneNumber, identificationNumber });
+      const { error } = therapistEntry.updateTherapistValidation({id:req.params.id, phoneNumber, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,

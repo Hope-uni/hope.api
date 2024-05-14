@@ -1,7 +1,7 @@
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
-const { TutorTherapist, Person, User, Role, Permission, UserRoles ,sequelize } = require('@models/index.js');
-const { pagination, userPerson, messages, dates } = require('@utils/index');
+const { TutorTherapist, Person, User, Role, Permission, UserRoles, Patient ,sequelize } = require('@models/index.js');
+const { pagination, userPerson, messages, dates, dataStructure } = require('../utils/index');
 const { 
   deleteUser
 } = require('./user.service');
@@ -32,13 +32,13 @@ module.exports = {
             status: true,
           },
           attributes: {
-            exclude: ['createdAt','updatedAt','status']
+            exclude: ['createdAt','updatedAt','status','personId']
           },
           include: [
             {
               model: Person,
               attributes: {
-                exclude: ['createdAt','updatedAt','status']
+                exclude: ['createdAt','updatedAt','status','birthday']
               },
             },
             {
@@ -54,9 +54,9 @@ module.exports = {
                   model: UserRoles,
                   where: {
                     roleId: 3,
-                    userId: {
+                    /* userId: {
                       [Op.col]: 'User.id'
-                    }
+                    } */
                   },
                   include: [
                     {
@@ -64,28 +64,17 @@ module.exports = {
                       attributes: {
                         exclude: ['createdAt','updatedAt','status']
                       },
-                      include: {
-                        model: Permission,
-                        as: 'permissions',
-                        attributes: {
-                          exclude: ['group','createdAt','updatedAt']
-                        },
-                        through: {
-                          attributes: {
-                            exclude: [
-                              'id',
-                              'createdAt',
-                              'updatedAt',
-                              'roleId',
-                              'permissionId',
-                            ]
-                          }
-                        }
-                      }
                     }
                   ]
-                }
+                },
               ]
+            },
+            {
+              model: Patient,
+              as: 'therapist',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
             }
           ],
         });
@@ -93,7 +82,7 @@ module.exports = {
         return {
           error: false,
           message: messages.therapist.success.all,
-          data: dates.getAllAges(data), // getAllAges method is just for get the age from the birthday
+          data: dataStructure.therapistDataStructure(data),
         }
       }
       // Pagination
@@ -108,13 +97,13 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt','status']
+              exclude: ['createdAt','updatedAt','status','birthday']
             },
           },
           {
@@ -130,9 +119,9 @@ module.exports = {
                 model: UserRoles,
                 where: {
                   roleId: 3,
-                  userId: {
+                  /* userId: {
                     [Op.col]: 'User.id'
-                  }
+                  } */
                 },
                 include: [
                   {
@@ -140,34 +129,23 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId',
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
-              }
+              },
             ]
+          },
+          {
+            model: Patient,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
           }
-        ]
+        ],
       });
 
       // Add therapist's age
-      data.rows = dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+      data.rows = dataStructure.therapistDataStructure(data.rows);// dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
 
       const dataResponse = pagination.getPageData(data, query.page, limit);
 
@@ -216,7 +194,7 @@ module.exports = {
           id
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','userId','personId']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -264,6 +242,13 @@ module.exports = {
                 ]
               }
             ]
+          },
+          {
+            model: Patient,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
           }
         ]
       });
@@ -279,7 +264,7 @@ module.exports = {
       return {
         error: false,
         message: messages.therapist.success.found,
-        data: dates.getAge(data) // getAge method is just for get the age from the birthday  
+        data: dataStructure.findTherapistDataStructure(data)// dates.getAge(data) // getAge method is just for get the age from the birthday  
       };
 
     } catch (error) {

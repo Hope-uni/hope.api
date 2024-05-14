@@ -5,6 +5,8 @@ const {
   create,
   update,
   removeUser,
+  addRolesUser,
+  removeRolesUser
 } = require('@controllers/user.controller');
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
@@ -18,5 +20,9 @@ router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear usu
 router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar usuarios']), update);
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar usuarios']), removeUser);
+
+router.post('/addRole', verifyToken, rolePermissions(['Superadmin','Admin'],[' ']), addRolesUser);
+
+router.post('/removeRole', verifyToken, rolePermissions(['Superadmin','Admin'],[' ']), removeRolesUser);
 
 module.exports = router;

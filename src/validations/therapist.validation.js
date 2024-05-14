@@ -18,9 +18,12 @@ module.exports = {
         'any.required': messages.therapist.fields.identificationNumber.required,
         'string.pattern.base': messages.therapist.fields.identificationNumber.pattern,
       }),
-      phoneNumber: joi.number().integer().required().messages({
-        'any.required': messages.therapist.fields.phoneNumber.required,
-        'number.base': messages.therapist.fields.phoneNumber.base,
+      phoneNumber: joi.string().required().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
+        'any.required': messages.tutor.fields.phoneNumber.required,
+        'string.base': messages.therapist.fields.phoneNumber.base,
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern
       }),
     }).unknown(false);
     return schema.validate(data);
@@ -28,6 +31,11 @@ module.exports = {
   
   updateTherapistValidation(data) {
     const schema = joi.object().keys({
+      id: joi.number().positive().required().messages({
+        'any.required': messages.therapist.fields.id.required,
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
+      }),
       identificationNumber: joi
       .string()
       .empty(' ')
@@ -39,8 +47,11 @@ module.exports = {
       .messages({
         'string.pattern.base': messages.therapist.fields.identificationNumber.pattern,
       }),
-      phoneNumber: joi.number().integer().empty(' ').messages({
-        'number.base': messages.therapist.fields.phoneNumber.base,
+      phoneNumber: joi.string().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
+        'string.base': messages.therapist.fields.phoneNumber.base,
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern
       }),
     }).unknown(false);
     return schema.validate(data);

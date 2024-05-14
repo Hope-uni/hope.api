@@ -71,13 +71,19 @@ const messages = {
   // Therapist Module
   therapist: {
     fields: {
+      id: {
+        required: `Identificador del Terapeuta es requerido`,
+        base: `Identificador del Terapeuta debe ser un número válido`,
+        positive: `Identificador del Terapeuta debe ser un número positivo`
+      },
       identificationNumber: {
         required: `Cédula es requerida`,
         pattern: `Cédula debe ser válida`,
       },
       phoneNumber: {
         required: `Teléfono es requerido`,
-        base: `Teléfono debe tener números naturales válidos`,
+        pattern: `Teléfono debe ser válido y debe tener como maximo 8 digitos`,
+        base: `Teléfono debe ser válido`
       }
     },
     errors: {
@@ -118,7 +124,8 @@ const messages = {
       },
       phoneNumber: {
         required: `Teléfono es requerido`,
-        base: `Teléfono debe tener números naturales válidos`,
+        pattern: `Teléfono debe ser válido y debe tener como maximo 8 digitos`,
+        base: `Teléfono debe ser válido`
       }
     },
     errors: {
@@ -186,9 +193,9 @@ const messages = {
   user: {
     fields: {
       id: {
-        required: `Identificador es requerido`,
-        base: `Identificador debe ser un número válido`,
-        positive: `Identificador debe ser un número positivo`
+        required: `Identificador del Usuario es requerido`,
+        base: `Identificador del Usuario debe ser un número válido`,
+        positive: `Identificador del Usuario debe ser un número positivo`
       },
       username: {
         required: `Nombre de usuario es requerido`,
@@ -206,10 +213,11 @@ const messages = {
         pattern: `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
         not_match: `Contraseñas no coinciden`
       },
-      roleId: {
+      roles: {
         required: `Rol es requerido`,
         base: `Identificador del rol debe ser un número válido`,
-        positive: `Identificador del rol debe ser un número positivo`
+        positive: `Identificador del rol debe ser un número positivo`,
+        unique: `Debe asignar roles diferentes a un mismo usuario`
       }
     },
     errors: {
@@ -218,9 +226,14 @@ const messages = {
         base: `Hubo un error en el servicio de usuario`,
         create: `Usuario no creado`,
         update: `Usuario no actualizado`,
-        delete: `Usuario no fue eliminado`
+        delete: `Usuario no fue eliminado`,
+        add_role: `Rol no fue agregado`,
+        delete_role: `Rol no fue eliminado`,
+        delete_role_user: `Este usuario no se le puede remover roles`,
       },
       not_found: `Usuario no encontrado`,
+      forbidden: `El tipo de usuario que desea registrar solo debe ser admisible con el rol "Admin" `,
+      rol_forbidden: `Este usuario no se le pueden asignar roles`,
       in_use: {
         username: `Nombre de usuario ya está en uso`,
         email: `Correo ya está en uso`,
@@ -231,16 +244,18 @@ const messages = {
       found: `Usuario encontrado`,
       create: `Usuario creado`,
       update: `Usuario actualizado`,
-      delete: `Usuario eliminado`
+      delete: `Usuario eliminado`,
+      add_role: `Rol fue agregado correctamente`,
+      delete_role: `Rol fue eliminado correctamente`,
     }
   },
 
   role: {
     fields: {
       id: {
-        required: `Identificador es requerido`,
-        base: `Identificador debe ser un número válido`,
-        positive: `Identificador debe ser un número positivo`
+        required: `Identificador del Rol es requerido`,
+        base: `Identificador del Rol debe ser un número válido`,
+        positive: `Identificador del Rol debe ser un número positivo`
       },
       name: {
         required: `Nombre de rol es requerido`,
@@ -264,8 +279,11 @@ const messages = {
         delete: `Rol no fue eliminado`
       },
       not_found: `Rol no encontrado`,
+      forbidden: `Este Usuario no se le puede asignar este Rol`,
+      unsign_rol: `Este Usuario no se le puede remover este Rol`,
       in_use: {
-        name: `Nombre de rol ya está en uso`
+        name: `Nombre de rol ya está en uso`,
+        rol: `El usuario ya tiene este Rol`
       }
     },
     success: {

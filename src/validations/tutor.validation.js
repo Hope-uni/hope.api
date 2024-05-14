@@ -1,5 +1,5 @@
 const joi = require('joi');
-const messages = require('@utils/messages.utils');
+const messages = require('../utils/messages.utils');
 
 module.exports = {
 
@@ -18,12 +18,18 @@ module.exports = {
         'any.required': messages.tutor.fields.identificationNumber.required,
         'string.pattern.base': messages.tutor.fields.identificationNumber.pattern,
       }),
-      phoneNumber: joi.number().integer().required().messages({
+      phoneNumber: joi.string().required().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
         'any.required': messages.tutor.fields.phoneNumber.required,
-        'number.base': messages.tutor.fields.phoneNumber.base,
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
+        'string.base': messages.tutor.fields.phoneNumber.base
       }),
-      telephone: joi.number().integer().empty(' ').messages({
-        'number.base': messages.tutor.fields.phoneNumber.base,
+      telephone: joi.string().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
+        'string.base': messages.tutor.fields.phoneNumber.base
       }),
     }).unknown(false);
     return schema.validate(data);
@@ -31,6 +37,11 @@ module.exports = {
   
   updateTutorValidation(data) {
     const schema = joi.object().keys({
+      id: joi.number().positive().required().messages({
+        'any.required': messages.tutor.fields.id.required,
+        'number.base': messages.tutor.fields.id.base,
+        'number.positive': messages.tutor.fields.id.positive,
+      }),
       identificationNumber: joi
       .string()
       .empty(' ')
@@ -42,11 +53,17 @@ module.exports = {
       .messages({
         'string.pattern.base': messages.tutor.fields.identificationNumber.pattern,
       }),
-      phoneNumber: joi.number().integer().empty(' ').messages({
-        'number.base': messages.tutor.fields.phoneNumber.base,
+      phoneNumber: joi.string().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
+        'string.base': messages.tutor.fields.phoneNumber.base
       }),
-      telephone: joi.number().integer().empty(' ').messages({
-        'number.base': messages.tutor.fields.phoneNumber.base,
+      telephone: joi.string().pattern(
+        new RegExp('^(5|7|8)[0-9]{7}$')
+      ).messages({
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
+        'string.base': messages.tutor.fields.phoneNumber.base
       }),
     }).unknown(false);
     return schema.validate(data);
