@@ -60,7 +60,7 @@ module.exports = {
     const {
       username,
       email,
-      roles,
+      // roles,
       firstName,
       secondName,
       surname,
@@ -73,11 +73,11 @@ module.exports = {
       gender
     } = data;
 
-    if(userId || username || email || roles) {
+    if(userId || username || email/*  || roles */) {
       const { error:userError } = updateUserValidation({
         username,
         email,
-        roles
+        // roles
       });
       if(userError) {
         return {

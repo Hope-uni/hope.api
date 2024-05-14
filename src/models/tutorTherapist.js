@@ -38,12 +38,12 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     TutorTherapist.hasMany(models.Patient, {
-      as: 'tutor',
+      as: 'patientTutor',
       foreignKey: 'tutorId'
     });
 
     TutorTherapist.hasMany(models.Patient, {
-      as: 'therapist',
+      as: 'patientTherapist',
       foreignKey: 'therapistId'
     });
 
