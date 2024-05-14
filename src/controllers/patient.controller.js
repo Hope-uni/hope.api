@@ -79,10 +79,10 @@ module.exports = {
   async createPatient(req,res) {
     try {
       // Destructuring Object
-      const { age, idTutor, ...resBody } = req.body;
+      const { tutorId, therapistId, ...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = patientEntry.createPatientValidation({ age, idTutor});
+      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId}); 
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -125,10 +125,10 @@ module.exports = {
   async updatePatient(req,res) {
     try {
       // Destructuring Object
-      const { age, idTutor,...resBody } = req.body;
+      const { therapistId, tutorId,...resBody } = req.body;
       
       // Patient joi validation
-      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, age, idTutor});
+      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, therapistId, tutorId});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,

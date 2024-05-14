@@ -93,7 +93,7 @@ const messages = {
         create: `Terapeuta no creado`,
         update: `Terapeuta no actualizado`,
         delete: `Terapeuta no fue eliminado`,
-        not_role: `El rol que está asignando a este usuario es erroneo, ya que esta tratando de registrar un Tutor`,
+        not_role: `El rol que está asignando a Terapeuta es inadmisible`,
       },
       not_found: `Terapeuta no encontrado`,
       in_use: {
@@ -135,7 +135,7 @@ const messages = {
         create: `Tutor no creado`,
         update: `Tutor no actualizado`,
         delete: `Tutor no fue eliminado`,
-        not_role: `El rol que está asignando a este usuario es erroneo, ya que esta tratando de registrar un Tutor`,
+        not_role: `El rol que está asignando al Tutor es inadmisible`,
       },
       not_found: `Tutor no encontrado`,
       in_use: {
@@ -172,7 +172,9 @@ const messages = {
         base: `Hubo un error en el servicio de paciente`,
         create: `Paciente no creado`,
         update: `Paciente no actualizado`,
-        delete: `Paciente no fue eliminado`
+        delete: `Paciente no fue eliminado`,
+        not_role: `El rol que está asignando a Paciente es inadmisible`,
+        user_person_incorrect: `Identificador de usuario o identificador de persona no son correctos`,
       },
       not_found: `Paciente no encontrado`,
       in_use: {

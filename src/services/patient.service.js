@@ -1,6 +1,6 @@
 const logger = require('@config/logger.config');
-const { Patient, TutorTherapist, User, Role, Permission, Person, UserRoles, sequelize } = require('@models/index.js');
-const { pagination, messages, userPerson, dates } = require('@utils/index');
+const { Patient, TutorTherapist, User, Role, Person, UserRoles, sequelize } = require('@models/index.js');
+const { pagination, messages, userPerson, dataStructure } = require('../utils/index');
 const {
   deleteUser
 } = require('./user.service');
@@ -20,7 +20,7 @@ module.exports = {
             status: true,
           },
           attributes: {
-            exclude: ['createdAt','updatedAt','status']
+            exclude: ['createdAt','updatedAt','status','personId']
           },
           include: [
             {
@@ -65,29 +65,11 @@ module.exports = {
                       attributes: {
                         exclude: ['createdAt','updatedAt','status']
                       },
-                      include: {
-                        model: Permission,
-                        as: 'permissions',
-                        attributes: {
-                          exclude: ['group','createdAt','updatedAt']
-                        },
-                        through: {
-                          attributes: {
-                            exclude: [
-                              'id',
-                              'createdAt',
-                              'updatedAt',
-                              'roleId',
-                              'permissionId'
-                            ]
-                          }
-                        }
-                      }
                     }
                   ]
-                }
+                },
               ]
-            }
+            },
           ]
         });
 
@@ -95,7 +77,7 @@ module.exports = {
         return {
           error: false,
           message: messages.patient.success.all,
-          data: dates.getAllAges(data), // getAllAges method is just for get the age from the birthday,
+          data: dataStructure.patientDataStructure(data),
         };
       }
       
@@ -154,34 +136,16 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId'
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
-              }
+              },
             ]
-          }
+          },
         ]
       });
 
-      // Add patient's age
-      data.rows = dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+      // get Patient structured
+      data.rows = dataStructure.patientDataStructure(data.rows);
 
       const dataResponse = pagination.getPageData(data, query.page, limit);
 
@@ -210,7 +174,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -225,10 +189,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: TutorTherapist,
@@ -236,10 +204,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: User,
@@ -255,36 +227,18 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId'
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
-              }
+              },
             ]
-          }
+          },
         ]
       });
 
       if(!data) {
         return {
           error: true,
-          message: messages.patient.errors.not_found,// 'Paciente no encontrado',
+          message: messages.patient.errors.not_found,
           statusCode: 404
         }
       };
@@ -292,7 +246,7 @@ module.exports = {
       return {
         error: false,
         message: messages.patient.success.found,
-        data
+        data: dataStructure.findPatientDataStructure(data),
       };
 
     } catch (error) {
@@ -309,7 +263,9 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
       
+      // Destructuring Data
       const { tutorId, therapistId, ...resData } = body;
+      
 
       // Tutor Exist validation
       const tutorExist = await TutorTherapist.findOne({
@@ -375,11 +331,24 @@ module.exports = {
         };
       };
 
+      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
+      for (const iterator of resData.roles) {
+        if(iterator !== 4){
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.patient.errors.service.not_role,
+            statusCode: 400
+          }
+        }
+      }
+
       const { error:userPersonError, statusCode, message = messages.patient.errors.service.create, data  } = await userPerson.createUserPerson(resData, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
-          error: userPersonError,
+          error: userPersonError, 
           message,
           statusCode
         };
@@ -410,7 +379,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -425,10 +394,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: TutorTherapist,
@@ -436,10 +409,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: User,
@@ -455,36 +432,18 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId'
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
-              }
+              },
             ]
-          }
+          },
         ]
       });
 
       return {
         error: false,
         message: messages.patient.success.create,
-        data: newData
+        data: dataStructure.findPatientDataStructure(newData),
       };
     } catch (error) {
       await transaction.rollback();
@@ -518,23 +477,13 @@ module.exports = {
       };
       
       // Destructuring Object
-      const { age, idTutor,...resData } = body;
-
-      // Validate if user and person are correct
-      if(patientExist.idUser !== resData.idUser || patientExist.idPerson !== resData.idPerson) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: 'Identificador de usuario o identificador de persona no son correctos',
-          statusCode: 400
-        };
-      }
+      const { tutorId, therapistId,...resData } = body;
 
       // Tutor Exist validation
-      if(idTutor) {
+      if(tutorId) {
         const tutorExist = await TutorTherapist.findOne({
           where: {
-            id: idTutor,
+            id: tutorId,
             status: true
           }
         });
@@ -548,8 +497,46 @@ module.exports = {
         };	
       };
 
+      if(therapistId) {
+        // Therapist Exist validation
+      const therapistExist = await TutorTherapist.findOne({
+        where: {
+          id: therapistId,
+          status: true
+        },
+        include: [
+          {
+            model: User,
+            include: [
+              {
+                model: UserRoles,
+                include: {
+                  model: Role,
+                  where: {
+                    name: 'Terapeuta',
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      });
+      if(!therapistExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.therapist.errors.not_found,
+          statusCode: 404
+        };
+      };
+      }
 
-      const { error:userPersonError, statusCode, message = messages.patient.errors.service.update } = await userPerson.updateUserPerson(resData, transaction);
+
+      const { error:userPersonError, statusCode, message = messages.patient.errors.service.update } = await userPerson.updateUserPerson({
+        ...resData,
+        personId: patientExist.personId,
+        userId: patientExist.userId,
+      }, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -560,23 +547,25 @@ module.exports = {
       };
 
 
-      const patientResponse = await Patient.update({
-        age,
-        idTutor
-      },{
-        where: {
-          id
-        },
-        transaction
-      });
-      if(!patientResponse) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: messages.patient.errors.service.update,
-          statusCode: 400
+      if(tutorId || therapistId) {
+        const patientResponse = await Patient.update({
+          tutorId,
+          therapistId
+        },{
+          where: {
+            id
+          },
+          transaction
+        });
+        if(!patientResponse) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.patient.errors.service.update,
+            statusCode: 400
+          };
         };
-      };
+      }
 
       // Commit transaction
       await transaction.commit();
@@ -588,7 +577,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -603,10 +592,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: TutorTherapist,
@@ -614,10 +607,14 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
           },
           {
             model: User,
@@ -633,36 +630,18 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId'
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
-              }
+              },
             ]
-          }
+          },
         ]
       });
 
       return {
         error: false,
         message: messages.patient.success.update,
-        data: newData
+        data: dataStructure.findPatientDataStructure(newData),
       }
 
     } catch (error) {

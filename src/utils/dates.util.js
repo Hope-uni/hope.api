@@ -6,12 +6,10 @@ const dayjs = require('dayjs');
 module.exports = {
 
   getAge(newData) {
-
     const birthday = dayjs(newData.Person.birthday);
     const currentDate = dayjs();
     const age = currentDate.diff(`${birthday}`, 'year');
     newData.Person.setDataValue('age', age);
-
     return newData;
   },
 
