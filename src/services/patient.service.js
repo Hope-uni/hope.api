@@ -1,6 +1,7 @@
 const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, sequelize } = require('@models/index.js');
-const { pagination, messages, userPerson, dataStructure } = require('../utils/index');
+const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
+const { Op } = require('sequelize');
 const {
   deleteUser
 } = require('./user.service');
@@ -18,6 +19,9 @@ module.exports = {
         const data = await Patient.findAll({
           where: {
             status: true,
+            therapistId: {
+              [Op.ne]: null
+            }
           },
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
@@ -88,7 +92,166 @@ module.exports = {
         offset,
         distinct: true,
         where: {
-          status: true
+          status: true,
+          therapistId: {
+            [Op.ne]: null
+          }
+        },
+        attributes: {
+          exclude: ['createdAt','updatedAt','status']
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+          },
+          {
+            model: TutorTherapist,
+            as: 'tutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: User,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','password']
+            },
+            include: [
+              {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              },
+            ]
+          },
+        ]
+      });
+
+      // get Patient structured
+      data.rows = dataStructure.patientDataStructure(data.rows);
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
+
+      return {
+        error: false,
+        message: messages.patient.success.all,
+        ...dataResponse
+      };
+
+    } catch (error) {
+      logger.error(`${messages.patient.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        message: `${messages.patient.errors.service.base}: ${error}`,
+        statusCode: 500
+      }
+    }
+  },
+
+  async allPatientsWithoutTherapist(query) {
+    try {
+
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await Patient.findAll({
+          where: {
+            status: true,
+            therapistId: null
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','personId']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: TutorTherapist,
+              as: 'tutor',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: TutorTherapist,
+              as: 'therapist',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: User,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                    }
+                  ]
+                },
+              ]
+            },
+          ]
+        });
+
+        // Return Patient
+        return {
+          error: false,
+          message: messages.patient.success.all,
+          data: dataStructure.patientDataStructure(data),
+        };
+      }
+      
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Patient.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
+        where: {
+          status: true,
+          therapistId: null
         },
         attributes: {
           exclude: ['createdAt','updatedAt','status']
@@ -300,36 +463,39 @@ module.exports = {
       };
 
       // Therapist Exist validation
-      const therapistExist = await TutorTherapist.findOne({
-        where: {
-          id: therapistId,
-          status: true
-        },
-        include: [
-          {
-            model: User,
-            include: [
-              {
-                model: UserRoles,
-                include: {
-                  model: Role,
-                  where: {
-                    name: 'Terapeuta',
+      if(therapistId) {
+        const therapistExist = await TutorTherapist.findOne({
+          where: {
+            id: therapistId,
+            status: true
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  include: {
+                    model: Role,
+                    where: {
+                      name: 'Terapeuta',
+                    }
                   }
                 }
-              }
-            ]
-          }
-        ]
-      });
-      if(!therapistExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+              ]
+            }
+          ]
+        });
+        if(!therapistExist) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.therapist.errors.not_found,
+            statusCode: 404
+          };
         };
-      };
+  
+      }
 
       /* eslint-disable no-restricted-syntax */
       /* eslint-disable no-await-in-loop */
@@ -675,7 +841,7 @@ module.exports = {
       };
   
       // remove user 
-      const { error:userError, statusCode } = await deleteUser(patientExist.idUser, transaction);
+      const { error:userError, statusCode } = await deleteUser(patientExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
