@@ -6,8 +6,10 @@ const {
   me,
   getRefreshToken,
   removeToken,
-} = require('@controllers/auth.controller');
-const { verifyToken, rolePermissions } = require('@middlewares/index');
+  changePassword,
+  changePasswordPatient
+} = require('../controllers/auth.controller');
+const { verifyToken, rolePermissions } = require('../middlewares/index');
 
 
 
@@ -17,7 +19,20 @@ router.post('/forgot-password', forgotPassword);
 
 router.post('/reset-password', verifyToken ,resetPassword);
 
-router.get('/me', verifyToken, rolePermissions(['Superadmin'],['']) ,me);
+router.post('/change-password', verifyToken, rolePermissions([
+  'Superadmin',
+  'Admin',
+  'Terapeuta',
+  'Tutor'
+]) ,changePassword);
+
+router.put('/:id', verifyToken, rolePermissions([
+  'Superadmin',
+  'Admin',
+  'Tutor'
+],[]) ,changePasswordPatient);
+
+router.get('/me', verifyToken,me);
 
 router.post('/newToken', getRefreshToken);
 

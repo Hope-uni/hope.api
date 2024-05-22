@@ -1,13 +1,14 @@
 const logger = require('@config/logger.config');
 const { messages, userPersonEntries } = require('@utils/index');
-const { therapistEntry, idEntry } = require('@validations/index');
+const { therapistEntry, idEntry } = require('../validations/index');
 const {
   all,
   findOne,
   create,
   update,
-  removeTherapist
-} = require('@services/therapist.service');
+  removeTherapist,
+  assignPatient,
+} = require('../services/therapist.service');
 
 module.exports = {
 
@@ -116,9 +117,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(201).json({
         error: dataError,
-        statusCode: 200,
+        statusCode: 201,
         message,
         data
       });
@@ -218,5 +219,37 @@ module.exports = {
       }); 
     }
   },
+
+  async assignPatient(req, res) {
+    try {
+      
+      const { error } = therapistEntry.assignPatientValidation(req.body);
+      if(error) return res.status(400).json({ error: error.details[0].message });
+
+      const { error:dataError, message, statusCode } = await assignPatient(req.body);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error:dataError,
+          statusCode,
+          message
+        });
+      };
+
+      return res.status(200).json({
+        error: dataError,
+        statusCode: 200,
+        message
+      });
+
+    } catch (error) {
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.therapist.errors.controller}: ${error}`
+      }); 
+    }
+  }
 
 }

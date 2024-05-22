@@ -5,7 +5,8 @@ const {
   findOne,
   create,
   update,
-  removePatient
+  removePatient,
+  allPatientsWithoutTherapist,
 } = require('@services/patient.service');
 const { patientEntry, idEntry } = require('@validations/index');
 
@@ -36,6 +37,36 @@ module.exports = {
         statusCode: 500,
         message: `${messages.patient.errors.controller}: ${error}`
       }); 
+    }
+  },
+
+  async allPatientsWithoutTherapist(req,res) {
+    try {
+      
+      const { error, statusCode, message, ...resData } = await allPatientsWithoutTherapist(req.query);
+
+      if(error) {
+        return res.status(statusCode).json({
+          error,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(200).json({
+        error,
+        statusCode: 200,
+        message,
+        ...resData
+      });
+
+    } catch (error) {
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.patient.errors.controller}: ${error}`
+      });
     }
   },
 
@@ -106,9 +137,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(201).json({
         error: dataError,
-        statusCode: 200,
+        statusCode: 201,
         message,
         data
       });

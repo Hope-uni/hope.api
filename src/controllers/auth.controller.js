@@ -6,9 +6,11 @@ const {
   resetPassword,
   me,
   refreshAuth,
-  removeRefreshToken
+  removeRefreshToken,
+  changePassword,
+  changePasswordPatient
 } = require('@services/auth.service');
-const { authEntry } = require('../validations/index');
+const { authEntry, idEntry } = require('@validations/index');
 
 module.exports = {
 
@@ -126,6 +128,74 @@ module.exports = {
         statusCode: 200,
         message
       });
+    } catch (error) {
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.auth.errors.controller}: ${error}`,
+      });
+    }
+  },
+
+  async changePassword(req,res) {
+    try {
+      
+      const { error } = authEntry.changePasswordValidation(req.body);
+      if(error) return res.status(400).json({ error: error.details[0].message });
+
+
+      const { error:dataError, message, statusCode } = await changePassword(req.body, req.payload);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      };
+
+      return res.status(200).json({
+        error: dataError,
+        statusCode: 200,
+        message
+      });
+
+    } catch (error) {
+      logger.error(`${messages.auth.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.auth.errors.controller}: ${error}`,
+      });
+    }
+  },
+
+  async changePasswordPatient(req,res) {
+    try {
+
+      const { error: idError } = idEntry.findOneValidation({id:req.params.id});
+      if(idError) return res.status(400).json({error: idError.details[0].message});
+
+      const { error } = authEntry.changePasswordValidation(req.body);
+      if(error) return res.status(400).json({ error: error.details[0].message });
+
+      const { error:dataError, message, statusCode } = await changePasswordPatient(req.body, req.params.id);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      };
+
+      return res.status(200).json({
+        error: dataError,
+        statusCode: 200,
+        message
+      });
+
     } catch (error) {
       logger.error(`${messages.auth.errors.controller}: ${error}`);
       return res.status(500).json({
