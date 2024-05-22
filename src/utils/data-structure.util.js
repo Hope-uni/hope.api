@@ -67,7 +67,7 @@ module.exports = {
           // Get age from Patient
           const childAge = dates.getAge(patient);
 
-          // Full Name validation
+          // Fullname validation
           let fullName = `${patient.Person.firstName} ${patient.Person.secondName} ${patient.Person.surname} ${patient.Person.secondSurname}`;
           if(!patient.Person.secondName || !patient.Person.secondSurname) {
             fullName = `${patient.Person.firstName} ${patient.Person.surname}`;
@@ -92,11 +92,16 @@ module.exports = {
         id: iterator.id,
         userId: iterator.userId,
         fullName,
+        firstName: iterator.Person.firstName,
+        secondName: iterator.Person.secondName,
+        surname: iterator.Person.surname,
+        secondSurname: iterator.Person.secondSurname,
         username: iterator.User.username,
         email: iterator.User.email,
         phoneNumber: iterator.phoneNumber,
         telephone: iterator.telephone,
-        patients: children
+        patients: children,
+        image: iterator.Person.imageProfile
       };
 
       newData.push(element);
@@ -122,15 +127,140 @@ module.exports = {
         }
         
         const childInfo = {
-          id: patient.id,
           userId: patient.userId,
+          id: patient.id,
           fullName,
           age: childAge.Person.dataValues.age,
+          // Grado de autismo
+          // fase
+          // cantidad de logros
         }
         children.push(childInfo);
       }
     }
 
+    // Therapist Fullname validation
+    let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
+    if(!data.Person.secondName || !data.Person.secondSurname) {
+      fullName = `${data.Person.firstName} ${data.Person.surname}`;
+    }
+
+    // Get age from therapist 
+    const therapistAge = dates.getAge(data);
+
+    const element = {
+      id: data.id,
+      userId: data.userId,
+      fullName,
+      image: data.Person.imageProfile,
+      username: data.User.username,
+      email: data.User.email,
+      identificationNumber: data.identificationNumber,
+      phoneNumber: data.phoneNumber,
+      birthday: data.Person.birthday,
+      age: therapistAge.Person.dataValues.age,
+      gender: data.Person.gender,
+      address: data.Person.address,
+      patients: children,
+      /*
+        Lista de actividaes creadas por el terapueta
+        name
+        description
+        points
+        fase
+      */
+    }
+
+    return element;
+  },
+
+  // Tutor
+
+  tutorDataStructure(data) {
+    // Variables
+    const newData = [];
+
+    for(const iterator of data) {
+
+      const children = [];
+
+      if(iterator.patientTutor) {
+
+        for (const patient of iterator.patientTutor) {
+          
+          // Get age from Patient.
+          const childAge = dates.getAge(patient);
+
+          // Fullname Validation
+          let fullName = `${patient.Person.firstName} ${patient.Person.secondName} ${patient.Person.surname} ${patient.Person.secondSurname}`;
+          if(!patient.Person.secondName || !patient.Person.secondSurname) {
+            fullName = `${patient.Person.firstName} ${patient.Person.surname}`;
+          }
+
+          const childInfo = {
+            id: patient.id,
+            userId: patient.userId,
+            fullName,
+            age: childAge.Person.dataValues.age,
+          }
+          children.push(childInfo);
+        }
+      }
+      // Tutor Fullname validatio
+      let fullName = `${iterator.Person.firstName} ${iterator.Person.secondName} ${iterator.Person.surname} ${iterator.Person.secondSurname}`;
+      if(!iterator.Person.secondName || !iterator.Person.secondSurname) {
+        fullName = `${iterator.Person.firstName} ${iterator.Person.surname}`;
+      }
+
+      const element = {
+        id: iterator.id,
+        userId: iterator.userId,
+        fullName,
+        username: iterator.User.username,
+        phoneNumber: iterator.phoneNumber,
+        telephone: iterator.telephone,
+        children,
+        image: iterator.Person.imageProfile,
+      }
+      newData.push(element);
+    }
+
+    return newData;
+  },
+  
+  findTutorDataStructure(data) {
+
+    const children = [];
+
+    if(data.patientTutor) {
+      for (const patient of data.patientTutor) {
+        
+        // Get age from Patient
+        const childAge = dates.getAge(patient);
+
+        // Full Name validation
+        let fullName = `${patient.Person.firstName} ${patient.Person.secondName} ${patient.Person.surname} ${patient.Person.secondSurname}`;
+        if(!patient.Person.secondName || !patient.Person.secondSurname) {
+          fullName = `${patient.Person.firstName} ${patient.Person.surname}`;
+        }
+
+        const childInfo = {
+          userId: patient.userId,
+          id: patient.id,
+          fullName,
+          age: childAge.Person.dataValues.age,
+          // Grado de Autismo
+          // Fase
+          // Cantidad de logros
+        }
+        children.push(childInfo);
+      }
+    }
+
+    // Get Age from Tutor
+    const tutorAge = dates.getAge(data);
+
+    // Tutor Fullname validation
     let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
     if(!data.Person.secondName || !data.Person.secondSurname) {
       fullName = `${data.Person.firstName} ${data.Person.surname}`;
@@ -140,14 +270,21 @@ module.exports = {
       id: data.id,
       userId: data.userId,
       fullName,
+      firstName: data.Person.firstName,
+      secondName: data.Person.secondName,
+      surname: data.Person.surname,
+      secondSurname: data.Person.secondSurname,
+      gender: data.Person.gender,
+      birthday: data.Person.birthday,
+      age: tutorAge.Person.dataValues.age,
       image: data.Person.imageProfile,
       username: data.User.username,
       email: data.User.email,
-      phoneNumber: data.phoneNumber,
       identificationNumber: data.identificationNumber,
+      phoneNumber: data.phoneNumber,
       telephone: data.telephone,
       address: data.Person.address,
-      patients: children,
+      children,
     }
 
     return element;
@@ -176,6 +313,7 @@ module.exports = {
         // GRADO
         // FASE
         // Cantidad de logros
+        image: iterator.Person.imageProfile,
       }
       newData.push(element);
     }
@@ -183,6 +321,9 @@ module.exports = {
   },
 
   findPatientDataStructure(data) {
+    
+    // Variables
+    let therapistFullName;
 
     // get Age from Patient
     const childAge = dates.getAge(data);
@@ -199,28 +340,32 @@ module.exports = {
       tutorFullName = `${data.tutor.Person.firstName} ${data.tutor.Person.surname}`;
     }
 
-    let therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.secondName} ${data.therapist.Person.surname} ${data.therapist.Person.secondSurname}`; // Therapist
-    if(!data.therapist.Person.secondName || !data.therapist.Person.secondSurname) {
-      therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.surname}`;
+    if(data.therapist) {
+      therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.secondName} ${data.therapist.Person.surname} ${data.therapist.Person.secondSurname}`; // Therapist
+      if(!data.therapist.Person.secondName || !data.therapist.Person.secondSurname) {
+        therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.surname}`;
+      }
     }
-
-
 
     return {
       id: data.id,
       userId: data.userId,
       fullName,
+      firstName: data.Person.firstName,
+      secondName: data.Person.secondName,
+      surname: data.Person.surname,
+      secondSurname: data.Person.secondSurname,
       image: data.Person.imageProfile,
-      age: childAge.Person.dataValues.age,
       gender: data.Person.gender,
+      age: childAge.Person.dataValues.age,
       username: data.User.username,
-      address: data.Person.address,
       // Grado de autismo
       // Fase actual
       // Progreso
       email: data.User.email,
       birthday: data.Person.birthday,
       telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
+      address: data.Person.address,
       // Observaciones
       /*
         Lista de logros Conseguidos: {
@@ -237,7 +382,7 @@ module.exports = {
         correo: data.tutor.User.email,
         telefono: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
       },
-      therapist: {
+      therapist: data.therapist ? {
         id: data.therapist.id,
         userId: data.therapist.userId,
         image: data.therapist.Person.imageProfile,
@@ -245,7 +390,7 @@ module.exports = {
         username: data.therapist.User.username,
         email: data.therapist.User.email,
         phoneNumber: data.therapist.phoneNumber
-      },
+      } : '',
     /*
         Informacion de la actividad asignada: {
           id
@@ -271,7 +416,5 @@ module.exports = {
         }
       */
     } 
-
   }
-
 }

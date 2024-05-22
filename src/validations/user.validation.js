@@ -1,30 +1,32 @@
 const joi = require('joi');
-const messages = require('../utils/messages.utils');
+const messages = require('@utils/messages.utils');
 
 module.exports = {
 
   createUserValidation(data) {
     const schema = joi.object().keys({
       username: joi.string().required().messages({
-        'any.required': `Nombre es requerido`,
-        'string.base': `Nombre debe ser un texto válido`,
-        'string.empty': `Nombre no debe estar vacío`
+        'any.required': messages.user.fields.username.required,
+        'string.base': messages.user.fields.username.base,
+        'string.empty': messages.user.fields.username.empty,
       }),
       email: joi.string().email().required().messages({
-        'any.required': `Correo es requerido`,
-        'string.email': `Correo debe ser válido`,
+        'any.required': messages.user.fields.email.required,
+        'string.base': messages.user.fields.email.base,
+        'string.email': messages.user.fields.email.format,
+        'string.empty': messages.user.fields.email.empty
       }),
       /* eslint-disable prefer-regex-literals */
       password: joi.string().required().pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
-        'any.required': `Contraseña es requerido`,
-        'string.empty': `Contraseña no debe estar vacío`,
-        'string.base': `Contraseña debe ser un texto válido`,
-        'string.pattern.base': `Contraseña debería tener entre 8 y 30 carácteres además contener letras y números`
+        'any.required': messages.user.fields.password.required,
+        'string.empty': messages.user.fields.password.empty,
+        'string.base': messages.user.fields.password.base,
+        'string.pattern.base': messages.user.fields.password.pattern
       }),
       roles: joi.array().items(joi.number().positive()).unique().min(1).required().messages({
-        'any.required': `Identificador del rol es requerido`,
-        'number.base': `Identificador del rol debe ser un número válido`,
-        'number.positive': `Identificador del rol debe ser un número positivo`,
+        'any.required': messages.user.fields.roles.required,
+        'number.base': messages.user.fields.roles.base,
+        'number.positive': messages.user.fields.roles.positive,
         'array.min': messages.role.fields.permissions.array_min,
         'array.base': messages.role.fields.permissions.base,
         'array.unique': messages.user.fields.roles.unique,
@@ -36,10 +38,12 @@ module.exports = {
   updateUserValidation(data) {
     const schema = joi.object().keys({
       username: joi.string().empty(' ').messages({
-        'string.base': `Nombre debe ser un texto válido`,
+        'string.base': messages.user.fields.username.base,
+        'string.empty': messages.user.fields.username.empty,
       }),
       email: joi.string().email().empty(' ').messages({
-        'string.email': `Correo debe ser válido`,
+        'string.email': messages.user.fields.email.format,
+        'string.empty': messages.user.fields.email.empty,
       }),
     }).unknown(false);
     return schema.validate(data);

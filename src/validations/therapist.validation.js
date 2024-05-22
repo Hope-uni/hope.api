@@ -57,4 +57,20 @@ module.exports = {
     return schema.validate(data);
   },
 
+  assignPatientValidation(data) {
+    const schema = joi.object().keys({
+      therapistId: joi.number().positive().required().messages({
+        'any.required': messages.therapist.fields.id.required,
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
+      }),
+      patientId: joi.number().positive().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+    }).unknown(false);
+    return schema.validate(data);
+  }
+
 }

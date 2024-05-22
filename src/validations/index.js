@@ -6,6 +6,7 @@ const patientEntry = require('./patient.validation');
 const therapistEntry = require('./therapist.validation');
 const tutorEntry = require('./tutor.validation');
 const roleEntry = require('./roles.validation');
+const categoryEntry = require('./category.validation');
 
 
 
@@ -17,4 +18,5 @@ module.exports = {
   therapistEntry,
   tutorEntry,
   roleEntry,
+  categoryEntry,
 }

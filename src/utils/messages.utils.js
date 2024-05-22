@@ -12,6 +12,8 @@ const messages = {
       email: {
         required: `Correo es requerido`,
         format: `Correo debe ser válido`,
+        base: `Correo debe ser válido`,
+        empty: `Correo no debe estar vacío`,
       },
       password: {
         required: `Contraseña es requerida`,
@@ -19,6 +21,16 @@ const messages = {
         empty: `Contraseña no debe estar vacía`,
         pattern: `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
         not_match: `Contraseñas no coinciden`
+      },
+      newPassword: {
+        required: `Nueva contraseña es requerida`,
+        base: `Nueva contraseña debe ser un texto válido`,
+        empty: `Nueva contraseña no debe estar vacía`,
+        pattern: `Nueva contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
+        not_match: `Contraseñas no coinciden`
+      },
+      confirmPassword: {
+        required: 'Confirmación de Contraseña es requerida' ,
       }
     },
     errors: {
@@ -37,6 +49,11 @@ const messages = {
         reset_password: {
           base: `Hubo un error en el servicio "Cambiar Contraseña" del modulo Auth`,
           update_password: `Hubo un error al momento de restaurar la contraseña`,
+        },
+        change_password: {
+          base: `Hubo un error en el servicio "Cambiar Contraseña"`,
+          incorrect_password: `Contraseña incorrecta`,
+          update_password: `Hubo un error al momento de cambiar la contraseña`,
         },
         me: {
           base: `Hubo un error en el servicio "Mi Perfil" del modulo Auth`,
@@ -62,6 +79,7 @@ const messages = {
       login: `Inicio de sesión existoso!`,
       forgot_password: `Correo enviado satisfactoriamente`,
       reset_password: `Contraseña restaurada satisfactoriamente`,
+      change_password: `Cambio de contraseña existoso`,
       me: `Información del usuario`,
       refresh_auth: `Token actualizado satisfactoriamente`,
       refresh_token: `Refresh token eliminado`,
@@ -94,6 +112,8 @@ const messages = {
         update: `Terapeuta no actualizado`,
         delete: `Terapeuta no fue eliminado`,
         not_role: `El rol que está asignando a Terapeuta es inadmisible`,
+        therapist_assigned: `El paciente ya tiene asignado un terapeuta`,
+        therapist_not_assigned: `Terapeuta no fue asignado al Paciente`
       },
       not_found: `Terapeuta no encontrado`,
       in_use: {
@@ -106,7 +126,8 @@ const messages = {
       found: `Terapeuta encontrado`,
       create: `Terapeuta creado`,
       update: `Terapeuta actualizado`,
-      delete: `Terapeuta eliminado`
+      delete: `Terapeuta eliminado`,
+      assign: `Terapeuta asignado exitosamente`,
     }
   },
 
@@ -207,6 +228,8 @@ const messages = {
       email: {
         required: `Correo es requerido`,
         format: `Correo debe ser válido`,
+        base: `Correo debe ser válido`,
+        empty: `Correo no debe estar vacío`,
       },
       password: {
         required: `Contraseña es requerida`,
@@ -286,11 +309,106 @@ const messages = {
       in_use: {
         name: `Nombre de rol ya está en uso`,
         rol: `El usuario ya tiene este Rol`
+      },
+      permissions: {
+        not_found: `Permiso no encontrado`
       }
     },
     success: {
       all: `Lista de Roles`,
       found: `Rol encontrado`,
+      create: `Rol creado`,
+      update: `Rol actualizado`,
+      delete: `Rol eliminado`
+    }
+  },
+
+
+  person: {
+    fields: {
+      firstName: {
+        required: `Primer Nombre es requerido`,
+        base: `Primer Nombre debe ser un texto válido`,
+        empty: `Primer Nombre no debe estar vacío`,
+        min: `Primer Nombre debe tener como minimo 3 caracteres`
+      },
+      secondName:{
+        base: `Segundo Nombre debe ser un texto válido`,
+        min: `Segundo Nombre debe tener como minimo 3 caracteres`
+      },
+      surname: {
+        required: `Primer Apellido es requerido`,
+        base: `Primer Apellido debe ser un texto válido`,
+        empty: `Primer Apellido no debe estar vacío`,
+        min: `Primer Apellido debe tener como minimo 3 caracteres`
+      },
+      secondSurname: {
+        base: `Segundo Apellido debe ser un texto válido`,
+        min: `Segundo Apellido debe tener como minimo 3 caracteres`
+      },
+      imageProfile: {
+        base: `Imagen de perfil debe ser un texto válido`
+      },
+      address: {
+        required: `Dirección es requerida`,
+        base: `Dirección debe ser un texto válido`,
+        empty: `Dirección no debe estar vacía`,
+        min: `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
+      },
+      birthday: {
+        required: 'Fecha de Nacimiento es requerida',
+        min: 'Fecha de nacimiento indica una edad que sobrepasa el estandar de longevidad a nivel mundial.',
+        format: 'Fecha de Nacimiento debe tener un formato de (Año-Mes-Dia)'
+      },
+      gender: {
+        required: 'Sexo debe ser especificado',
+        only: 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
+        base: 'Sexo debe ser un texto valido '
+      }
+    }
+  },
+
+
+  // Category
+  category: {
+    fields: {
+      id: {
+        required: `Identificador de Categoría es requerido`,
+        base: `Identificador de Categoría debe ser un número válido`,
+        positive: `Identificador de Categoría debe ser un número positivo`
+      },
+      name: {
+        required: `Nombre de categoría es requerido`,
+        base: `Nombre de categoría debe ser un texto válido`,
+        empty: `Nombre de categoría no debe estar vacío`,
+        min: `Nombre de categoría debe tener como minimo 3 caracteres`
+      },
+      icon: {
+        required: `Icono de categoría es requerido`,
+        base: `Icono de categoría debe ser un texto válido`,
+        empty: `Icono de categoría no debe estar vacío`
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de Categoría`,
+      service: {
+        base: `Hubo un error en el servicio de Categoría`,
+        create: `Categoría no creada`,
+        update: `Categoría no actualizada`,
+        delete: `Categoría no fue eliminada`
+      },
+      not_found: `Categoría no encontrada`,
+      in_use: {
+        name: `Nombre de categoría ya está en uso`,
+        icon: `Icono ya está en uso`
+      },
+    },
+    success: {
+      all: `Lista de Categorías`,
+      found: `Categoría encontrada`,
+      create: `Categoría creada`,
+      update: `Categoría actualizada`,
+      delete: `Categoría eliminada`,
     }
   }
 
