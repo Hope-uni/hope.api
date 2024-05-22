@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { TutorTherapist, User, Person, Permission, Role, UserRoles, sequelize } = require('@models/index.js');
-const { pagination, messages, userPerson, dates } = require('@utils/index');
+const { TutorTherapist, User, Person, Role, UserRoles, Patient, sequelize } = require('@models/index.js');
+const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
 
 const { 
   deleteUser
@@ -21,7 +21,7 @@ module.exports = {
             status: true
           },
           attributes: {
-            exclude: ['createdAt','updatedAt','status','personId','userId']
+            exclude: ['createdAt','updatedAt','status','personId']
           },
           include: [
             {
@@ -43,9 +43,6 @@ module.exports = {
                   model: UserRoles,
                   where: {
                     roleId: 5,
-                    userId: {
-                      [Op.col]: 'User.id'
-                    }
                   },
                   include: [
                     {
@@ -53,26 +50,23 @@ module.exports = {
                       attributes: {
                         exclude: ['createdAt','updatedAt','status']
                       },
-                      include: {
-                        model: Permission,
-                        as: 'permissions',
-                        attributes: {
-                          exclude: ['group','createdAt','updatedAt']
-                        },
-                        through: {
-                          attributes: {
-                            exclude: [
-                              'id',
-                              'createdAt',
-                              'updatedAt',
-                              'roleId',
-                              'permissionId',
-                            ]
-                          }
-                        }
-                      }
                     }
                   ]
+                },
+              ]
+            },
+            {
+              model: Patient,
+              as: 'patientTutor',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: [
+                {
+                  model: Person
+                },
+                {
+                  model: User
                 }
               ]
             }
@@ -82,7 +76,7 @@ module.exports = {
         return {
           error: false,
           message: messages.tutor.success.all,
-          data: dates.getAllAges(data), // getAllAges method is just for get the age from the birthday
+          data: dataStructure.tutorDataStructure(data),
         }
       }
     
@@ -119,9 +113,6 @@ module.exports = {
                 model: UserRoles,
                 where: {
                   roleId: 5,
-                  userId: {
-                    [Op.col]: 'User.id'
-                  }
                 },
                 include: [
                   {
@@ -129,34 +120,31 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId',
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
+              },
+            ]
+          },
+          {
+            model: Patient,
+            as: 'patientTutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person
+              },
+              {
+                model: User
               }
             ]
           }
         ]
       });
 
-      // Add tutor's age
-      data.rows = dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+      // Get Tutor Structure
+      data.rows = dataStructure.tutorDataStructure(data.rows);
 
       const dataResponse = pagination.getPageData(data, query.page, limit);
 
@@ -207,7 +195,7 @@ module.exports = {
               {
                 model: UserRoles,
                 where: {
-                  roleId: 5
+                  roleId: 5,
                 },
                 include: [
                   {
@@ -215,26 +203,23 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId',
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
+              },
+            ]
+          },
+          {
+            model: Patient,
+            as: 'patientTutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person
+              },
+              {
+                model: User
               }
             ]
           }
@@ -252,7 +237,7 @@ module.exports = {
       return {
         error: false,
         message: messages.tutor.success.found,
-        data: dates.getAge(data) // getAge method is just for get the age from the birthday
+        data: dataStructure.findTutorDataStructure(data),
       }
 
     } catch (error) {
@@ -394,32 +379,32 @@ module.exports = {
             include: [
               {
                 model: UserRoles,
+                where: {
+                  roleId: 5,
+                },
                 include: [
                   {
                     model: Role,
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId',
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
+              },
+            ]
+          },
+          {
+            model: Patient,
+            as: 'patientTutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person
+              },
+              {
+                model: User
               }
             ]
           }
@@ -429,7 +414,7 @@ module.exports = {
       return {
         error: false,
         message: messages.tutor.success.create,
-        data: dates.getAge(newData) // getAge method is just for get the age from the birthday
+        data: dataStructure.findTutorDataStructure(newData),
       };
     } catch (error) {
       await transaction.rollback();
@@ -611,6 +596,9 @@ module.exports = {
           },
           {
             model: User,
+            where: {
+              status: true,
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
@@ -618,7 +606,7 @@ module.exports = {
               {
                 model: UserRoles,
                 where: {
-                  roleId: 5
+                  roleId: 5,
                 },
                 include: [
                   {
@@ -626,26 +614,23 @@ module.exports = {
                     attributes: {
                       exclude: ['createdAt','updatedAt','status']
                     },
-                    include: {
-                      model: Permission,
-                      as: 'permissions',
-                      attributes: {
-                        exclude: ['group','createdAt','updatedAt']
-                      },
-                      through: {
-                        attributes: {
-                          exclude: [
-                            'id',
-                            'createdAt',
-                            'updatedAt',
-                            'roleId',
-                            'permissionId',
-                          ]
-                        }
-                      }
-                    }
                   }
                 ]
+              },
+            ]
+          },
+          {
+            model: Patient,
+            as: 'patientTutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person
+              },
+              {
+                model: User
               }
             ]
           }
@@ -657,7 +642,7 @@ module.exports = {
       return {
         error: false,
         message: messages.tutor.success.update,
-        data: dates.getAge(newData) // getAge method is just for get the age from the birthday
+        data: dataStructure.findTutorDataStructure(newData),
       }
     } catch (error) {
       await transaction.rollback();

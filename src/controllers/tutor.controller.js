@@ -115,9 +115,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(201).json({
         error: dataError,
-        statusCode: 200,
+        statusCode: 201,
         message,
         data
       });

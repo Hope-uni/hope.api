@@ -1,12 +1,13 @@
-const { User, Role, Permission, AuthToken, UserRoles, sequelize } = require('@models/index.js');
+const { User, Role, Permission, AuthToken, UserRoles, Patient, sequelize } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
-const { secretKey, domain, userEmail } = require('@config/variables.config');
 const logger = require('@config/logger.config');
+const { secretKey, domain, userEmail } = require('@config/variables.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const { jwtAccessExpiration } = require('@config/variables.config');
 const { messages } = require('@utils/index');
+const { dataStructure } = require('@utils/index');
 
 module.exports = {
 
@@ -343,7 +344,7 @@ module.exports = {
         {
           where: {
             id: payload.id,
-            status: 1
+            status: true,
           }
         }
       );
@@ -370,7 +371,154 @@ module.exports = {
       }
     }
   },
+  
+  async changePassword(body, payload) {
+    const transaction = await sequelize.transaction();
+    try {
+      
+      const getUser = await User.findOne({
+        where: {
+          id: payload.id,
+          status: true
+        }
+      });
 
+      // Password match Validation
+      const passwordValid = await bcrypt.compare(body.password, getUser.password);
+      if(!passwordValid) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.service.change_password.incorrect_password,
+          statusCode: 400
+        }
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedNewPassword = await bcrypt.hash(body.newPassword, salt);
+
+      const userResponse = await User.update(
+        {
+          password:  hashedNewPassword
+        },
+        {
+          where: {
+            id: payload.id,
+            status: true
+          }
+        },
+        {transaction}
+      );
+
+      if(!userResponse) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.service.change_password.update_password,
+          statusCode: 400
+        }
+      }
+
+      // Commit transaction
+      await transaction.commit();   
+
+      return {
+        error: false,
+        message: messages.auth.success.change_password
+      }
+
+
+    } catch (error) {
+      logger.error(`${messages.auth.errors.service.change_password.base}: ${error}`);
+      await transaction.rollback();
+      return {
+        error: true,
+        message: `${messages.auth.errors.service.change_password.base}: ${error}`,
+        statusCode: 500
+      }
+    }
+  },
+  
+  async changePasswordPatient(body, id) {
+    const transaction = await sequelize.transaction();
+    try {
+      
+      const getPatient = await Patient.findOne({
+        where: {
+          id,
+          status: true
+        },
+        include: [
+          {
+            model: User,
+          }
+        ]
+      });
+
+      if(!getPatient) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.patient.errors.not_found,
+          statusCode: 404
+        }
+      }
+
+      // Password match Validation
+      const passwordValid = await bcrypt.compare(body.password, getPatient.User.password);
+      if(!passwordValid) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.service.change_password.incorrect_password,
+          statusCode: 400
+        }
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedNewPassword = await bcrypt.hash(body.newPassword, salt);
+
+      const userResponse = await User.update(
+        {
+          password:  hashedNewPassword
+        },
+        {
+          where: {
+            id: getPatient.userId,
+            status: true
+          }
+        },
+        {transaction}
+      );
+
+      if(!userResponse) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.service.change_password.update_password,
+          statusCode: 400
+        }
+      }
+
+      // Commit transaction
+      await transaction.commit();   
+
+      return {
+        error: false,
+        message: messages.auth.success.change_password
+      }
+
+
+    } catch (error) {
+      logger.error(`${messages.auth.errors.service.change_password.base}: ${error}`);
+      await transaction.rollback();
+      return {
+        error: true,
+        message: `${messages.auth.errors.service.change_password.base}: ${error}`,
+        statusCode: 500
+      }
+    }
+  },
 
   /**
    * The function `me` retrieves user data based on a payload, with error handling and logging.
@@ -404,6 +552,9 @@ module.exports = {
         include: [
           {
             model: UserRoles,
+            attributes: {
+              exclude: ['createdAt','updatedAt','roleId','userId']
+            },
             include: [
               {
                 model: Role,
@@ -437,7 +588,7 @@ module.exports = {
       return {
         error: false,
         message: messages.auth.success.me,
-        data
+        data: dataStructure.findUserDataStructure(data),
       }
 
     } catch (error) {
@@ -461,12 +612,20 @@ module.exports = {
    */
   async refreshAuth(refreshToken) {
     const transaction = await sequelize.transaction();
-    // validate if the parameter is empty
+    // validate if the parameter is empty or not a string
     if(refreshToken === null) {
       await transaction.rollback();
       return {
         error: true,
-        message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
+        message: messages.auth.errors.service.refresh_auth.token_invalid.empty, 
+        statusCode: 400
+      }
+    };
+    if(typeof refreshToken === 'number') {
+      await transaction.rollback();
+      return {
+        error: true,
+        message: messages.auth.errors.service.refresh_auth.token_invalid.base, 
         statusCode: 400
       }
     };
@@ -568,6 +727,13 @@ module.exports = {
           statusCode: 401
         }
       }
+      if(error.message === 'jwt malformed') {
+        return {
+          error: true,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
+          statusCode: 401
+        }
+      }
       return {
         error: true,
         message: `${messages.auth.errors.service.refresh_auth.base}: ${error}`,
@@ -591,12 +757,20 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
-      // validate if the parameter is empty
+      // validate if the parameter is empty or is not a string
       if(refreshToken === null) {
         await transaction.rollback();
         return {
           error: true,
           message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
+          statusCode: 400
+        }
+      };
+      if(typeof refreshToken === 'number') {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base, 
           statusCode: 400
         }
       };
@@ -646,6 +820,20 @@ module.exports = {
     } catch (error) {
       await transaction.rollback();
       logger.error(`${messages.auth.errors.service.refresh_auth.remove_token}: ${error}`);
+      if(error.message === 'invalid signature') {
+        return {
+          error: true,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
+          statusCode: 401
+        }
+      }
+      if(error.message === 'jwt malformed') {
+        return {
+          error: true,
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
+          statusCode: 401
+        }
+      }
       return {
         error: true,
         message: `${messages.auth.errors.service.refresh_auth.remove_token}: ${error}`,

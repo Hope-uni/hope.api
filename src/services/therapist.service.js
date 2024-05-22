@@ -1,7 +1,7 @@
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const { TutorTherapist, Person, User, Role, UserRoles, Patient ,sequelize } = require('@models/index.js');
-const { pagination, userPerson, messages, dataStructure } = require('../utils/index');
+const { pagination, userPerson, messages, dataStructure } = require('@utils/index');
 const { 
   deleteUser
 } = require('./user.service');
@@ -68,6 +68,9 @@ module.exports = {
             },
             {
               model: Patient,
+              where: {
+                status: true,
+              },
               as: 'patientTherapist',
               attributes: {
                 exclude: ['createdAt','updatedAt','status']
@@ -138,6 +141,9 @@ module.exports = {
           },
           {
             model: Patient,
+            where: {
+              status: true,
+            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -155,7 +161,7 @@ module.exports = {
       });
 
       // get Therapist structured
-      data.rows = dataStructure.therapistDataStructure(data.rows);// dates.getAllAges(data.rows); // getAllAges method is just for get the age from the birthday
+      data.rows = dataStructure.therapistDataStructure(data.rows);
 
       const dataResponse = pagination.getPageData(data, query.page, limit);
 
@@ -240,6 +246,9 @@ module.exports = {
           },
           {
             model: Patient,
+            where: {
+              status: true,
+            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -416,6 +425,9 @@ module.exports = {
           },
           {
             model: Patient,
+            where: {
+              status: true,
+            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -636,6 +648,9 @@ module.exports = {
           },
           {
             model: Patient,
+            where: {
+              status: true,
+            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -746,6 +761,109 @@ module.exports = {
         statusCode: 500
       }
     }
+  },
+
+  async assignPatient(body) {
+    const transaction = await sequelize.transaction();
+    try {
+      
+      // Verify if therapist exists
+      const therapistExist = await TutorTherapist.findOne({
+        where: {
+          id: body.therapistId,
+          status: true
+        },
+        include: [
+          {
+            model: User,
+            include: [
+              {
+                model: UserRoles,
+                include: {
+                  model: Role,
+                  where: {
+                    name: 'Terapeuta',
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      });
+      if(!therapistExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.therapist.errors.not_found,
+          statusCode: 404
+        };
+      };
+
+      // Verify if patient exists and if patient does not have therapist assigned
+      const patientExist = await Patient.findOne({
+        where: {
+          id: body.patientId,
+          status: true
+        }
+      });
+      if(!patientExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.patient.errors.not_found,
+          statusCode: 404
+        };
+      };
+
+      if(patientExist.therapistId) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.therapist.errors.service.therapist_assigned,
+          statusCode: 400
+        };
+      } 
+
+      // Assign Therapist to Patient
+      const updatePatientResponse = await Patient.update(
+        {
+          therapistId: body.therapistId
+        },
+        {
+          where: {
+            id: body.patientId
+          },
+          transaction
+        }
+      );
+
+      if(!updatePatientResponse) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.therapist.errors.service.therapist_not_assigned,
+          statusCode: 400
+        };
+      }
+
+      // commit transaction
+      await transaction.commit();
+
+      return {
+        error: false,
+        message: messages.therapist.success.assign,
+      }
+
+    } catch (error) {
+      await transaction.rollback();
+      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        message: `${messages.therapist.errors.service.base}: ${error}`,
+        statusCode: 500
+      }
+    }
   }
+
 }
 

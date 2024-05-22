@@ -6,11 +6,28 @@ const logger = require('@config/logger.config');
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable new-cap */
 
+// update-patient-therapist
+// update-patient-tutor
+
 async function assignPermissionsRoles() {
 
   try {
     const permissionsData = await Permission.findAll({});
 
+
+    const therapistPermissions = [
+      'listar pacientes',
+      'buscar pacientes',
+      'listar tutores',
+      'buscar tutores',
+      'actualizar perfil',
+    ]
+
+    const tutorPermissions = [
+      'listar pacientes',
+      'actualizar perfil',
+      'actualizar pacientes',
+    ]
 
     for(let i=0; i<permissionsData.length; i++) {
 
@@ -45,13 +62,7 @@ async function assignPermissionsRoles() {
       });
 
       //  Therapist
-      if(
-        permissionsData[i].description === 'listar pacientes' ||
-        permissionsData[i].description === 'buscar pacientes' ||
-        permissionsData[i].description === 'listar tutores' ||
-        permissionsData[i].description === 'buscar tutores' ||
-        permissionsData[i].description === 'actualizar terapeutas' 
-      ) {
+      if(therapistPermissions.includes(permissionsData[i].description)) {
         RolesPermission.findOne({
           where: {
             roleId: 3,
@@ -68,10 +79,7 @@ async function assignPermissionsRoles() {
       }
 
       // Tutor
-      if(
-        permissionsData[i].description === 'listar pacientes' ||
-        permissionsData[i].description === 'actualizar tutores'
-      ) {
+      if(tutorPermissions.includes(permissionsData[i].description)) {
         RolesPermission.findOne({
           where: {
             roleId: 5,

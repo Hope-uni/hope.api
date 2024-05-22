@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const { paginationValidation, getPageData} = require('@utils/pagination.util');
-const messages = require('@utils/messages.utils');
 const dataStructure = require('@utils/data-structure.util');
+const messages = require('@utils/messages.utils');
 
 
 
@@ -299,7 +299,7 @@ module.exports = {
             await transaction.rollback();
             return {
               error: true,
-              message: 'Usuario no creado',
+              message: messages.user.errors.service.create,
               statusCode: 400
             }
           }

@@ -209,7 +209,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: `Nombre de rol ya esta en uso`,
+          message: messages.role.errors.in_use.name,
         }
       };
 
@@ -228,7 +228,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 400,
-            message: `Permiso no encontrado`,
+            message: messages.role.errors.permissions.not_found,
           }
         }
       }
@@ -256,7 +256,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: `Rol no creado`,
+          message: messages.role.errors.service.create,
         }
       };
 
@@ -292,17 +292,17 @@ module.exports = {
 
       return {
         error: false,
-        message: `Rol creado`,
+        message: messages.role.success.create,
         data: newRole
       };
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Services: ${error.message}`,
+        message: `${messages.role.errors.service.base}: ${error}`,
       };
     }
   },
@@ -344,7 +344,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: `Rol no encontrado`,
+          message: messages.role.errors.not_found,
         };
       };
 
@@ -368,7 +368,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: `Nombre de rol ya esta en uso`,
+          message: messages.role.errors.in_use.name,
         };
       };
 
@@ -397,7 +397,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: `Rol no actualizado`,
+          message: messages.role.errors.service.update,
         }
       };
 
@@ -431,7 +431,7 @@ module.exports = {
 
       return {
         error: false,
-        message: `Rol actualizado`,
+        message: messages.role.success.update,
         data: roleExist
       };
 
@@ -441,7 +441,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Services: ${error.message}`,
+        message: `${messages.role.errors.service.base}: ${error}`,
       };
     }
   },
@@ -463,7 +463,7 @@ module.exports = {
         return {
           error: true,
           statusCodw: 404,
-          message: `Rol no encontrado`,
+          message: messages.role.errors.not_found,
         };
       }
       
@@ -485,7 +485,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: `Rol no encontrado`,
+          message: messages.role.errors.not_found,
         };
       };
 
@@ -505,7 +505,7 @@ module.exports = {
       await transaction.commit();
 
       return {
-        message: `Rol eliminado`,
+        message: messages.role.success.delete,
         error: false,
       };
 
@@ -515,7 +515,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `There was an error in Role Services: ${error.message}`,
+        message: `${messages.role.errors.service.base}: ${error}`,
       };
     }
   }

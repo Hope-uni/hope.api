@@ -7,6 +7,8 @@ const modules = {
   therapist: "terapeutas",
   tutor: "tutores",
   patient: "pacientes",
+  profile: "perfil",
+  category: "categorias"
 }
 
 const permission = {
