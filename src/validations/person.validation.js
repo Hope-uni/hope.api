@@ -1,47 +1,48 @@
 const joi = require('joi');
+const messages = require('@utils/messages.utils');
 
 module.exports = {
 
   createPersonValidation(data) {
     const schema = joi.object().keys({
       firstName: joi.string().required().min(3,'utf8').messages({
-        'any.required': `Primer Nombre es requerido`,
-        'string.base': `Primer Nombre debe ser un texto válido`,
-        'string.empty': `Primer Nombre no debe estar vacío`,
-        'string.min': `Primer Nombre debe tener como minimo 3 caracteres`
+        'any.required': messages.person.fields.firstName.required,
+        'string.base': messages.person.fields.firstName.base,
+        'string.min': messages.person.fields.firstName.min,
+        'string.empty': messages.person.fields.firstName.empty,
       }),
       secondName: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Segundo Nombre debe ser un texto válido`,
-        'string.min': `Segundo Nombre debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.secondName.base,
+        'string.min': messages.person.fields.secondName.min
       }),
       surname: joi.string().required().min(3,'utf8').messages({
-        'any.required': `Primer Apellido es requerido`,
-        'string.base': `Primer Apellido debe ser un texto válido`,
-        'string.empty': `Primer Apellido no debe estar vacío`,
-        'string.min': `Primer Apellido debe tener como minimo 3 caracteres`
+        'any.required': messages.person.fields.surname.required,
+        'string.base': messages.person.fields.surname.base,
+        'string.min': messages.person.fields.surname.min,
+        'string.empty': messages.person.fields.surname.empty,
       }),
       secondSurname: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Segundo Apellido debe ser un texto válido`,
-        'string.min': `Segundo Apellido debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.secondSurname.base,
+        'string.min': messages.person.fields.secondSurname.min
       }),
       imageProfile: joi.string().empty(' ').messages({
-        'string.base': `Imagen de perfil debe ser un texto válido`
+        'string.base': messages.person.fields.imageProfile.base
       }),
       address: joi.string().required().min(3,'utf8').messages({
-        'any.required': `Dirección es requerida`,
-        'string.base': `Dirección debe ser un texto válido`,
-        'string.empty': `Dirección no debe estar vacía`,
-        'string.min': `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
+        'any.required': messages.person.fields.address.required,
+        'string.base': messages.person.fields.address.base,
+        'string.min': messages.person.fields.address.min,
+        'string.empty': messages.person.fields.address.empty,
       }),
       birthday: joi.date().iso().min('01-01-1900').required().messages({
-        'any.required': 'Fecha de Nacimiento es requerida',
-        'date.min': 'Fecha de nacimiento indica una edad que sobrepasa el estandar de longevidad a nivel mundial.',
-        'date.format': 'Fecha de Nacimiento debe tener un formato de (Año-Mes-Dia)'
+        'any.required': messages.person.fields.birthday.required,
+        'date.min': messages.person.fields.birthday.min,
+        'date.format': messages.person.fields.birthday.format
       }),
       gender: joi.string().valid('Femenino','femenino','Masculino','masculino').required().messages({
-        'any.required': 'Sexo debe ser especificado',
-        'any.only': 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
-        'string.base': 'Sexo debe ser un texto valido '
+        'any.required': messages.person.fields.gender.required,
+        'any.only': messages.person.fields.gender.only,
+        'string.base': messages.person.fields.gender.base
       })
     }).unknown(false);
     return schema.validate(data);
@@ -50,35 +51,35 @@ module.exports = {
   updatePersonValidation(data) {
     const schema = joi.object().keys({
       firstName: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Primer Nombre debe ser un texto válido`,
-        'string.min': `Primer Nombre debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.firstName.base,
+        'string.min': messages.person.fields.firstName.min,
       }),
       secondName: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Segundo Nombre debe ser un texto válido`,
-        'string.min': `Segundo Nombre debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.secondSurname.base,
+        'string.min': messages.person.fields.secondSurname.min
       }),
       surname: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Primer Apellido debe ser un texto válido`,
-        'string.min': `Primer Apellido debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.surname.base,
+        'string.min': messages.person.fields.surname.min,
       }),
       secondSurname: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Segundo Apellido debe ser un texto válido`,
-        'string.min': `Segundo Apellido debe tener como minimo 3 caracteres`
+        'string.base': messages.person.fields.secondSurname.base,
+        'string.min': messages.person.fields.secondSurname.min
       }),
       imageProfile: joi.string().empty(' ').messages({
-        'string.base': `Imagen de perfil debe ser un texto válido`
+        'string.base': messages.person.fields.imageProfile.base
       }),
       address: joi.string().empty(' ').min(3,'utf8').messages({
-        'string.base': `Dirección debe ser un texto válido`,
-        'string.min': `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
+        'string.base': messages.person.fields.address.base,
+        'string.min': messages.person.fields.address.min,
       }),
       birthday: joi.date().iso().min('01-01-1900').empty(' ').messages({
-        'date.min': 'Fecha de nacimiento indica una edad que sobrepasa el estandar de longevidad a nivel mundial.',
-        'date.format': 'Fecha de Nacimiento debe tener un formato de (Año-Mes-Dia)'
+        'date.min': messages.person.fields.birthday.min,
+        'date.format': messages.person.fields.birthday.format
       }),
       gender: joi.string().valid('Femenino','femenino','Masculino','masculino').empty(' ').messages({
-        'any.only': 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
-        'string.base': 'Sexo debe ser un texto valido '
+        'any.only': messages.person.fields.gender.only,
+        'string.base': messages.person.fields.gender.base
       })
     }).unknown(false);
     return schema.validate(data);

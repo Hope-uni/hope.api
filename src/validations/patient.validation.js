@@ -1,5 +1,5 @@
 const joi = require('joi');
-const { messages } = require('../utils/index');
+const { messages } = require('@utils/index');
 
 
 module.exports = {
@@ -11,8 +11,7 @@ module.exports = {
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),
-      therapistId: joi.number().positive().required().messages({
-        'any.required': messages.tutor.fields.id.required,
+      therapistId: joi.number().positive().empty(' ').messages({
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),

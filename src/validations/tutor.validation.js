@@ -1,5 +1,5 @@
 const joi = require('joi');
-const messages = require('../utils/messages.utils');
+const messages = require('@utils/messages.utils');
 
 module.exports = {
 
