@@ -31,6 +31,11 @@ const messages = {
       },
       confirmPassword: {
         required: 'Confirmación de Contraseña es requerida' ,
+      },
+      emailUsername: {
+        required: ` Nombre de usuario o correo son requeridos`,
+        empty: ` Nombre de usuario o correo dede ser digitado`,
+        base: ` Nombre de usuario o correo deben ser un texto válido`,
       }
     },
     errors: {
@@ -71,8 +76,7 @@ const messages = {
       },
       not_found: {
         token: `Token no encontrado`,
-        username: `El nombre de usuario ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
-        email: `El correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+        email_username: `El nombre de usuario o correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
       }
     },
     success: {

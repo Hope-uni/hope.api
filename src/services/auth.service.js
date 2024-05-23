@@ -2,12 +2,13 @@ const { User, Role, Permission, AuthToken, UserRoles, Patient, sequelize } = req
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
+const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { secretKey, domain, userEmail } = require('@config/variables.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const { jwtAccessExpiration } = require('@config/variables.config');
-const { messages } = require('@utils/index');
 const { dataStructure } = require('@utils/index');
+const { messages } = require('@utils/index');
 
 module.exports = {
 
@@ -29,74 +30,50 @@ module.exports = {
     try {
       
       // variables
-      let userVerify;
+      // let userVerify;
 
-      // Username Exist
-      if(body.username) {
-        userVerify = await User.findOne({
-          where: {
-            username: body.username,
-            status: true
-          },
-          include: [
+      const userVerify = await User.findOne({
+        where: {
+          [Op.and]: [
             {
-              model: UserRoles,
-              include: [
+              status: true,
+            },
+            {
+              [Op.or]: [
                 {
-                  model: Role,
-                  include: [
-                    {
-                      model: Permission,
-                      as: 'permissions'
-                    }
-                  ]
+                  email: body.email_username,
+                },
+                {
+                  username: body.email_username,
                 }
               ]
             }
           ]
-        });
-        if(!userVerify) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: messages.auth.errors.not_found.username,
-            statusCode: 404
+        },
+        include: [
+          {
+            model: UserRoles,
+            include: [
+              {
+                model: Role,
+                include: [
+                  {
+                    model: Permission,
+                    as: 'permissions'
+                  }
+                ]
+              }
+            ]
           }
-        };
-      };
-
-      // Email Validation
-      if(body.email) {
-        userVerify = await User.findOne({
-          where: {
-            email: body.email,
-            status: true,
-          },
-          include: [
-            {
-              model: UserRoles,
-              include: [
-                {
-                  model: Role,
-                  include: [
-                    {
-                      model: Permission,
-                      as: 'permissions'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        });
-        if(!userVerify) {
-          await transaction.rollback();
-          return {
-            error: true,
-            message: messages.auth.errors.not_found.email,
-            statusCode: 404
-          }
-        };
+        ]
+      });
+      if(!userVerify) {
+        await transaction.rollback();
+        return {
+          error: true,
+          message: messages.auth.errors.not_found.email_username,
+          statusCode: 404
+        }
       };
       
       // Password Match Validation
@@ -228,40 +205,34 @@ module.exports = {
   async forgotPassword(body) {
     try {
       // variables
-      let userData;
+      // let userData;
 
-      // Verify Email
-      if(body.email) {
-        userData = await User.findOne({
-          where: {
-            email: body.email,
-            status: true
-          }
-        });
-        if(!userData) {
-          return {
-            error: true,
-            message: messages.auth.errors.not_found.email,
-            statusCode: 404
-          }
-        };
-      };
+      const userData = await User.findOne({
+        where: {
+          [Op.and]: [
+            {
+              status: true,
+            },
+            {
+              [Op.or]: [
+                {
+                  email: body.email_username,
+                },
+                {
+                  username: body.email_username,
+                }
+              ]
+            }
+          ]
+        }
+      });
 
-      // verify username
-      if(body.username) {
-        userData = await User.findOne({
-          where: {
-            username: body.username,
-            status: true
-          }
-        });
-        if(!userData) {
-          return {
-            error: true,
-            message: messages.auth.errors.not_found.username,
-            statusCode: 404
-          }
-        };
+      if(!userData) {
+        return {
+          error: true,
+          message: messages.auth.errors.not_found.email_username,
+          statusCode: 404
+        }
       };
 
       // Creating Payload

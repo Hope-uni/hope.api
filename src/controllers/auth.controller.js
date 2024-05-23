@@ -19,15 +19,6 @@ module.exports = {
   async login(req,res) {
     try {
 
-      // Username | email validation
-      if(!req.body.username && !req.body.email) {
-        return res.status(400).json({
-          error: true,
-          statusCode: 400,
-          message: messages.auth.fields.username_email,
-        })
-      };
-
       // Joi Validation
       const { error } = authEntry.loginValidation(req.body);
       if(error) return res.status(400).json({
