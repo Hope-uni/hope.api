@@ -5,12 +5,11 @@ module.exports = {
 
   loginValidation(data) {
     const schema = joi.object().keys({
-      username: joi.string().empty(' ').messages({
-        'string.base': messages.auth.fields.username.base,
-        'string.empty': messages.auth.fields.username.empty,
-      }),
-      email: joi.string().email().empty(' ').messages({
-        'string.email': messages.auth.fields.email.format
+
+      email_username: joi.string().required().messages({
+        'any.required': messages.auth.fields.emailUsername.required,
+        'string.base': messages.auth.fields.emailUsername.base,
+        'string.empty': messages.auth.fields.emailUsername.empty,
       }),
       password: joi.string().required().messages({
         'any.required': messages.auth.fields.password.required,
@@ -24,12 +23,10 @@ module.exports = {
 
   forgotPasswordValidation(data) {
     const schema = joi.object().keys({
-      email: joi.string().email().empty(' ').messages({
-        'string.email': messages.auth.fields.email.format
-      }),
-      username: joi.string().empty(' ').messages({
-        'string.base': messages.auth.fields.username.base,
-        'string.empty': messages.auth.fields.username.empty,
+      email_username: joi.string().required().messages({
+        'any.required': messages.auth.fields.emailUsername.required,
+        'string.base': messages.auth.fields.emailUsername.base,
+        'string.empty': messages.auth.fields.emailUsername.empty,
       }),
     }).unknown(false);
     return schema.validate(data);

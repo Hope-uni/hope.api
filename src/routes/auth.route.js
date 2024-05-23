@@ -8,8 +8,8 @@ const {
   removeToken,
   changePassword,
   changePasswordPatient
-} = require('../controllers/auth.controller');
-const { verifyToken, rolePermissions } = require('../middlewares/index');
+} = require('@controllers/auth.controller');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
 
