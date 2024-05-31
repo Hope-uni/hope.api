@@ -6,9 +6,6 @@ const logger = require('@config/logger.config');
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable new-cap */
 
-// update-patient-therapist
-// update-patient-tutor
-
 async function assignPermissionsRoles() {
 
   try {
@@ -21,12 +18,16 @@ async function assignPermissionsRoles() {
       'listar tutores',
       'buscar tutores',
       'actualizar perfil',
+      'buscarme',
+      'update-patient-therapist',
     ]
 
     const tutorPermissions = [
       'listar pacientes',
       'actualizar perfil',
       'actualizar pacientes',
+      'buscarme',
+      'update-patient-tutor',
     ]
 
     for(let i=0; i<permissionsData.length; i++) {

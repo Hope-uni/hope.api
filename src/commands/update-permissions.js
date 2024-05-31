@@ -8,7 +8,8 @@ const modules = {
   tutor: "tutores",
   patient: "pacientes",
   profile: "perfil",
-  category: "categorias"
+  category: "categorias",
+  pictogram: "pictogramas"
 }
 
 const permission = {
@@ -42,3 +43,28 @@ Object.keys(dataToUpdate).forEach((group) => {
     });
   });
 });
+
+// Custom Permissions
+const customPermissions = [
+  {
+    description: 'buscarme',
+    group: ' '
+  },
+  {
+    description: 'update-patient-therapist',
+    group: 'therapist'
+  },
+  {
+    description: 'update-patient-tutor',
+    group: 'tutor'
+  },
+]
+
+/* eslint-disable no-restricted-syntax */
+for (const iterator of customPermissions) {
+  Permission.findOne({ where: { description: iterator.description } }).then((exists) => {
+    if (!exists) {
+      Permission.create({ description: iterator.description, group: iterator.group });
+    }
+  });
+}

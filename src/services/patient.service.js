@@ -1,7 +1,7 @@
 const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
-const { Op } = require('sequelize');
+const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
 const {
   deleteUser
 } = require('./user.service');
@@ -12,155 +12,18 @@ module.exports = {
 
   /* eslint-disable radix */
   /* eslint-disable consistent-return */
-  async all(query) {
+  async all(query, payload) {
     try {
 
-      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
-        const data = await Patient.findAll({
-          where: {
-            status: true,
-            therapistId: {
-              [Op.ne]: null
-            }
-          },
-          attributes: {
-            exclude: ['createdAt','updatedAt','status','personId']
-          },
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            },
-            {
-              model: TutorTherapist,
-              as: 'tutor',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: {
-                model: Person,
-                attributes: ['id', 'firstName', 'surname']
-              }
-            },
-            {
-              model: TutorTherapist,
-              as: 'therapist',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: {
-                model: Person,
-                attributes: ['id', 'firstName', 'surname']
-              }
-            },
-            {
-              model: User,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
-            },
-          ]
-        });
-
-        // Return Patient
-        return {
-          error: false,
-          message: messages.patient.success.all,
-          data: dataStructure.patientDataStructure(data),
-        };
+      if(query.tutor) {
+        return await getPatientsTutor(query,payload);
       }
-      
-      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
-      const data = await Patient.findAndCountAll({
-        limit,
-        offset,
-        distinct: true,
-        where: {
-          status: true,
-          therapistId: {
-            [Op.ne]: null
-          }
-        },
-        attributes: {
-          exclude: ['createdAt','updatedAt','status']
-        },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: TutorTherapist,
-            as: 'tutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
-          },
-          {
-            model: TutorTherapist,
-            as: 'therapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            }
-          },
-          {
-            model: User,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-        ]
-      });
+      if(query.therapist) {
+        return await getPatientsTherapist(query,payload);
+      }
 
-      // get Patient structured
-      data.rows = dataStructure.patientDataStructure(data.rows);
-
-      const dataResponse = pagination.getPageData(data, query.page, limit);
-
-      return {
-        error: false,
-        message: messages.patient.success.all,
-        ...dataResponse
-      };
+      return await getPatients(query, payload);
 
     } catch (error) {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
@@ -497,18 +360,8 @@ module.exports = {
   
       }
 
-      /* eslint-disable no-restricted-syntax */
-      /* eslint-disable no-await-in-loop */
-      for (const iterator of resData.roles) {
-        if(iterator !== 4){
-          await transaction.rollback();
-          return {
-            error: true,
-            message: messages.patient.errors.service.not_role,
-            statusCode: 400
-          }
-        }
-      }
+      // Setting rol to patient.
+      resData.roles = [4];
 
       const { error:userPersonError, statusCode, message = messages.patient.errors.service.create, data  } = await userPerson.createUserPerson(resData, transaction);
       if(userPersonError) {

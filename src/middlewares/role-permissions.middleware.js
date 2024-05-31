@@ -45,7 +45,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
     // Admin Validation
     // Variables
     let getAdmin; // Admin validation
-    let havePermission = true; // Permission validation
+    let havePermission = false; // Permission validation
     let haveRole = false;
 
     user.UserRoles.some((rolElement) => {
@@ -70,9 +70,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
         user.UserRoles.map((element) => {
           element.Role.permissions.some((permission) => {
             if(permission.description === iterator) {
-              havePermission = true
-            } else {
-              havePermission = false;
+              havePermission = true;
             }
           });
         });

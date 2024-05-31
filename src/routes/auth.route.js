@@ -24,13 +24,13 @@ router.post('/change-password', verifyToken, rolePermissions([
   'Admin',
   'Terapeuta',
   'Tutor'
-]) ,changePassword);
+]) ,changePassword); // TODO: Adaptar un permiso para estas rutas
 
 router.put('/:id', verifyToken, rolePermissions([
   'Superadmin',
   'Admin',
   'Tutor'
-],[]) ,changePasswordPatient);
+],[]) ,changePasswordPatient); // TODO: Adaptar un permiso para estas rutas
 
 router.get('/me', verifyToken,me);
 

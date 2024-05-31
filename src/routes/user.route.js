@@ -21,8 +21,8 @@ router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actuali
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar usuarios']), removeUser);
 
-router.post('/addRole', verifyToken, rolePermissions(['Superadmin','Admin'],[' ']), addRolesUser);
+router.post('/addRole', verifyToken, rolePermissions(['Superadmin','Admin']), addRolesUser);
 
-router.post('/removeRole', verifyToken, rolePermissions(['Superadmin','Admin'],[' ']), removeRolesUser);
+router.post('/removeRole', verifyToken, rolePermissions(['Superadmin','Admin']), removeRolesUser);
 
 module.exports = router;
