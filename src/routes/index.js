@@ -8,5 +8,7 @@ router. use('/therapist', require('./therapist.route'));
 router.use('/tutor', require('./tutor.route'));
 router.use('/patient', require('./patient.route'));
 router.use('/category', require('./category.route'));
+router.use('/pictogram', require('./pictogram.route'));
+router.use('/patientPictogram', require('./patientPictograms.route'));
 
 module.exports = router;
