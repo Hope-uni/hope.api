@@ -6,7 +6,7 @@
     <img src="https://avatars.githubusercontent.com/u/158122848?s=400&u=175d02c6e0d435be1bae60e66ddeff812b974eab&v=4" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">HOPE - WEB</h3>
+  <h3 align="center">HOPE - API</h3>
   
 </div>
 
@@ -14,9 +14,9 @@
 <!-- ABOUT THE PROJECT -->
 ## Acerca del proyecto
 
-**Proyecto de Desarrollo: Módulo Web Administrativo para Aplicación Móvil en la Fundación Azul Esperanza**
+**Proyecto de Desarrollo: API REST para Aplicación Móvil en la Fundación Azul Esperanza**
 
-Este proyecto tiene como objetivo principal desarrollar un módulo web administrativo que complementará una aplicación móvil diseñada para mejorar las habilidades comunicativas en niños con Trastorno del Espectro Autista (TEA). La aplicación implementará la metodología PECS (Sistema de Comunicación por Intercambio de Pictogramas) y se enfocará en beneficiar a los niños atendidos por la Fundación Azul Esperanza en la ciudad de Managua.
+Este proyecto tiene como objetivo principal desarrollar una API REST que será el núcleo de la interacción entre la aplicación móvil y los servicios de backend. La API está diseñada para mejorar las habilidades comunicativas en niños con Trastorno del Espectro Autista (TEA) al implementar la metodología PECS (Sistema de Comunicación por Intercambio de Pictogramas). La API permitirá la gestión eficiente de datos y la autenticación de usuarios, beneficiando así a los niños atendidos por la Fundación Azul Esperanza en la ciudad de Managua.
 
 **Objetivos del Sistema:**
 1. **Gestión de Terapeutas:** Administrar la información relevante de los terapeutas que colaboran con la fundación.
@@ -30,10 +30,10 @@ Este proyecto tiene como objetivo principal desarrollar un módulo web administr
 Este proyecto busca contribuir significativamente a la calidad de vida de los niños con autismo, proporcionando herramientas tecnológicas especializadas y adaptadas a sus necesidades específicas.
 
 
-
 ### Tecnologías
 
-* html
+* HTML5
+* CSS3
 * javascript
 * nodejs
 * sequelize
@@ -62,7 +62,6 @@ _Sigue estos pasos sencillos para configurar y ejecutar el proyecto localmente._
    ```sh
    npm install
    ```
-   ```
 3. Run npx sequelize makemigrations
 
 4. Run npx sequelize migrate
@@ -77,7 +76,7 @@ _Sigue estos pasos sencillos para configurar y ejecutar el proyecto localmente._
     # or
     bun dev
     ```
-6. Abre Postman, insomnia u otra herramienta en donde puedas testiar los endpoints. localhost://3000/"Nombre del Modulo"/"Nombre del endpoint"
+6. Abre Postman, insomnia u otra herramienta en donde puedas testiar los endpoints. localhost://3000/api/"Nombre del Modulo"/"Nombre del endpoint"
 
 
 <!-- Maintainers -->
@@ -89,12 +88,11 @@ _Sigue estos pasos sencillos para configurar y ejecutar el proyecto localmente._
 
 ### Contributors
 
-* Mario Mejía
 * Samuel Barberena
+* Mario Mejía
 
 
 
 <!-- LICENSE -->
 ## License
-
 Distributed under the MIT License. See `LICENSE.txt` for more information.
