@@ -7,7 +7,8 @@ const therapistEntry = require('./therapist.validation');
 const tutorEntry = require('./tutor.validation');
 const roleEntry = require('./roles.validation');
 const categoryEntry = require('./category.validation');
-
+const pictogramEntry = require('./pictogram.validation');
+const patientPictogramsEntry = require('./patientPictogram.validation');
 
 
 module.exports = {
@@ -19,4 +20,6 @@ module.exports = {
   tutorEntry,
   roleEntry,
   categoryEntry,
+  pictogramEntry,
+  patientPictogramsEntry
 }

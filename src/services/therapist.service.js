@@ -68,9 +68,6 @@ module.exports = {
             },
             {
               model: Patient,
-              where: {
-                status: true,
-              },
               as: 'patientTherapist',
               attributes: {
                 exclude: ['createdAt','updatedAt','status']
@@ -141,9 +138,6 @@ module.exports = {
           },
           {
             model: Patient,
-            where: {
-              status: true,
-            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -204,10 +198,11 @@ module.exports = {
    */
   async findOne(id) {
     try {
-      
+
       const data = await TutorTherapist.findOne({
         where: {
-          id
+          id,
+          status: true,
         },
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
@@ -246,9 +241,6 @@ module.exports = {
           },
           {
             model: Patient,
-            where: {
-              status: true,
-            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -425,9 +417,6 @@ module.exports = {
           },
           {
             model: Patient,
-            where: {
-              status: true,
-            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']
@@ -451,7 +440,7 @@ module.exports = {
       }
 
     } catch (error) {
-      await transaction.rollback();
+      // await transaction.rollback();
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
@@ -648,9 +637,6 @@ module.exports = {
           },
           {
             model: Patient,
-            where: {
-              status: true,
-            },
             as: 'patientTherapist',
             attributes: {
               exclude: ['createdAt','updatedAt','status']

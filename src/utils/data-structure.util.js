@@ -1,10 +1,13 @@
 const dates = require('./dates.util');
+const { getPatient, getTutorTherapist } = require('../helpers/auth.helper');
 
 /* eslint-disable no-restricted-syntax */
 module.exports = {
 
 
-  // Users 
+  /*
+    * User Structure
+  */
 
   /* The `userDataStructure(data)` function is creating a new data structure for users by iterating
   over the input `data` array. It extracts specific information from each user object in the array
@@ -48,8 +51,9 @@ module.exports = {
     return element;
   },
 
-  // Therapist
-
+  /*
+    * Therapist Structure
+  */
   /* The `therapistDataStructure(data)` function is creating a new data structure for therapists by
   iterating over the input `data` array. It extracts specific information from each therapist object
   in the array and organizes it into a new structure. Here's a breakdown of what it does: */
@@ -174,8 +178,9 @@ module.exports = {
     return element;
   },
 
-  // Tutor
-
+  /*
+    * Tutor Structure
+  */
   tutorDataStructure(data) {
     // Variables
     const newData = [];
@@ -291,7 +296,9 @@ module.exports = {
   },
 
 
-  // Patient 
+  /*
+    * Patient Structure
+  */
 
   /* The `patientDataStructure(data)` function is responsible for creating a new data structure for
   patients by iterating over the input `data` array. It extracts specific information from each
@@ -416,5 +423,95 @@ module.exports = {
         }
       */
     } 
+  },
+
+  /*
+    * Me Structure
+  */
+  async meDataStructure(data) {
+    const roles = [];
+    /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-await-in-loop */
+    for (const iterator of data.UserRoles) {
+      if(iterator.Role.id === 1) {
+        data.setDataValue('superAdmin', true);
+      }
+      if(iterator.Role.id === 2) {
+        data.setDataValue('admin', true);
+      }
+      if(iterator.Role.id === 3) {
+        const { id } = await getTutorTherapist(iterator.Role.id);
+        data.setDataValue('therapist', id);
+      }
+      if(iterator.Role.id === 4) {
+        const { id } = await getPatient(iterator.Role.id);
+        data.setDataValue('patient', id);
+      }
+      if(iterator.Role.id === 5) {
+        const { id } = await getTutorTherapist(iterator.Role.id);
+        data.setDataValue('tutor', id);
+      }
+      roles.push(iterator.Role);
+    }
+
+    // customizing UserRoles
+
+    const { UserRoles, ...resData } = data.dataValues;
+
+    const newData = {
+      ...resData,
+      roles,
+    }
+
+    return newData;
+  },
+
+
+  /*
+    * Custom Pictograms Structure
+  */
+
+  customPictogramDataStructure(data){
+
+    // Variables
+    const newData = [];
+
+    for (const item of data) {
+
+      if(item.Pictogram) {
+        const element = {
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl,
+          Category: {
+            id: item.Pictogram.Category.id,
+            name: item.Pictogram.Category.name,
+          }
+        }
+
+        newData.push(element);
+      }
+
+      if(!item.Pictogram) {
+        newData.push(item);
+      }
+
+    }
+
+    return newData;
+  },
+
+  findCustomPictogramDataStructure(data) {
+    return {
+      id: data.id,
+      name: data.name,
+      imageUrl: data.imageUrl,
+      Category: {
+        id: data.Pictogram.Category.id,
+        name: data.Pictogram.Category.name,
+      }
+    }
   }
+
+
 }
