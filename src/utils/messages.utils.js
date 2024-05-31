@@ -62,7 +62,9 @@ const messages = {
         },
         me: {
           base: `Hubo un error en el servicio "Mi Perfil" del modulo Auth`,
-          payload_empty: `Payload esta vacio`
+          payload_empty: `Payload esta vacio`,
+          get_patient: `There was an error trying to get Patient in me endpoint`,
+          get_tutorTherapist: `There was an error trying to get TutorTherapist in me endpoint`,
         },
         refresh_auth: {
           base: `Hubo un error en el servicio "Refrescar Token" del modulo Auth`,
@@ -77,6 +79,7 @@ const messages = {
       not_found: {
         token: `Token no encontrado`,
         email_username: `El nombre de usuario o correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
+        tutorTherapist: `Tutor o terapeuta no encontrado`,
       }
     },
     success: {
@@ -200,6 +203,7 @@ const messages = {
         delete: `Paciente no fue eliminado`,
         not_role: `El rol que está asignando a Paciente es inadmisible`,
         user_person_incorrect: `Identificador de usuario o identificador de persona no son correctos`,
+        forbidden: `No tienes permíso de listar pacientes que no están relacionados contigo`,
       },
       not_found: `Paciente no encontrado`,
       in_use: {
@@ -414,7 +418,51 @@ const messages = {
       update: `Categoría actualizada`,
       delete: `Categoría eliminada`,
     }
-  }
+  },
+
+  pictogram: {
+    fields: {
+      id: {
+        required: `Identificador de Pictograma es requerido`,
+        base: `Identificador de Pictograma debe ser un número válido`,
+        positive: `Identificador de Pictograma debe ser un número positivo`
+      },
+      name: {
+        required: `Nombre de pictograma es requerido`,
+        base: `Nombre de pictograma debe ser un texto válido`,
+        empty: `Nombre de pictograma no debe estar vacío`,
+        min: `Nombre de pictograma debe tener como minimo 3 caracteres`
+      },
+      image: {
+        base: `Imagen del pictograma debe ser un texto válido`,
+        required: `Imagen del pictograma es requerido`,
+        empty: `Imagen del pictograma no debe estar vacío`,
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de Pictograma`,
+      controller2: `Hubo un error en el controlador de Paciente-Pictograma`,
+      service: {
+        base: `Hubo un error en el servicio de Pictograma`,
+        base2: `Hubo un error en el servicio de Paciente-Pictograma`,
+        create: `Pictograma no creado`,
+        update: `Pictograma no actualizado`,
+        delete: `Pictograma no fue eliminado`,
+        pictogram_not_match: `El pictograma personalizado que intenta modificar no pertence al Paciente solicitante`
+      },
+      not_found: `Pictograma no encontrado`,
+      in_use: {
+        name: `Nombre de pictograma ya está en uso`,
+      },
+    },
+    success: {
+      all: `Lista de Pictogramas`,
+      found: `Pictograma encontrado`,
+      create: `Pictograma creado`,
+      update: `Pictograma actualizado`,
+      delete: `Pictograma eliminado`,
+    }
+  },
 
 }
 

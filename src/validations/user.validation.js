@@ -23,8 +23,7 @@ module.exports = {
         'string.base': messages.user.fields.password.base,
         'string.pattern.base': messages.user.fields.password.pattern
       }),
-      roles: joi.array().items(joi.number().positive()).unique().min(1).required().messages({
-        'any.required': messages.user.fields.roles.required,
+      roles: joi.array().items(joi.number().positive()).unique().min(1).empty(' ').messages({
         'number.base': messages.user.fields.roles.base,
         'number.positive': messages.user.fields.roles.positive,
         'array.min': messages.role.fields.permissions.array_min,

@@ -7,8 +7,8 @@ const logger = require('@config/logger.config');
 const { secretKey, domain, userEmail } = require('@config/variables.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const { jwtAccessExpiration } = require('@config/variables.config');
-const { dataStructure } = require('@utils/index');
 const { messages } = require('@utils/index');
+const { dataStructure } = require('@utils/index');
 
 module.exports = {
 
@@ -28,9 +28,6 @@ module.exports = {
   async login(body) {
     const transaction = await sequelize.transaction();
     try {
-      
-      // variables
-      // let userVerify;
 
       const userVerify = await User.findOne({
         where: {
@@ -204,8 +201,6 @@ module.exports = {
    */
   async forgotPassword(body) {
     try {
-      // variables
-      // let userData;
 
       const userData = await User.findOne({
         where: {
@@ -343,6 +338,17 @@ module.exports = {
     }
   },
   
+  /**
+   * The function `changePassword` updates a user's password after validating the current password and
+   * handling potential errors using transactions in a Node.js application.
+   * @param body - The `body` parameter in the `changePassword` function likely contains the following
+   * information related to changing a user's password:
+   * @param payload - The `payload` parameter likely contains information about the user making the
+   * request, such as their ID or other identifying details. It is used in this function to find the
+   * user in the database and update their password.
+   * @returns The `changePassword` function returns an object with properties based on the outcome of
+   * the password change operation.
+   */
   async changePassword(body, payload) {
     const transaction = await sequelize.transaction();
     try {
@@ -410,6 +416,18 @@ module.exports = {
     }
   },
   
+  /**
+   * The function `changePasswordPatient` updates a patient's password after validating the current
+   * password and committing the changes in a transaction.
+   * @param body - The `body` parameter in the `changePasswordPatient` function likely contains the
+   * following information related to changing a patient's password:
+   * @param id - The `id` parameter in the `changePasswordPatient` function is used to specify the
+   * unique identifier of the patient whose password needs to be changed. This identifier is typically
+   * used to locate the specific patient record in the database and perform the password change
+   * operation for that patient.
+   * @returns The function `changePasswordPatient` returns an object with properties based on the
+   * outcome of the password change operation.
+   */
   async changePasswordPatient(body, id) {
     const transaction = await sequelize.transaction();
     try {
@@ -478,8 +496,6 @@ module.exports = {
         error: false,
         message: messages.auth.success.change_password
       }
-
-
     } catch (error) {
       logger.error(`${messages.auth.errors.service.change_password.base}: ${error}`);
       await transaction.rollback();
@@ -503,6 +519,7 @@ module.exports = {
    */
   async me(payload) {
     try {
+
       // Payload Validation
       if (!payload) {
         return {
@@ -524,7 +541,7 @@ module.exports = {
           {
             model: UserRoles,
             attributes: {
-              exclude: ['createdAt','updatedAt','roleId','userId']
+              exclude: ['createdAt','updatedAt','roleId','id']
             },
             include: [
               {
@@ -559,7 +576,7 @@ module.exports = {
       return {
         error: false,
         message: messages.auth.success.me,
-        data: dataStructure.findUserDataStructure(data),
+        data: await dataStructure.meDataStructure(data),
       }
 
     } catch (error) {

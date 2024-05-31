@@ -14,7 +14,7 @@ module.exports = {
 
   async all(req,res) {
     try {
-      const { error, statusCode, message, ...resData } = await all(req.query);
+      const { error, statusCode, message, ...resData } = await all(req.query,req.payload);
       if(error) {
         return res.status(statusCode).json({
           error,
@@ -130,7 +130,7 @@ module.exports = {
 
       const { error:dataError, statusCode, message, data } = await create(req.body);
       if(dataError) {
-        return res.status(statusCode).json({
+        return res.status(statusCode).json({  
           error:dataError,
           statusCode,
           message

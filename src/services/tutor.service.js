@@ -310,7 +310,7 @@ module.exports = {
 
       /* eslint-disable no-restricted-syntax */
       /* eslint-disable no-await-in-loop */
-      for (const iterator of resBody.roles) {
+      /* for (const iterator of resBody.roles) {
         if(iterator !== 5){
           await transaction.rollback();
           return {
@@ -319,7 +319,8 @@ module.exports = {
             statusCode: 400
           }
         }
-      }
+      } */
+      resBody.roles = [5];
 
       // Validate and create User and Person
       const { error:userPersonError, message, statusCode, data } = await userPerson.createUserPerson(resBody, transaction);
