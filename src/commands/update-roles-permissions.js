@@ -19,7 +19,10 @@ async function assignPermissionsRoles() {
       // 'buscar tutores',
       'actualizar perfil',
       'buscarme',
-      'modificar paciente-terapeuta', 
+      'modificar paciente-terapeuta',
+      'listar pictogramas',
+      'buscar pictogramas'
+      // 'listar pictogramas-personalizados',
     ]
 
     const tutorPermissions = [
@@ -28,6 +31,10 @@ async function assignPermissionsRoles() {
       // 'actualizar pacientes',
       'buscarme',
       'modificar paciente-tutor',
+      'listar pictogramas-personalizados',
+      'crear pictogramas-personalizados',
+      'actualizar pictogramas-personalizados',
+      'borrar pictogramas-personalizados',
     ]
 
     for(let i=0; i<permissionsData.length; i++) {

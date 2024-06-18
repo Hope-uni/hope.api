@@ -8,7 +8,7 @@ const {
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta','Tutor'],['listar pictogramas-personalizados']), verifyToken, all);
+router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['listar pictogramas-personalizados']), verifyToken, all);
 
 router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['crear pictogramas-personalizados']), create);
 
