@@ -9,7 +9,8 @@ const modules = {
   patient: "pacientes",
   profile: "perfil",
   category: "categorias",
-  pictogram: "pictogramas"
+  pictogram: "pictogramas",
+  customPictogram: "pictogramas-personalizados"
 }
 
 const permission = {
@@ -51,11 +52,11 @@ const customPermissions = [
     group: ' '
   },
   {
-    description: 'update-patient-therapist',
+    description: 'modificar paciente-terapeuta',
     group: 'therapist'
   },
   {
-    description: 'update-patient-tutor',
+    description: 'modificar paciente-tutor',
     group: 'tutor'
   },
 ]

@@ -6,15 +6,16 @@ const {
   update,
   removePictogram
 } = require('@controllers/pictogram.controller');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
 
-router.get('/', all);
-router.get('/:id', findOne);
+router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta'],['listar pictogramas']), all);
+router.get('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta'],['buscar pictogramas']), findOne);
 
-router.post('/', create);
+router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin'],['crear pictogramas']), create);
 
-router.put('/:id', update);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['actualizar pictogramas']), update);
 
-router.delete('/:id', removePictogram);
+router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['borrar pictogramas']), removePictogram);
 
 
 module.exports = router;
