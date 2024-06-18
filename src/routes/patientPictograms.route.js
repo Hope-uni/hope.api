@@ -5,16 +5,16 @@ const {
   update,
   removePatientPictogram
 } = require('@controllers/patientPictogram.controller');
-const { verifyToken } = require('@middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
-router.get('/', verifyToken, all);
+router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta','Tutor'],['listar pictogramas-personalizados']), verifyToken, all);
 
-router.post('/', verifyToken, create);
+router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['crear pictogramas-personalizados']), create);
 
-router.put('/:id', verifyToken, update);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['actualizar pictogramas-personalizados']), update);
 
-router.delete('/:id', verifyToken, removePatientPictogram);
+router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['borrar pictogramas-personalizados']), removePatientPictogram);
 
 
 

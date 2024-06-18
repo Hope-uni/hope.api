@@ -15,19 +15,19 @@ async function assignPermissionsRoles() {
     const therapistPermissions = [
       'listar pacientes',
       'buscar pacientes',
-      'listar tutores',
-      'buscar tutores',
+      // 'listar tutores',
+      // 'buscar tutores',
       'actualizar perfil',
       'buscarme',
-      'update-patient-therapist',
+      'modificar paciente-terapeuta', 
     ]
 
     const tutorPermissions = [
       'listar pacientes',
       'actualizar perfil',
-      'actualizar pacientes',
+      // 'actualizar pacientes',
       'buscarme',
-      'update-patient-tutor',
+      'modificar paciente-tutor',
     ]
 
     for(let i=0; i<permissionsData.length; i++) {
