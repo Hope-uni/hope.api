@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const logger = require('../config/logger.config');
+const { SeederMeta } = require('../models/index');
 const { userCode } = require('../config/variables.config');
 
 /** @type {import('sequelize-cli').Migration} */
@@ -11,36 +12,56 @@ module.exports = {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(userCode, salt);
     try { 
-      await queryInterface.bulkInsert('Users',[
-        {
-          username: 'hope',
-          password: hashPassword,
-          email: 'superadmin@hope.com',
-          status: true,
-          createdAt: new Date(
-            date.toDateString(
-              date.getYear(),
-              date.getMonth(),
-              date.getDate(),
-              date.getHours(),
-              date.getMinutes(),
-              date.getSeconds()
-            )
-          ),
-          updatedAt: new Date(
-            date.toDateString(
-              date.getYear(),
-              date.getMonth(),
-              date.getDate(),
-              date.getHours(),
-              date.getMinutes(),
-              date.getSeconds()
-            )
-          ),
-        }
-      ],{ transaction });
 
-      await transaction.commit();
+      const seederName = 'AdminUser';
+      
+      const executedSeeders =await SeederMeta.findOne({
+        where: {
+          name: seederName
+        }
+      });
+
+      if(!executedSeeders){
+        await queryInterface.bulkInsert('Users',[
+          {
+            username: 'hope',
+            password: hashPassword,
+            email: 'superadmin@hope.com',
+            status: true,
+            createdAt: new Date(
+              date.toDateString(
+                date.getYear(),
+                date.getMonth(),
+                date.getDate(),
+                date.getHours(),
+                date.getMinutes(),
+                date.getSeconds()
+              )
+            ),
+            updatedAt: new Date(
+              date.toDateString(
+                date.getYear(),
+                date.getMonth(),
+                date.getDate(),
+                date.getHours(),
+                date.getMinutes(),
+                date.getSeconds()
+              )
+            ),
+          }
+        ],{ transaction });
+
+        const seederRegistered = await SeederMeta.create({
+          name: seederName
+        },{transaction});
+
+        if(!seederRegistered) {
+          await transaction.rollback();
+          logger.error(`Seeder History was not created!`);
+        }
+  
+        await transaction.commit();
+      }
 
     } catch (error) {
       await transaction.rollback();
