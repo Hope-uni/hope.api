@@ -1,4 +1,4 @@
-const { Patient, TutorTherapist } = require('@models/index');
+const { Patient, TutorTherapist, Person } = require('@models/index');
 const logger = require('@config/logger.config');
 const messages = require('@utils/messages.utils');
 
@@ -12,7 +12,18 @@ module.exports = {
         where: {
           status: true,
           userId: id,
-        }
+        },
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'status'],
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            }
+          }
+        ]
       });
 
       if(!patientResponse) {
@@ -23,10 +34,23 @@ module.exports = {
         }
       }
 
+      /// Building the json response structure
+      const newPatientStructure = {
+        profileId: patientResponse.id,
+        firstName: patientResponse.Person.firstName,
+        secondName: patientResponse.Person.secondName,
+        surname: patientResponse.Person.surname,
+        secondSurname: patientResponse.Person.secondSurname,
+        image: patientResponse.Person.imageProfile,
+        address: patientResponse.Person.address,
+        birthday: patientResponse.Person.birthday,
+        gender: patientResponse.Person.gender,
+      }
+
       return {
         statusCode: 200,
         error: false,
-        id: patientResponse.id,
+        data: newPatientStructure,
       }
 
     } catch (error) {
@@ -46,7 +70,18 @@ module.exports = {
         where: {
           status: true,
           userId: id,
-        }
+        },
+        attributes: {
+          exclude: ['createdAt','updatedAt','status','personId']
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            }
+          }
+        ],
       });
 
       if(!tutorTherapistResponse) {
@@ -57,10 +92,26 @@ module.exports = {
         }
       }
 
+      /// Building the json response structure
+      const newTutorTherapistStructure = {
+        profileId: tutorTherapistResponse.id,
+        firstName: tutorTherapistResponse.Person.firstName,
+        secondName: tutorTherapistResponse.Person.secondName,
+        surname: tutorTherapistResponse.Person.surname,
+        secondSurname: tutorTherapistResponse.Person.secondSurname,
+        image: tutorTherapistResponse.Person.imageProfile,
+        identificationNumber: tutorTherapistResponse.identificationNumber,
+        phoneNumber: tutorTherapistResponse.phoneNumber,
+        telephone: tutorTherapistResponse.telephone,
+        address: tutorTherapistResponse.Person.address,
+        birthday: tutorTherapistResponse.Person.birthday,
+        gender: tutorTherapistResponse.Person.gender,
+      }
+
       return {
         statusCode: 200,
         error: false,
-        id: tutorTherapistResponse.id,
+        data: newTutorTherapistStructure,
       }
 
     } catch (error) {

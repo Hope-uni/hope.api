@@ -429,6 +429,7 @@ module.exports = {
     * Me Structure
   */
   async meDataStructure(data) {
+
     const roles = [];
     /* eslint-disable no-restricted-syntax */
     /* eslint-disable no-await-in-loop */
@@ -440,16 +441,16 @@ module.exports = {
         data.setDataValue('admin', true);
       }
       if(iterator.Role.id === 3) {
-        const { id } = await getTutorTherapist(iterator.Role.id);
-        data.setDataValue('therapist', id);
+        const { data: therapistData } = await getTutorTherapist(data.id);
+        data.setDataValue('profile', therapistData);
       }
       if(iterator.Role.id === 4) {
-        const { id } = await getPatient(iterator.Role.id);
-        data.setDataValue('patient', id);
+        const { data: patientData } = await getPatient(data.id);
+        data.setDataValue('profile', patientData);
       }
       if(iterator.Role.id === 5) {
-        const { id } = await getTutorTherapist(iterator.Role.id);
-        data.setDataValue('tutor', id);
+        const { data: tutorData } = await getTutorTherapist(data.id);;
+        data.setDataValue('profile', tutorData);
       }
       roles.push(iterator.Role);
     }
