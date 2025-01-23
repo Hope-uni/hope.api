@@ -8,6 +8,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
     /* eslint-disable no-loop-func */
   return async (request, response, next) => {
     const { id } = request.payload;
+
     const user = await User.findByPk(id,{
       include: [
         {

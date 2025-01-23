@@ -29,6 +29,7 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
+      
       const userVerify = await User.findOne({
         where: {
           [Op.and]: [
@@ -64,6 +65,7 @@ module.exports = {
           }
         ]
       });
+
       if(!userVerify) {
         await transaction.rollback();
         return {
