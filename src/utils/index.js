@@ -6,6 +6,7 @@ const userPersonEntries = require('./user-person-entries.util');
 const userPerson = require('./user-person.util');
 const dates = require('./dates.util');
 const dataStructure = require('./data-structure.util');
+const fixtures = require('./fixtures.util');
 
 module.exports = {
   pagination,
@@ -13,5 +14,6 @@ module.exports = {
   userPersonEntries,
   userPerson,
   dates,
-  dataStructure
+  dataStructure,
+  fixtures,
 }
