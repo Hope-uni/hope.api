@@ -464,6 +464,49 @@ const messages = {
     }
   },
 
+  phase: {
+    fields: {
+      id: {
+        required: `Identificador de la fase es requerido`,
+        base: `Identificador de la fase debe ser un número válido`,
+        positive: `Identificador de la fase debe ser un número positivo`
+      },
+      name: {
+        base: `Nombre de la fase debe ser un texto válido`,
+        min: `Nombre de la fase debe tener como minimo 3 caracteres`
+      },
+      description: {
+        base: `Descripción de la fase debe ser un texto válido`,
+        min: `Descripción de la fase debe tener como minimo 10 caracteres`
+      },
+      scoreActivities: {
+        base: `Puntuación de actividades debe ser un número válido`,
+        positive: `Puntuación de actividades debe ser un número positivo`,
+        max: `La puntuación de actividades debe ser menor o igual a 20`
+      }
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de fase`,
+      service: {
+        base: `Hubo un error en el servicio de fase`,
+        create: `Fase no creada`,
+        update: `Fase no actualizada`,
+        delete: `Fase no fue eliminada`,
+        all: `Fases no encontradas`,
+      },
+      not_found: `Fase no encontrada`,
+      in_use: {
+        name: `Nombre de fase ya está en uso`
+      },
+    },
+    success: {
+      all: `Lista de Fases`,
+      found: `Fase encontrada`,
+      create: `Fase creada`,
+      update: `Fase actualizada`,
+      delete: `Fase eliminada`,
+    }
+  },
 }
 
 module.exports = messages;

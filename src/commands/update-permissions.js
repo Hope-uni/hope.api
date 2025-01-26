@@ -10,7 +10,8 @@ const modules = {
   profile: "perfil",
   category: "categorias",
   pictogram: "pictogramas",
-  customPictogram: "pictogramas-personalizados"
+  customPictogram: "pictogramas-personalizados",
+  phase: "fases",
 }
 
 const permission = {

@@ -294,6 +294,7 @@ module.exports = {
   async create(body) {
     const transaction = await sequelize.transaction();
     try {
+
         // destructuring Object
         const {
           identificationNumber,
