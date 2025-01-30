@@ -27,5 +27,14 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Phase',
   });
+
+  Phase.associate = (models) => {
+
+    Phase.hasMany(models.HealthRecordPhase, {
+      foreignKey: 'phaseId',
+    });
+
+  }
+
   return Phase;
 };
