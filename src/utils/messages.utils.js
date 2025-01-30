@@ -507,6 +507,20 @@ const messages = {
       delete: `Fase eliminada`,
     }
   },
+
+  teaDegree: {
+    errors: {
+      controller: `Hubo un error en el controlador de Grados de transtorno expectro autista`,
+      service: {
+        base: `Hubo un error en el servicio de Grados de transtorno expectro autista`,
+        all: `Grados de transtorno expectro autista no encontrados`,
+      },
+      not_found: `Grado de transtorno expectro autista no encontrado`,
+    },
+    success: {
+      all: `Lista de Grados de transtorno expectro autista`,
+    }
+  }
 }
 
 module.exports = messages;

@@ -11,5 +11,6 @@ router.use('/category', require('./category.route'));
 router.use('/pictogram', require('./pictogram.route'));
 router.use('/patientPictogram', require('./patientPictograms.route'));
 router.use('/phase', require('./phase.route'));
+router.use('/teaDegree', require('./teaDegree.route'));
 
 module.exports = router;
