@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
     });
 
+    User.hasMany(models.Observation, {
+      foreignKey: 'userId',
+    });
+
   }
 
   return User;

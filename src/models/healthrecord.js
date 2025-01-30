@@ -23,7 +23,11 @@ module.exports = (sequelize, DataTypes) => {
 
     HealthRecord.hasMany(models.HealthRecordPhase, {
       foreignKey: 'healthRecordId',
-    })
+    });
+
+    HealthRecord.hasMany(models.Observation, {
+      foreignKey: 'healthRecordId',
+    });
 
   }
 
