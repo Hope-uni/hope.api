@@ -26,7 +26,7 @@ module.exports = {
         id: iterator.id,
         username: iterator.username,
         email: iterator.email,
-        Roles: rolesData
+        roles: rolesData
       }
       newData.push(element);
     }
@@ -45,7 +45,7 @@ module.exports = {
       id: data.id,
       username: data.username,
       email: data.email,
-      Roles: rolesData
+      roles: rolesData
     }
 
     return element;

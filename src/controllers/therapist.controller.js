@@ -92,20 +92,27 @@ module.exports = {
       // destructuring object
       const { phoneNumber, identificationNumber, ...resBody } = req.body;
 
+      // TODO: These comments are temporary, i will removed and do the implementation in the apropiate Jira ticket
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
-      if(customError) return res.status(400).json({
+      if(customError) return res.status(422).json({
         error: true,
-        statusCode: 400,
-        message: customError
+        statusCode: 422,
+        message: customError // Validation Failed.
+        // validationErrors:
       });
+
+      /* "validation_errors": {
+      "email": "The email address is invalid.",
+      "password": "The password must be at least 8 characters long."
+    } */
 
       // Therapist joi validation
       const { error } = therapistEntry.createTherapistValidation({ phoneNumber, identificationNumber });
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
-        message: error.details[0].message
+        message: error.details,
       });
 
       const { error:dataError, statusCode, message, data } = await create(req.body);
