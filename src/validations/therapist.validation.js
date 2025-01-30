@@ -23,9 +23,9 @@ module.exports = {
       ).messages({
         'any.required': messages.tutor.fields.phoneNumber.required,
         'string.base': messages.therapist.fields.phoneNumber.base,
-        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern
+        'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false });
     return schema.validate(data);
   },
   
