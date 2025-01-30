@@ -507,6 +507,20 @@ const messages = {
       delete: `Fase eliminada`,
     }
   },
+
+  teaDegree: {
+    errors: {
+      controller: `Hubo un error en el controlador de Grados de TEA`,
+      service: {
+        base: `Hubo un error en el servicio de Grados de TEA`,
+        all: `Grados de TEA no encontrados`,
+      },
+      not_found: `Grado de TEA no encontrado`,
+    },
+    success: {
+      all: `Lista de Grados de TEA`,
+    }
+  }
 }
 
 module.exports = messages;
