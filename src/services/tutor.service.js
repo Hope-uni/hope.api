@@ -308,18 +308,7 @@ module.exports = {
         };
       }
 
-      /* eslint-disable no-restricted-syntax */
-      /* eslint-disable no-await-in-loop */
-      /* for (const iterator of resBody.roles) {
-        if(iterator !== 5){
-          await transaction.rollback();
-          return {
-            error: true,
-            message: messages.tutor.errors.service.not_role,
-            statusCode: 400
-          }
-        }
-      } */
+      // Assigning Roles
       resBody.roles = [5];
 
       // Validate and create User and Person

@@ -334,18 +334,9 @@ module.exports = {
           statusCode: 400
         };
       };
-      /* eslint-disable no-restricted-syntax */
-      /* eslint-disable no-await-in-loop */
-      for (const iterator of resBody.roles) {
-        if(iterator !== 3){
-          await transaction.rollback();
-          return {
-            error: true,
-            message: messages.therapist.errors.service.not_role,
-            statusCode: 400
-          }
-        }
-      }
+      
+      // Assigning Roles
+      resBody.roles = [3];
 
       // User and Person creation
       const { error:userPersonError, statusCode, message = messages.therapist.errors.service.create, data  } = await userPerson.createUserPerson(resBody,transaction);
