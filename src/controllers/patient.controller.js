@@ -110,10 +110,10 @@ module.exports = {
   async createPatient(req,res) {
     try {
       // Destructuring Object
-      const { tutorId, therapistId, ...resBody } = req.body;
+      const { tutorId, therapistId, phaseId, teaDegreeId, observations, ...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId}); 
+      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId, phaseId, teaDegreeId, observations}); 
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,

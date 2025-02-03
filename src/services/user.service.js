@@ -333,13 +333,15 @@ module.exports = {
           ]
         });
 
+
         return {
           error: false,
           message: messages.user.success.create,
-          data:newData
+          data: dataStructure.findUserDataStructure(newData)
         };
-      }
+      };
 
+      // This part is applied when you are creating a therapist, tutor or patient register.
       // username Validation
       const usernameExist = await User.findOne({
         where: {

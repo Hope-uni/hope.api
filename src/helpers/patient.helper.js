@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Patient, Person, TutorTherapist, User, UserRoles, Role } = require('@models/index');
+const { Patient, Person, TutorTherapist, User, UserRoles, Role, HealthRecord, TeaDegree, Phase, Observation } = require('@models/index');
 const logger = require('@config/logger.config');
 const { pagination, messages, dataStructure } = require('@utils/index');
 
@@ -95,6 +95,32 @@ module.exports = {
                 },
               ]
             },
+            {
+              model: HealthRecord,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','patientId']
+              },
+              include: [
+                {
+                  model: TeaDegree,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Observation,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                  }
+                }
+              ],
+            }
           ]
         });
 
@@ -166,6 +192,32 @@ module.exports = {
               },
             ]
           },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
         ]
       });
 

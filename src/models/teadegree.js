@@ -18,5 +18,14 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'TeaDegree',
   });
+
+  TeaDegree.associate = (models) => {
+
+    TeaDegree.hasMany(models.HealthRecord, {
+      foreignKey: 'teaDegreeId',
+    });
+
+  }
+
   return TeaDegree;
 };
