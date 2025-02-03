@@ -192,6 +192,9 @@ const messages = {
         required: `Edad es requerida`,
         base: `Edad debe ser un numero válido`,
         positive: `Edad debe ser un número positivo mayor a cero`
+      },
+      observations: {
+        base: `Observaciones deben ser enviadas en formato válido`,
       }
     },
     errors: {
@@ -494,6 +497,7 @@ const messages = {
         delete: `Fase no fue eliminada`,
         all: `Fases no encontradas`,
       },
+      helper: `Hubo un error en el helper del Expediente en donde se buscaba las fases`,
       not_found: `Fase no encontrada`,
       in_use: {
         name: `Nombre de fase ya está en uso`
@@ -509,6 +513,13 @@ const messages = {
   },
 
   teaDegree: {
+    fields: {
+      id: {
+        required: `Identificador del Grado de TEA es requerido`,
+        base: `Identificador del Grado de TEA debe ser un número válido`,
+        positive: `Identificador del Grado de TEA debe ser un número positivo`
+      },
+    },
     errors: {
       controller: `Hubo un error en el controlador de Grados de TEA`,
       service: {
@@ -519,6 +530,90 @@ const messages = {
     },
     success: {
       all: `Lista de Grados de TEA`,
+    }
+  },
+
+  healthRecord: {
+    fields: {
+      id: {
+        required: `Identificador del Expediente es requerido`,
+        base: `Identificador del Expediente debe ser un número válido`,
+        positive: `Identificador del Expediente debe ser un número positivo`
+      },
+      description: {
+        required: `Descripción es requerida`,
+        base: `Descripción debe ser un texto válido`,
+        empty: `Descripción no debe estar vacía`,
+        min: `Descripción debe tener como minimo 3 caracteres`
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador del Expediente`,
+      service: {
+        base: `Hubo un error en el servicio del Expediente`,
+        create: `Expediente no creado`,
+        update: `Expediente no actualizado`,
+        delete: `Expediente no fue eliminado`,
+        all: `Expedientes no encontrados`,
+      },
+      not_found: `Expediente no encontrado`,
+    },
+    success: {
+      all: `Lista de Expedientes`,
+      found: `Expediente encontrado`,
+      create: `Expediente creado`,
+      update: `Expediente actualizado`,
+    }
+  },
+
+  healthRecordPhase: {
+    errors: {
+      controller: `Hubo un error en el controlador de la relación Fase-expediente`,
+      service: {
+        base: `Hubo un error en el servicio de al momento de agregar la fase al expediente`,
+        create: `Fase no pudo ser agregada al expediente`,
+        update: `Fase no pudo ser actualizada al expediente`,
+        all: `Las fases asociadas a este expediente no pudieron ser encontradas`,
+      },
+      already_exist: `La fase ya está asociada al Expediente`,
+    },
+    success: {
+      all: `Lista de las fases del expediente`,
+      create: `Fase fue agregada al expediente`,
+      update: `Fase fue actualizada al expediente`,
+    }
+  },
+
+  observations: {
+    fields: {
+      id: {
+        required: `Identificador de la observación es requerido`,
+        base: `Identificador de la observación debe ser un número válido`,
+        positive: `Identificador de la observación debe ser un número positivo`
+      },
+      description: {
+        required: `Descripción es requerida`,
+        base: `Descripción debe ser un texto válido`,
+        empty: `Descripción no debe estar vacía`,
+        min: `Descripción debe tener como minimo 3 caracteres`
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de observaciones`,
+      service: {
+        base: `Hubo un error en el servicio de observaciones`,
+        create: `Observación no creada`,
+        update: `Observación no actualizada`,
+        delete: `Observación no fue eliminada`,
+        all: `Observaciones no encontradas`,
+      },
+      not_found: `Observación no encontrada`,
+    },
+    success: {
+      all: `Lista de Observaciones`,
+      found: `Observación encontrada`,
+      create: `Observación creada`,
+      update: `Observación actualizada`,
     }
   }
 }

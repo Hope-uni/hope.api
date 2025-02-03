@@ -29,5 +29,8 @@ module.exports = {
   emailSecure: process.env.EMAIL_SECURE,
 
   // Token Variables
-  jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION
+  jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION,
+
+  // Roles
+  isAdmin: process.env.IS_ADMIN,
 }

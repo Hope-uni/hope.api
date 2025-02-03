@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   HealthRecord.associate = (models) => {
 
     HealthRecord.belongsTo(models.TeaDegree, {
-      foreignKey: 'teadegreeId',
+      foreignKey: 'teaDegreeId',
     });
 
     HealthRecord.hasMany(models.HealthRecordPhase, {
@@ -27,6 +27,14 @@ module.exports = (sequelize, DataTypes) => {
 
     HealthRecord.hasMany(models.Observation, {
       foreignKey: 'healthRecordId',
+    });
+
+    HealthRecord.belongsTo(models.Patient, {
+      foreignKey: 'patientId',
+    });
+
+    HealthRecord.belongsTo(models.Phase, {
+      foreignKey: 'phaseId',
     });
 
   }

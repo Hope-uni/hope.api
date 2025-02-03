@@ -36,17 +36,32 @@ module.exports = {
 
   findUserDataStructure(data) {
 
+    // Variables
     const rolesData = [];
+    let isAdmin;
+    let element;
+
     for (const role of data.UserRoles) {
+      if(role.Role.id === 2) {
+        isAdmin = true;
+      }
       rolesData.push(role.Role);
     }
 
-    const element = {
-      id: data.id,
-      username: data.username,
-      email: data.email,
-      roles: rolesData
+    if(isAdmin) {
+      element = {
+        username: data.username,
+        email: data.email
+      }
+    } else {
+      element = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        roles: rolesData
+      }
     }
+
 
     return element;
   },
@@ -317,10 +332,10 @@ module.exports = {
         userId: iterator.userId,
         fullName: `${iterator.Person.firstName} ${iterator.Person.secondName ? iterator.Person.secondName : ''} ${iterator.Person.surname} ${iterator.Person.secondSurname ? iterator.Person.secondSurname : ''}`,
         age: childAge.Person.dataValues.age,
-        // GRADO
-        // FASE
-        // Cantidad de logros
+        teaDegree: iterator.HealthRecord?.TeaDegree.name ?? '',
+        phase: iterator.HealthRecord?.Phase.name ?? '',
         image: iterator.Person.imageProfile,
+        // Cantidad de logros
       }
       newData.push(element);
     }
@@ -336,7 +351,6 @@ module.exports = {
     const childAge = dates.getAge(data);
 
     // Full Name validation
-
     let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`; // Patient
     if(!data.Person.secondName || !data.Person.secondSurname) {
       fullName = `${data.Person.firstName} ${data.Person.surname}`;
@@ -354,6 +368,15 @@ module.exports = {
       }
     }
 
+   // Get the observations
+    const observationsGotit = data.HealthRecord.Observations.map((item) => {
+      return {
+        id: item.id,
+        description: item.description,
+        userId: item.userId,
+      }
+    });
+
     return {
       id: data.id,
       userId: data.userId,
@@ -366,14 +389,15 @@ module.exports = {
       gender: data.Person.gender,
       age: childAge.Person.dataValues.age,
       username: data.User.username,
-      // Grado de autismo
-      // Fase actual
-      // Progreso
+      teaDegree: data.HealthRecord.TeaDegree.name ?? '',
+      currentPhase: data.HealthRecord.Phase.name ?? '',
+      phaseProgress: data.phaseProgress,
       email: data.User.email,
       birthday: data.Person.birthday,
       telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
       address: data.Person.address,
-      // Observaciones
+      observations: observationsGotit,
+      
       /*
         Lista de logros Conseguidos: {
           Nombre

@@ -1,10 +1,21 @@
+
 const logger = require('@config/logger.config');
-const { Patient, TutorTherapist, User, Role, Person, UserRoles, sequelize } = require('@models/index.js');
+const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
 const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
 const {
+  getProgress
+} = require('@helpers/healthRecord.helper');
+const {
   deleteUser
 } = require('./user.service');
+const {
+  createHealthRecord
+} = require('./healthRecord.service');
+const {
+  createObservation
+} = require('./observations.service');
+
 
 
 
@@ -95,6 +106,32 @@ module.exports = {
                 },
               ]
             },
+            {
+              model: HealthRecord,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','patientId']
+              },
+              include: [
+                {
+                  model: TeaDegree,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Observation,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                  }
+                }
+              ],
+            }
           ]
         });
 
@@ -167,6 +204,32 @@ module.exports = {
               },
             ]
           },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
         ]
       });
 
@@ -258,9 +321,36 @@ module.exports = {
               },
             ]
           },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
         ]
       });
 
+      
       if(!data) {
         return {
           error: true,
@@ -268,6 +358,18 @@ module.exports = {
           statusCode: 404
         }
       };
+
+      // Get Progress of the Patient about his phase level and activities score
+      const { error:progressError, message: progressMessage, phaseProgress } = await getProgress(data.id);
+      if(progressError) {
+        return {
+          error: progressError,
+          message: progressMessage,
+          statusCode: 400
+        }
+      }
+
+      data.phaseProgress = phaseProgress;
 
       return {
         error: false,
@@ -290,7 +392,14 @@ module.exports = {
     try {
       
       // Destructuring Data
-      const { tutorId, therapistId, ...resData } = body;
+      const { 
+        tutorId, 
+        therapistId, 
+        phaseId, 
+        teaDegreeId, 
+        observations = '', 
+        ...resData 
+      } = body;
       
 
       // Tutor Exist validation
@@ -357,7 +466,6 @@ module.exports = {
             statusCode: 404
           };
         };
-  
       }
 
       // Setting rol to patient.
@@ -373,12 +481,14 @@ module.exports = {
         };
       };
 
+      // Creating the new Patient
       const patientResponse = await Patient.create({
         personId: data.personId,
         userId: data.userId,
         tutorId,
         therapistId
       },{transaction});
+
       if(!patientResponse) {
         await transaction.rollback();
         return {
@@ -387,6 +497,42 @@ module.exports = {
           statusCode: 400
         };
       };
+
+      // Create a HealthRecord
+      const { error:healthRecordError, statusCode: healthRecordStatusCode, message: healthRecordMessage, healthRecordCreated } = await createHealthRecord({
+        teaDegreeId,
+        phaseId,
+        patientId: patientResponse.id,
+      }, transaction);
+
+      if(healthRecordError) {
+        return {
+          error: healthRecordError,
+          message: healthRecordMessage,
+          statusCode: healthRecordStatusCode                                                          
+        }
+      };
+
+      // Creating observation.
+      if(observations !== '') {
+        const observationPayload = {
+          description: observations,
+          userId: patientResponse.userId,
+          healthRecordId: healthRecordCreated.id
+        }
+
+        const { error: observationError, message: observationMessage } = await createObservation( observationPayload,transaction);
+
+        if(observationError) {
+          return {
+            error: observationError,
+            message: observationMessage,
+            statusCode: 400
+          }
+        }
+      }
+
+
 
       // commit transaction
       await transaction.commit();
@@ -456,8 +602,46 @@ module.exports = {
               },
             ]
           },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
         ]
       });
+
+      // Get Progress of the Patient about his phase level and activities score
+      const { error:progressError, message: progressMessage, phaseProgress } = await getProgress(newData.id);
+      if(progressError) {
+        return {
+          error: progressError,
+          message: progressMessage,
+          statusCode: 400
+        }
+      }
+
+      newData.phaseProgress = phaseProgress;
 
       return {
         error: false,

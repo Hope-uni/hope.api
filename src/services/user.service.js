@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const { paginationValidation, getPageData} = require('@utils/pagination.util');
 const dataStructure = require('@utils/data-structure.util');
 const messages = require('@utils/messages.utils');
+const { isAdmin } = require('@config/variables.config');
 
 
 
@@ -239,31 +240,6 @@ module.exports = {
           }
         };
 
-        // Role Validation
-        for (const iterator of roles) {
-          const roleExist = await Role.findOne({
-            where: {
-              id: iterator,
-              status: true
-            }
-          });
-          if(!roleExist) {
-            await transaction.rollback();
-            return {
-              message: messages.role.errors.not_found,
-              error: true,
-              statusCode: 404
-            }
-          };
-          if(roleExist.name !== 'Admin') {
-            await transaction.rollback();
-            return {
-              message: messages.user.errors.forbidden,
-              error: true,
-              statusCode: 404
-            }
-          }
-        }
 
         // Hash Password Validation
         const salt = await bcrypt.genSalt(10);
@@ -289,19 +265,33 @@ module.exports = {
           }
         };
 
+        // get admin user
+        const getAdminUser = await Role.findOne({
+          where: {
+            name: isAdmin,
+          }
+        });
+
+        if(!getAdminUser) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.user.errors.not_found,
+            statusCode: 400
+          }
+        };
+
         // associate role with the user recently created
-        for (const iterator of roles) {
-          const userRolesData = await UserRoles.create({
-            userId: data.id,
-            roleId: iterator
-          },{transaction});
-          if(!userRolesData) {
-            await transaction.rollback();
-            return {
-              error: true,
-              message: messages.user.errors.service.create,
-              statusCode: 400
-            }
+        const userRolesData = await UserRoles.create({
+          userId: data.id,
+          roleId: getAdminUser.id
+        },{transaction});
+        if(!userRolesData) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.user.errors.service.create,
+            statusCode: 400
           }
         }
 
@@ -333,13 +323,15 @@ module.exports = {
           ]
         });
 
+
         return {
           error: false,
           message: messages.user.success.create,
-          data:newData
+          data: dataStructure.findUserDataStructure(newData)
         };
-      }
+      };
 
+      // This part is applied when you are creating a therapist, tutor or patient register.
       // username Validation
       const usernameExist = await User.findOne({
         where: {
