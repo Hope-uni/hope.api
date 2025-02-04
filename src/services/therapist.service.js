@@ -778,51 +778,75 @@ module.exports = {
       };
 
       // Verify if patient exists and if patient does not have therapist assigned
-      const patientExist = await Patient.findOne({
+
+      const patientsExist = await Patient.findAll({
         where: {
-          id: body.patientId,
-          status: true
+          id: {
+            [Op.in]: body.patients
+          }
         }
       });
-      if(!patientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: messages.patient.errors.not_found,
-          statusCode: 404
-        };
-      };
 
-      if(patientExist.therapistId) {
+      if(patientsExist.length < 0 || !patientsExist) {
+        return {
+          error: true,
+          message: messages.patient.errors.service.no_registered,
+          statusCode: 400,
+        }
+      }
+
+      // validate if all patients were found
+      const patientsFound = patientsExist.map(item => item.id);
+      const patientsNotFound = body.patients.filter(item => !patientsFound.includes(item));
+
+      if(patientsNotFound.length > 0) {
+        return {
+          error: true,
+          message: messages.therapist.errors.service.patient_to_assign,
+          statusCode: 400
+        }
+      }
+
+
+      // validate if therapist already assigned
+      const therapistAssigned = patientsExist.filter(item => item.therapistId !== null);
+
+      if(therapistAssigned)  {
         await transaction.rollback();
         return {
           error: true,
+          statusCode: 400,
           message: messages.therapist.errors.service.therapist_assigned,
-          statusCode: 400
-        };
-      } 
+          data: therapistAssigned,
+        }
+      }
+
 
       // Assign Therapist to Patient
-      const updatePatientResponse = await Patient.update(
-        {
-          therapistId: body.therapistId
-        },
-        {
-          where: {
-            id: body.patientId
-          },
-          transaction
-        }
-      );
 
-      if(!updatePatientResponse) {
-        await transaction.rollback();
-        return {
-          error: true,
-          message: messages.therapist.errors.service.therapist_not_assigned,
-          statusCode: 400
-        };
-      }
+      await Promise.all(body.patients.map(async (item) => {
+
+        const updatePatientResponse = await Patient.update(
+          {
+            therapistId: body.therapistId
+          },
+          {
+            where: {
+              id: item
+            },
+            transaction
+          }
+        );
+  
+        if(!updatePatientResponse) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: messages.therapist.errors.service.therapist_not_assigned,
+            statusCode: 400
+          };
+        }
+      }));
 
       // commit transaction
       await transaction.commit();
