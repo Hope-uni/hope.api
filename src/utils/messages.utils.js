@@ -109,6 +109,14 @@ const messages = {
         required: `Teléfono es requerido`,
         pattern: `Teléfono debe ser válido y debe tener como maximo 8 digitos`,
         base: `Teléfono debe ser válido`
+      },
+      patients: {
+        required: `Paciente es requerido`,
+        base: `Identificador de paciente debe ser un número válido`,
+        positive: `Identificador de paciente debe ser un número positivo`,
+        unique: `Debe seleccionar pacientes diferentes para poder asignar Terapeuta`,
+        array: `Debe enviar los pacientes seleccionados en un formato válido`,
+        array_min: `Debe seleccionar al menos un paciente para poder asignarle un Terapeuta`,
       }
     },
     errors: {
@@ -120,7 +128,8 @@ const messages = {
         delete: `Terapeuta no fue eliminado`,
         not_role: `El rol que está asignando a Terapeuta es inadmisible`,
         therapist_assigned: `El paciente ya tiene asignado un terapeuta`,
-        therapist_not_assigned: `Terapeuta no fue asignado al Paciente`
+        therapist_not_assigned: `Terapeuta no fue asignado al Paciente`,
+        patient_to_assign: `Uno de los pacientes que esta intentando asignar no existe, porfavor verifique que todos los pacientes esten en el sistema`,
       },
       not_found: `Terapeuta no encontrado`,
       in_use: {
@@ -207,6 +216,7 @@ const messages = {
         not_role: `El rol que está asignando a Paciente es inadmisible`,
         user_person_incorrect: `Identificador de usuario o identificador de persona no son correctos`,
         forbidden: `No tienes permíso de listar pacientes que no están relacionados contigo`,
+        no_registered: `Pacientes no registrados`,
       },
       not_found: `Paciente no encontrado`,
       in_use: {

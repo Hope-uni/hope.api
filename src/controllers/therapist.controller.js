@@ -227,13 +227,14 @@ module.exports = {
       const { error } = therapistEntry.assignPatientValidation(req.body);
       if(error) return res.status(400).json({ error: error.details[0].message });
 
-      const { error:dataError, message, statusCode } = await assignPatient(req.body);
+      const { error:dataError, message, statusCode, data } = await assignPatient(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          data: data ?? ''
         });
       };
 

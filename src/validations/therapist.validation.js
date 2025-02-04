@@ -64,10 +64,13 @@ module.exports = {
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,
       }),
-      patientId: joi.number().positive().required().messages({
-        'any.required': messages.patient.fields.id.required,
-        'number.base': messages.patient.fields.id.base,
-        'number.positive': messages.patient.fields.id.positive,
+      patients: joi.array().items(joi.number().positive()).unique().min(1).messages({
+        'number.base': messages.therapist.fields.patients.base,
+        'number.positive': messages.therapist.fields.patients.positive,
+        'any.required': messages.therapist.fields.patients.required,
+        'array.unique': messages.therapist.fields.patients.unique,
+        'array.min': messages.therapist.fields.patients.array_min,
+        'array.base': messages.therapist.fields.patients.array,
       }),
     }).unknown(false);
     return schema.validate(data);
