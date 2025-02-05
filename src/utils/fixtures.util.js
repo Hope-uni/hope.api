@@ -1,4 +1,4 @@
-
+const { v4: uuid } = require('uuid');
 
 // getting the current date
 const date = new Date();
@@ -140,7 +140,17 @@ const getFixtures = [
 ];
 
 
+const getUserUuid = () => {
+  // Variable
+  const getUuid = uuid(); // getting the uuid
+  const passwordTemp = getUuid.slice(0,8); // getting the first 8 characters of the uuid
+
+  return passwordTemp;
+}
+
+
 
 module.exports = {
-  getFixtures
+  getFixtures,
+  getUserUuid
 }

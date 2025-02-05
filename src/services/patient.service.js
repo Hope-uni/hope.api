@@ -3,18 +3,12 @@ const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
 const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
-const {
-  getProgress
-} = require('@helpers/healthRecord.helper');
-const {
-  deleteUser
-} = require('./user.service');
-const {
-  createHealthRecord
-} = require('./healthRecord.service');
-const {
-  createObservation
-} = require('./observations.service');
+const { getProgress } = require('@helpers/healthRecord.helper');
+const { getUserUuid } = require('@utils/fixtures.util');
+const { userSendEmail } = require('../helpers/user.helper');
+const { deleteUser } = require('./user.service');
+const { createHealthRecord } = require('./healthRecord.service');
+const { createObservation } = require('./observations.service');
 
 
 
@@ -468,8 +462,10 @@ module.exports = {
         };
       }
 
-      // Setting rol to patient.
+      // Setting rol to patient and generate the temporary password.
       resData.roles = [4];
+      const passwordTemp = getUserUuid(); // generate the temporary password using uuid and get the first 8 characters
+      resData.password = passwordTemp;
 
       const { error:userPersonError, statusCode, message = messages.patient.errors.service.create, data  } = await userPerson.createUserPerson(resData, transaction);
       if(userPersonError) {
@@ -532,7 +528,21 @@ module.exports = {
         }
       }
 
+      // Send email with the temporary password
+      const { error: emailError, message: emailMessage } = await userSendEmail({
+        email: resData.email,
+        password: passwordTemp,
+        username: resData.username,
+      });
 
+      if(emailError) {
+        await transaction.rollback();
+        return {
+          error: emailError,
+          message: emailMessage,
+          statusCode: 400
+        }
+      };
 
       // commit transaction
       await transaction.commit();

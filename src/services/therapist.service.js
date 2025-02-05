@@ -2,9 +2,9 @@ const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const { TutorTherapist, Person, User, Role, UserRoles, Patient ,sequelize } = require('@models/index.js');
 const { pagination, userPerson, messages, dataStructure } = require('@utils/index');
-const { 
-  deleteUser
-} = require('./user.service');
+const { getUserUuid } = require('@utils/fixtures.util');
+const { userSendEmail } = require('@helpers/user.helper');
+const { deleteUser } = require('./user.service');
 
 module.exports = {
 
@@ -335,7 +335,9 @@ module.exports = {
         };
       };
       
-      // Assigning Roles
+      // Assigning Roles and generate the temporary password.
+      const passwordTemp = getUserUuid(); // generate the temporary password using uuid and get the first 8 characters
+      resBody.password = passwordTemp;
       resBody.roles = [3];
 
       // User and Person creation
@@ -363,6 +365,23 @@ module.exports = {
           statusCode: 400
         };
       };
+
+      // Send email with the temporary password to the therapist
+      const { error: emailError, message: emailMessage } = await userSendEmail({
+        email: resBody.email,
+        password: passwordTemp,
+        username: resBody.username,
+      });
+
+      if(emailError) {
+        await transaction.rollback();
+        return {
+          error: emailError,
+          message: emailMessage,
+          statusCode: 400
+        }
+      };
+
 
       // commit transaction
       await transaction.commit();

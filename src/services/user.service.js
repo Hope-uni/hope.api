@@ -3,10 +3,11 @@ const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const { paginationValidation, getPageData} = require('@utils/pagination.util');
-const dataStructure = require('@utils/data-structure.util');
-const messages = require('@utils/messages.utils');
 const { isAdmin } = require('@config/variables.config');
-
+const { userSendEmail } = require('@helpers/user.helper');
+const messages = require('@utils/messages.utils');
+const dataStructure = require('@utils/data-structure.util');
+const { getUserUuid } = require('@utils/fixtures.util');
 
 
 module.exports = {
@@ -207,8 +208,11 @@ module.exports = {
       const { roles, ...resBody } = body;
 
       // this is when you try to create a user directly
-      if(!transaction) {  
+      if(!transaction) {
+        // Variables
+        const passwordTemp = getUserUuid();
         transaction = await sequelize.transaction();
+        
         // username Validation
         const usernameExist = await User.findOne({
           where: {
@@ -243,7 +247,7 @@ module.exports = {
 
         // Hash Password Validation
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(body.password, salt);
+        const hashedPassword = await bcrypt.hash(passwordTemp, salt);
         
         // Create User
         const data = await User.create(
@@ -294,6 +298,22 @@ module.exports = {
             statusCode: 400
           }
         }
+
+        // Send email with temporary password
+        const { error: emailError, message: emailMessage } = await userSendEmail({
+          email: resBody.email,
+          password: passwordTemp,
+          username: resBody.username,
+        });
+
+        if(emailError) {
+          await transaction.rollback();
+          return {
+            error: true,
+            message: emailMessage,
+            statusCode: 400
+          }
+        };
 
         await transaction.commit();
 
@@ -380,7 +400,7 @@ module.exports = {
 
       // Hash Password Validation
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(body.password, salt);
+      const hashedPassword = await bcrypt.hash(resBody.password, salt);
       
       // Create User
       const data = await User.create(
