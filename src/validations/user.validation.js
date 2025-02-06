@@ -17,8 +17,7 @@ module.exports = {
         'string.empty': messages.user.fields.email.empty
       }),
       /* eslint-disable prefer-regex-literals */
-      password: joi.string().required().pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
-        'any.required': messages.user.fields.password.required,
+      password: joi.string().empty(' ').pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
         'string.empty': messages.user.fields.password.empty,
         'string.base': messages.user.fields.password.base,
         'string.pattern.base': messages.user.fields.password.pattern

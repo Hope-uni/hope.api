@@ -1,5 +1,4 @@
 
-
 // getting the current date
 const date = new Date();
 
@@ -138,7 +137,6 @@ const getFixtures = [
     ),
   },
 ];
-
 
 
 module.exports = {

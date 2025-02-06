@@ -30,7 +30,7 @@ module.exports = {
     try {
 
       
-      const userVerify = await User.findOne({
+      const getUserFromDb = await User.findOne({
         where: {
           [Op.and]: [
             {
@@ -66,7 +66,8 @@ module.exports = {
         ]
       });
 
-      if(!userVerify) {
+      // Verify if user exist
+      if(!getUserFromDb) {
         await transaction.rollback();
         return {
           error: true,
@@ -76,7 +77,7 @@ module.exports = {
       };
       
       // Password Match Validation
-      const passwordValid = await bcrypt.compare(body.password, userVerify.password);
+      const passwordValid = await bcrypt.compare(body.password, getUserFromDb.password);
       if(!passwordValid) {
         await transaction.rollback();
         return {
@@ -89,8 +90,8 @@ module.exports = {
       // Verify if user has a Refresh Token
       const refreshTokenData = await AuthToken.findOne({
         where: {
-          userId: userVerify.id,
-          email: userVerify.email
+          userId: getUserFromDb.id,
+          email: getUserFromDb.email
         }
       });
       if(refreshTokenData) {
@@ -108,7 +109,7 @@ module.exports = {
       /* eslint-disable no-unused-vars */
       let accessToken;
     
-      const getSuperAdmin = userVerify.UserRoles.map((element ) => {
+      const getSuperAdmin = getUserFromDb.UserRoles.map((element ) => {
         if(element.Role.name === 'Superadmin') {
           return element.Role.name;
         }
@@ -118,8 +119,8 @@ module.exports = {
       if(getSuperAdmin[0] !== 'Superadmin') {
         accessToken = jwt.sign(
           {
-            id: userVerify.id,
-            email: userVerify.email
+            id: getUserFromDb.id,
+            email: getUserFromDb.email
           },
           secretKey,
           {
@@ -131,8 +132,8 @@ module.exports = {
       if(getSuperAdmin[0] === 'Superadmin') {
         accessToken = jwt.sign(
           {
-            id: userVerify.id,
-            email: userVerify.email
+            id: getUserFromDb.id,
+            email: getUserFromDb.email
           },
           secretKey,
           {
@@ -153,8 +154,8 @@ module.exports = {
       // Generate refresh Token
       const refreshToken = jwt.sign(
         {
-          id: userVerify.id,
-          email: userVerify.email
+          id: getUserFromDb.id,
+          email: getUserFromDb.email
         },
         secretKey,
         {
@@ -163,8 +164,8 @@ module.exports = {
       );
       const authtokenReponse = await AuthToken.create({
         token: refreshToken,
-        userId: userVerify.id,
-        email: userVerify.email,
+        userId: getUserFromDb.id,
+        email: getUserFromDb.email,
       },{transaction});
 
       // Commit the refresh token
@@ -364,7 +365,8 @@ module.exports = {
 
       // Password match Validation
       const passwordValid = await bcrypt.compare(body.password, getUser.password);
-      if(!passwordValid) {
+
+      if(passwordValid === false) {
         await transaction.rollback();
         return {
           error: true,
@@ -378,7 +380,8 @@ module.exports = {
 
       const userResponse = await User.update(
         {
-          password:  hashedNewPassword
+          password:  hashedNewPassword,
+          userVerified: true
         },
         {
           where: {
@@ -471,7 +474,8 @@ module.exports = {
 
       const userResponse = await User.update(
         {
-          password:  hashedNewPassword
+          password:  hashedNewPassword,
+          userVerified: true
         },
         {
           where: {

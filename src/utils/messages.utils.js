@@ -46,6 +46,7 @@ const messages = {
           password_not_match: `Usuario o contraseña incorrectos`,
           generate_token_error: `Hubo un error al momento de iniciar sesión`,
           login_required: `Inicio de sesión es requerido`,
+          user_verified: `Usuario no verificado`,
         },
         forgot_password: {
           base: `Hubo un error en el servicio "Olvidó Contraseña" del modulo Auth`,
@@ -57,8 +58,11 @@ const messages = {
         },
         change_password: {
           base: `Hubo un error en el servicio "Cambiar Contraseña"`,
-          incorrect_password: `Contraseña incorrecta`,
+          incorrect_password: `Contraseña anterior incorrecta`,
           update_password: `Hubo un error al momento de cambiar la contraseña`,
+        },
+        change_default_password: {
+          base: `Hubo un error en el servicio "Cambiar Contraseña por Defecto"`,
         },
         me: {
           base: `Hubo un error en el servicio "Mi Perfil" del modulo Auth`,
@@ -87,6 +91,7 @@ const messages = {
       forgot_password: `Correo enviado satisfactoriamente`,
       reset_password: `Contraseña restaurada satisfactoriamente`,
       change_password: `Cambio de contraseña existoso`,
+      change_default_password: `Contraseña por defecto cambiada satisfactoriamente`,
       me: `Información del usuario`,
       refresh_auth: `Token actualizado satisfactoriamente`,
       refresh_token: `Refresh token eliminado`,

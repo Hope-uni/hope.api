@@ -19,18 +19,13 @@ router.post('/forgot-password', forgotPassword);
 
 router.post('/reset-password', verifyToken ,resetPassword);
 
-router.post('/change-password', verifyToken, rolePermissions([
-  'Superadmin',
-  'Admin',
-  'Terapeuta',
-  'Tutor'
-]) ,changePassword); // TODO: Adaptar un permiso para estas rutas
+router.post('/change-password', verifyToken ,changePassword);
 
 router.put('/:id', verifyToken, rolePermissions([
   'Superadmin',
   'Admin',
   'Tutor'
-],[]) ,changePasswordPatient); // TODO: Adaptar un permiso para estas rutas
+],[]) ,changePasswordPatient);
 
 router.get('/me', verifyToken,me);
 
