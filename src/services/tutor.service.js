@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { TutorTherapist, User, Person, Role, UserRoles, Patient, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
-const { getUserUuid } = require('@utils/fixtures.util');
+const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
 
 const { 
@@ -311,7 +311,7 @@ module.exports = {
       }
 
       // Assigning Roles and generate the temporary password.
-      const passwordTemp = getUserUuid(); // generate the temporary password using uuid and get the first 8 characters
+      const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
       resBody.password = passwordTemp;
       resBody.roles = [5];
 

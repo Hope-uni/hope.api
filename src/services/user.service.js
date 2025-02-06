@@ -7,7 +7,7 @@ const { isAdmin } = require('@config/variables.config');
 const { userSendEmail } = require('@helpers/user.helper');
 const messages = require('@utils/messages.utils');
 const dataStructure = require('@utils/data-structure.util');
-const { getUserUuid } = require('@utils/fixtures.util');
+const { generatePassword } = require('@utils/generatePassword.util');
 
 
 module.exports = {
@@ -210,7 +210,7 @@ module.exports = {
       // this is when you try to create a user directly
       if(!transaction) {
         // Variables
-        const passwordTemp = getUserUuid();
+        const passwordTemp = generatePassword();
         transaction = await sequelize.transaction();
         
         // username Validation
