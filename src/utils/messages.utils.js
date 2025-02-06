@@ -1,5 +1,15 @@
 
 const messages = {
+  generalMessages: {
+    base: `Hubo un problema con los datos ingresados. Verifique los datos e intente nuevamente`,
+    server: `Hubo un problema inesperado. Por favor, intente más tarde`,
+    bad_request: 'BAD_REQUEST',
+    unauthorized: 'UNAUTHORIZED',
+    forbidden: 'FORBIDDEN',
+    not_found: 'NOT_FOUND',
+    conflict: 'CONFLICT',
+  },
+
   // Auth Module
   auth: {
     fields: {
@@ -391,6 +401,13 @@ const messages = {
         only: 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
         base: 'Sexo debe ser un texto valido '
       }
+    },
+    errors: {
+      service: {
+        update: `La entidad persona que desea modificar no esta activa o no existe en el sistema`,
+        create: `Hubo un error al intentar crear el perfil de personal`,
+      },
+      not_found: `Persona no encontrada`,
     }
   },
 

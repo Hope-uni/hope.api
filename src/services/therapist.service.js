@@ -4,7 +4,9 @@ const { TutorTherapist, Person, User, Role, UserRoles, Patient ,sequelize } = re
 const { pagination, userPerson, messages, dataStructure } = require('@utils/index');
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
+const { formatErrorMessages } = require('@utils/formatErrorMessages.util');
 const { deleteUser } = require('./user.service');
+
 
 module.exports = {
 
@@ -86,6 +88,7 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 200,
           message: messages.therapist.success.all,
           data: dataStructure.therapistDataStructure(data),
         }
@@ -161,6 +164,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.therapist.success.all,
         ...dataResponse
       }
@@ -170,7 +174,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -260,13 +264,15 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('findTherapist', messages.therapist.errors.not_found),
         }
       };
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.therapist.success.found,
         data: dataStructure.findTherapistDataStructure(data) 
       };
@@ -275,8 +281,8 @@ module.exports = {
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -314,8 +320,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.in_use.identificationNumber,
-          statusCode: 400
+          message: messages.generalMessages.base,
+          statusCode: 409,
+          validationErrors: formatErrorMessages('identificationNumber', messages.therapist.errors.in_use.identificationNumber)
         };
       };
 
@@ -330,8 +337,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.in_use.phoneNumber,
-          statusCode: 400
+          message: messages.generalMessages.base,
+          statusCode: 409,
+          validationErrors: formatErrorMessages('phoneNumber', messages.therapist.errors.in_use.phoneNumber)
         };
       };
       
@@ -341,13 +349,14 @@ module.exports = {
       resBody.roles = [3];
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message = messages.therapist.errors.service.create, data  } = await userPerson.createUserPerson(resBody,transaction);
+      const { error:userPersonError, statusCode, message, data  } = await userPerson.createUserPerson(resBody,transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
-          error: userPersonError,
           message,
-          statusCode
+          statusCode,
+          error: userPersonError,
+          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
         };
       };
 
@@ -361,8 +370,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.service.create,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
         };
       };
 
@@ -377,8 +387,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: emailError,
-          message: emailMessage,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('sendEmail', emailMessage),
         }
       };
 
@@ -446,17 +457,17 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.therapist.success.create,
         data: dataStructure.findTherapistDataStructure(newData)
       }
 
     } catch (error) {
-      // await transaction.rollback();
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -509,8 +520,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
         }
       };
 
@@ -537,8 +549,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.therapist.errors.in_use.identificationNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('identificationNumber', messages.therapist.errors.in_use.identificationNumber),
           };
         };
       };
@@ -558,15 +571,16 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.therapist.errors.in_use.phoneNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('phoneNumber', messages.therapist.errors.in_use.phoneNumber),
           };
         };
       };
 
       // User and Person update
       if(resBody) {
-        const { error:userPersonError, statusCode, message=messages.therapist.errors.service.update  } = await userPerson.updateUserPerson({
+        const { error:userPersonError, statusCode, message, validationErrors  } = await userPerson.updateUserPerson({
           ...resBody,
           personId: therapistExist.personId,
           userId: therapistExist.userId
@@ -575,8 +589,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: userPersonError,
+            statusCode,
             message,
-            statusCode
+            validationErrors,
           };
         };
       }
@@ -599,8 +614,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.therapist.errors.service.update,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.therapist.errors.service.update),
           };
         };
       }
@@ -666,6 +682,7 @@ module.exports = {
     
       return {
         error: false,
+        statusCode: 200,
         message: messages.therapist.success.update,
         data: dataStructure.findTherapistDataStructure(data),
       };
@@ -674,8 +691,8 @@ module.exports = {
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -704,8 +721,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
         }
       };
 
@@ -715,8 +733,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: userError,
+          statusCode,
           message: messages.therapist.errors.service.delete,
-          statusCode
+          validationErrors: formatErrorMessages('delete', messages.therapist.errors.service.delete),
         }
       };
 
@@ -736,8 +755,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
+          statusCode: 409,
           message: messages.therapist.errors.service.delete,
-          statusCode: 400
+          validationErrors: formatErrorMessages('delete', messages.therapist.errors.service.delete),
         };
       };
 
@@ -746,6 +766,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.therapist.success.delete,
       }
 
@@ -754,8 +775,8 @@ module.exports = {
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -791,13 +812,13 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
         };
       };
 
       // Verify if patient exists and if patient does not have therapist assigned
-
       const patientsExist = await Patient.findAll({
         where: {
           id: {
@@ -809,8 +830,9 @@ module.exports = {
       if(patientsExist.length < 0 || !patientsExist) {
         return {
           error: true,
-          message: messages.patient.errors.service.no_registered,
-          statusCode: 400,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.service.no_registered),
         }
       }
 
@@ -821,8 +843,9 @@ module.exports = {
       if(patientsNotFound.length > 0) {
         return {
           error: true,
-          message: messages.therapist.errors.service.patient_to_assign,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.therapist.errors.service.patient_to_assign),
         }
       }
 
@@ -834,8 +857,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.therapist.errors.service.therapist_assigned,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.service.therapist_assigned),
           data: therapistAssigned,
         }
       }
@@ -861,8 +885,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.therapist.errors.service.therapist_not_assigned,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('therapist', messages.therapist.errors.service.therapist_not_assigned),
           };
         }
       }));
@@ -872,6 +897,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.therapist.success.assign,
       }
 
@@ -880,8 +906,8 @@ module.exports = {
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.therapist.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

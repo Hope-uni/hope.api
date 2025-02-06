@@ -4,6 +4,8 @@ const {
   createUser,
   updateUser
 } = require('@services/user.service');
+const { formatErrorMessages } = require('./formatErrorMessages.util');
+const messages = require('./messages.utils');
 
 
 module.exports = {
@@ -28,7 +30,7 @@ module.exports = {
       } = body;
 
       // User creation
-      const { error:dataError, statusCode, message, data:userData } = await createUser({
+      const { error:dataError, statusCode, message, validationErrors, data:userData } = await createUser({
         username,
         password,
         email,
@@ -37,8 +39,9 @@ module.exports = {
       if(dataError) {
         return {
           error: dataError,
+          statusCode,
           message,
-          statusCode
+          validationErrors,
         }
       };
 
@@ -54,11 +57,12 @@ module.exports = {
         gender
       },{transaction});
       if(!personData) {
-        logger.error(`Persona no pudo ser creada`);
+        logger.error(messages.person.errors.service.create);
         return {
           error: true,
-          message: 'Tutor no creado',
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
         };
       };
 
@@ -70,11 +74,12 @@ module.exports = {
       }
 
     } catch (error) {
-      logger.error(`There was an error in  User-Person util: ${error}`);
+      logger.error(`${messages.person.errors.service.create}: ${error}`);
       return {
         error: true,
-        message: `There was an error in User-Person util: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
+        validationErrors: formatErrorMessages('Person', messages.person.errors.service.create),
       }
     }
   },
@@ -99,7 +104,7 @@ module.exports = {
 
       // Update therapist's user
       if(username || email || roleId) {
-        const { error:userError, statusCode, message } = await updateUser(userId,{
+        const { error:userError, statusCode, message, validationErrors } = await updateUser(userId,{
           username,
           email,
           roleId
@@ -107,8 +112,9 @@ module.exports = {
         if(userError) {
           return {
             error: userError,
+            statusCode,
             message,
-            statusCode
+            validationErrors
           }
         };
       };
@@ -122,10 +128,12 @@ module.exports = {
           }
         });
         if(!personExist) {
-          logger.error(`La entidad persona que desea modificar no esta activa o no existe en el sistema`);
+          logger.error(messages.person.errors.not_found);
           return {
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.person.errors.not_found),
           };
         }
 
@@ -142,10 +150,12 @@ module.exports = {
           }
         },{transaction});
         if(!personData) {
+          logger.error(messages.person.errors.service.update);
           return {
             error: true,
-            message: 'Tutor no actualizado',
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.person.errors.service.update),
           };
         };
       };
@@ -155,11 +165,12 @@ module.exports = {
       }
 
     } catch (error) {
-      logger.error(`There was an error in  User-Person util: ${error}`);
+      logger.error(`${messages.person.errors.service.update}: ${error}`);
       return {
         error: true,
-        message: `There was an error in User-Person util: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
+        validationErrors: formatErrorMessages('update', messages.therapist.errors.service.update),
       }
     }
   }
