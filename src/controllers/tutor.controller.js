@@ -6,7 +6,7 @@ const {
   update,
   removeTutor
 } = require('@services/tutor.service');
-const { messages, userPersonEntries } = require('@utils/index');
+const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
 const { tutorEntry, idEntry } = require('@validations/index');
 
 
@@ -27,9 +27,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         ...resData
       });
@@ -39,7 +39,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.tutor.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -53,22 +53,24 @@ module.exports = {
       const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({ 
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, data } = await findOne(req.params.id);
+      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -92,32 +94,42 @@ module.exports = {
       
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
-      if(customError) return res.status(400).json({ 
-        error: true,
-        statusCode: 400,
-        message: customError
-      });
       
       // Tutor joi validation
       const { error } = tutorEntry.createTutorValidation({ phoneNumber, telephone, identificationNumber });
-      if(error) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: error.details[0].message
-      });
 
-      const { error:dataError, statusCode, message, data } = await create(req.body);
+      if(error || customError) {
+        const userPersonErrors = customError ? customError.details : [];
+        const tutorErrors = error ? error.details : [];
+
+        const joinErrors = {
+          details: [
+            ...userPersonErrors,
+            ...tutorErrors
+          ]
+        }
+
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(joinErrors),
+        });
+      }
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -127,7 +139,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.tutor.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -142,28 +154,42 @@ module.exports = {
       
       // User and person joi validation
       const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
-      if(customError) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: customError
-      });
       
       // Joi validation
       const { error } = tutorEntry.updateTutorValidation({id:req.params.id, phoneNumber, identificationNumber, telephone});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      
+      if(error || customError) {
+        const userPersonErrors = customError ? customError.details : [];
+        const tutorErrors = error ? error.details : [];
 
-      const { error:dataError, statusCode, message, data } = await update(req.params.id,req.body);
+        const joinErrors = {
+          details: [
+            ...userPersonErrors,
+            ...tutorErrors
+          ]
+        }
+
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(joinErrors),
+        });
+      }
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id,req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -173,7 +199,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.tutor.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -189,21 +215,23 @@ module.exports = {
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
-        message: error.details[0].message
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message } = await removeTutor(req.params.id);
+      const { error:dataError, statusCode, message, validationErrors } = await removeTutor(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
       });
       
@@ -212,7 +240,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.tutor.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
