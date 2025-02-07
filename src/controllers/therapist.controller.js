@@ -109,7 +109,7 @@ module.exports = {
           ]
         }
 
-        if(error) return res.status(400).json({
+        return res.status(400).json({
           error: true,
           statusCode: 422,
           message: messages.generalMessages.bad_request,
@@ -170,7 +170,7 @@ module.exports = {
           ]
         }
 
-        if(error) return res.status(400).json({
+        return res.status(400).json({
           error: true,
           statusCode: 422,
           message: messages.generalMessages.bad_request,

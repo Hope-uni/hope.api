@@ -369,13 +369,13 @@ module.exports = {
     }
 
    // Get the observations
-    const observationsGotit = data.HealthRecord.Observations.map((item) => {
+    const observationsGotit = Object.keys(data.HealthRecord).includes('Observations') ? data.HealthRecord.Observations.map((item) => {
       return {
         id: item.id,
         description: item.description,
         userId: item.userId,
       }
-    });
+    }) : [];
 
     return {
       id: data.id,
