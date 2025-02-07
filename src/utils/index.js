@@ -7,6 +7,7 @@ const userPerson = require('./user-person.util');
 const dates = require('./dates.util');
 const dataStructure = require('./data-structure.util');
 const fixtures = require('./fixtures.util');
+const { formatJoiMessages, formatErrorMessages } = require('./formatErrorMessages.util');
 
 module.exports = {
   pagination,
@@ -16,4 +17,6 @@ module.exports = {
   dates,
   dataStructure,
   fixtures,
+  formatJoiMessages,
+  formatErrorMessages
 }

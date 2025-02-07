@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { Patient, Person, TutorTherapist, User, UserRoles, Role, HealthRecord, TeaDegree, Phase, Observation } = require('@models/index');
 const logger = require('@config/logger.config');
-const { pagination, messages, dataStructure } = require('@utils/index');
+const { pagination, messages, dataStructure, formatErrorMessages } = require('../utils/index');
 
 /* eslint-disable radix */
 module.exports = {
@@ -35,7 +35,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 403,
-          message: messages.patient.errors.service.forbidden,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('all', messages.patient.errors.service.forbidden),
         }
       }
 
@@ -127,6 +128,7 @@ module.exports = {
         // Return Patient
         return {
           error: false,
+          statusCode: 200,
           message: messages.patient.success.all,
           data: dataStructure.patientDataStructure(data),
         };
@@ -228,6 +230,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.all,
         ...dataResponse
       };
@@ -236,8 +239,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        message: messages.generalMessages.server,
+        statusCode: 500,
       }
     }
   },
@@ -279,8 +282,9 @@ module.exports = {
       if(!tutorExist) {
         return {
           error: true,
-          message: messages.tutor.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
         }
       }
 
@@ -348,6 +352,7 @@ module.exports = {
         // Return Patient
         return {
           error: false,
+          statusCode: 200,
           message: messages.patient.success.all,
           data: dataStructure.patientDataStructure(data),
         };
@@ -424,6 +429,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.all,
         ...dataResponse
       };
@@ -432,8 +438,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -474,8 +480,9 @@ module.exports = {
       if(!therapistExist) {
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
         }
       }
 
@@ -532,6 +539,7 @@ module.exports = {
         // Return Patient
         return {
           error: false,
+          statusCode: 200,
           message: messages.patient.success.all,
           data: dataStructure.patientDataStructure(data),
         };
@@ -608,6 +616,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.all,
         ...dataResponse
       };
@@ -616,8 +625,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }
