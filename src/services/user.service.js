@@ -8,6 +8,7 @@ const { userSendEmail } = require('@helpers/user.helper');
 const messages = require('@utils/messages.utils');
 const dataStructure = require('@utils/data-structure.util');
 const { generatePassword } = require('@utils/generatePassword.util');
+const { formatErrorMessages } = require('@utils/formatErrorMessages.util');
 
 
 module.exports = {
@@ -110,9 +111,9 @@ module.exports = {
     } catch (error) {
       logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -132,9 +133,10 @@ module.exports = {
       
       if(parseInt(id) === 1) {
         return {
-          message: messages.user.errors.not_found,
           error: true,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       }
 
@@ -166,24 +168,26 @@ module.exports = {
 
       if(!data) {
         return {
-          message: messages.user.errors.not_found,
           error: true,
           statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       };
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.user.success.found,
         data: dataStructure.findUserDataStructure(data),
       };
 
     } catch (error) {
-      logger.error(error);
+      logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -223,9 +227,10 @@ module.exports = {
         if(usernameExist) {
           await transaction.rollback();
           return {
-            message: messages.user.errors.in_use.username,
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('username', messages.user.errors.in_use.username)
           }
         };
         // Email Validation
@@ -238,9 +243,10 @@ module.exports = {
         if(emailExist) {
           await transaction.rollback();
           return {
-            message: messages.user.errors.in_use.email,
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('email', messages.user.errors.in_use.email),
           }
         };
 
@@ -264,38 +270,41 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.user.errors.service.create,
-            statusCode: 400
+            message: messages.generalMessages.base,
+            statusCode: 409,
+            validationErrors: formatErrorMessages('create', messages.user.errors.service.create),
           }
         };
 
         // get admin user
-        const getAdminUser = await Role.findOne({
+        const getAdminRole = await Role.findOne({
           where: {
             name: isAdmin,
           }
         });
 
-        if(!getAdminUser) {
+        if(!getAdminRole) {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.user.errors.not_found,
-            statusCode: 400
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('role', messages.role.errors.not_found),
           }
         };
 
         // associate role with the user recently created
         const userRolesData = await UserRoles.create({
           userId: data.id,
-          roleId: getAdminUser.id
+          roleId: getAdminRole.id
         },{transaction});
         if(!userRolesData) {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.user.errors.service.create,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('role', messages.user.errors.service.create),
           }
         }
 
@@ -310,8 +319,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: emailMessage,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('sendEmail', emailMessage),
           }
         };
 
@@ -361,9 +371,10 @@ module.exports = {
       });
       if(usernameExist) {
         return {
-          message: messages.user.errors.in_use.username,
           error: true,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('username', messages.user.errors.in_use.username),
         }
       };
       // Email Validation
@@ -375,9 +386,10 @@ module.exports = {
       });
       if(emailExist) {
         return {
-          message: messages.user.errors.in_use.email,
           error: true,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('email', messages.user.errors.in_use.email),
         }
       };
 
@@ -391,9 +403,10 @@ module.exports = {
         });
         if(!roleExist) {
           return {
-            message: messages.role.errors.not_found,
             error: true,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('role', messages.role.errors.not_found),
           }
         };
       }
@@ -416,8 +429,9 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: messages.user.errors.service.create,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.user.errors.service.create),
         }
       };
 
@@ -430,47 +444,32 @@ module.exports = {
         if(!userRolesData) {
           return {
             error: true,
+            statusCode: 409,
             message: messages.user.errors.service.create,
-            statusCode: 400
+            validationErrors: formatErrorMessages('create', messages.user.errors.service.create),
           }
         }
       }
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.user.success.create,
-        data
+        data,
       };
     } catch (error) {
       logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
 
-  /**
-   * The function `updateUser` updates a user in a database with validations for username, email, and
-   * roleId, and returns appropriate messages and data based on the outcome.
-   * @param id - The `id` parameter in the `updateUser` function represents the unique identifier of
-   * the user whose information is being updated. This identifier is used to locate the specific user
-   * record in the database that needs to be updated.
-   * @param ts => transaction param. this will be use it when you update therapist, tutor or patient register
-   * @param body - The `body` parameter in the `updateUser` function contains the data that needs to be
-   * updated for a user. It can include fields like `username`, `email`, `roleId`, etc. The function
-   * first checks if the user with the specified `id` exists in the database. Then it
-   * @returns The function `updateUser` returns an object with the following properties:
-   * - `error`: A boolean indicating if an error occurred or not.
-   * - `message`: A message describing the result of the operation.
-   * - `data`: The updated user data if the operation was successful.
-   * - `statusCode`: The status code of the response.
-   */
+  
   async updateUser(id, body, transaction) {
     try {
-
-
       // Destructuring data
       const {roles, ...resBody} = body;
       
@@ -495,9 +494,10 @@ module.exports = {
       });
       if(!userExist) {
         return {
-          message: messages.user.errors.not_found,
           error: true,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       };
       
@@ -518,9 +518,10 @@ module.exports = {
           if(usernameExist) {
             await transaction.rollback();
             return {
-              message: messages.user.errors.in_use.username,
               error: true,
-              statusCode: 400
+              statusCode: 409,
+              message: messages.generalMessages.base,
+              validationErrors: formatErrorMessages('username', messages.user.errors.in_use.username),
             }
           };
         };
@@ -539,9 +540,10 @@ module.exports = {
           if(emailExist) {
             await transaction.rollback();
             return {
-              message: messages.user.errors.in_use.email,
               error: true,
-              statusCode: 400
+              statusCode: 409,
+              message: messages.generalMessages.base,
+              validationErrors: formatErrorMessages('email', messages.user.errors.in_use.email),
             }
           };
         };
@@ -558,8 +560,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.user.errors.service.update,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.user.errors.service.update),
           }
         };
         
@@ -595,6 +598,7 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 200,
           message: messages.user.success.update,
           data: dataStructure.findUserDataStructure(newData)
         };
@@ -613,9 +617,10 @@ module.exports = {
         });
         if(usernameExist) {
           return {
-            message: messages.user.errors.in_use.username,
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('username', messages.user.errors.in_use.username),
           }
         };
       };
@@ -633,9 +638,10 @@ module.exports = {
         });
         if(emailExist) {
           return {
-            message: messages.user.errors.in_use.email,
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('email', messages.user.errors.in_use.email),
           }
         };
       };
@@ -651,38 +657,30 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: messages.user.errors.service.update,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('update', messages.user.errors.service.update),
         }
       };
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.user.success.update,
-        data
+        data,
       };
 
     } catch (error) {
       logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
 
 
-  /**
-   * This function deletes a user from a database using Sequelize transactions and handles various
-   * error scenarios.
-   * @param id - The `id` parameter in the `deleteUser` function represents the unique identifier of
-   * the user that you want to delete from the database. This identifier is used to locate the specific
-   * user record that needs to be marked as deleted by setting its `status` field to `false`.
-   * @param ts => transaction param. this will be use it when you delete therapist, tutor or patient register
-   * @returns The `deleteUser` function returns an object with different properties based on the
-   * outcome of the operation. Here are the possible return values:
-   */
   async deleteUser(id, transaction) {
     try {
 
@@ -721,9 +719,10 @@ module.exports = {
         if(!userExist) {
           await transaction.rollback();
           return {
-            message: messages.user.errors.not_found,
             error: true,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
           }
         };
 
@@ -742,9 +741,10 @@ module.exports = {
         if (!data) {
           await transaction.rollback();
           return {
-            message: messages.user.errors.service.delete,
             error: true,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('delete', messages.user.errors.service.delete), 
           };
         };
 
@@ -767,6 +767,7 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 200,
           message: messages.user.success.delete,
         }
       }
@@ -779,9 +780,10 @@ module.exports = {
       });
       if(!userExist) {
         return {
-          message: messages.user.errors.not_found,
           error: true,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       };
 
@@ -799,9 +801,10 @@ module.exports = {
 
       if (!data) {
         return {
-          message: messages.user.errors.service.delete,
           error: true,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('delete', messages.user.errors.service.delete),
         };
       };
 
@@ -821,33 +824,21 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.user.success.delete,
       }
 
     } catch (error) {
       logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
-        message: `${messages.user.errors.service.base}: ${error}`,
         error: true,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
 
 
-  /**
-   * The function `addRoleUser` adds a role to a user while handling various validations and
-   * transactions.
-   * @param userId - The `userId` parameter in the `addRoleUser` function represents the unique
-   * identifier of the user to whom you want to add a new role. This ID is used to locate the specific
-   * user in the database and perform operations related to adding a role for that user.
-   * @param roleId - The `roleId` parameter in the `addRoleUser` function represents the ID of the role
-   * that you want to assign to a user. This function is responsible for adding a role to a user, but
-   * it includes certain validations and checks before performing the operation. The function ensures
-   * that the user is not
-   * @returns The `addRoleUser` function returns an object with properties `error`, `statusCode`, and
-   * `message`. The specific return values depend on the logic and conditions within the function:
-   */
   async addRoleUser(userId, roleId) {
     const transaction = await sequelize.transaction();
     try {
@@ -856,16 +847,18 @@ module.exports = {
       if(parseInt(userId) === 1) {
         return {
           error: true,
-          statusCode: 400,
-          message: messages.user.errors.rol_forbidden,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.rol_forbidden),
         }
       }
 
-      if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 3 || parseInt(roleId) === 4) {
+      if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 4 || parseInt(roleId) === 5) {
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.forbidden,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.role.errors.forbidden),
         }
       }
 
@@ -920,8 +913,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.user.errors.not_found
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       }
 
@@ -936,8 +930,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.in_use.rol,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.role.errors.in_use.rol),
         }
       }
 
@@ -949,8 +944,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.user.errors.service.add_role,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.service.add_role),
         }
       }
 
@@ -964,11 +960,11 @@ module.exports = {
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(error.message);
+      logger.error(`${messages.user.errors.service.base}: ${error.message}`);
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.service.base}: ${error.message}`,
+        message: messages.generalMessages.server,
       };
     }
   },
@@ -996,16 +992,18 @@ module.exports = {
       if(parseInt(userId) === 1) {
         return {
           error: true,
-          statusCode: 400,
-          message: messages.user.errors.service.delete_role_user,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.service.delete_role_user),
         }
       }
 
       if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 3 || parseInt(roleId) === 4) {
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.unsign_rol,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.role.errors.unsign_rol),
         }
       }
 
@@ -1055,8 +1053,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.user.errors.not_found
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       }
 
@@ -1071,8 +1070,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.unsign_rol,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.role.errors.unsign_rol),
         }
       }
       
@@ -1087,8 +1087,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: `${messages.role.errors.not_found} para este usuario`,
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', `${messages.role.errors.not_found} para este usuario`),
         }
       }
 
@@ -1109,11 +1110,11 @@ module.exports = {
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(error.message);
+      logger.error(`${messages.user.errors.service.base}: ${error.message}`);
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.service.base}: ${error.message}`,
+        message: messages.generalMessages.server,
       };
     }
   }

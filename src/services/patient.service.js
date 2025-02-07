@@ -5,10 +5,11 @@ const { pagination, messages, userPerson, dataStructure } = require('@utils/inde
 const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
 const { getProgress } = require('@helpers/healthRecord.helper');
 const { generatePassword } = require('@utils/generatePassword.util');
-const { userSendEmail } = require('../helpers/user.helper');
+const { userSendEmail } = require('@helpers/user.helper');
 const { deleteUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
+const { formatErrorMessages } = require('../utils');
 
 
 
@@ -34,8 +35,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -132,6 +133,7 @@ module.exports = {
         // Return Patient
         return {
           error: false,
+          statusCode: 200,
           message: messages.patient.success.all,
           data: dataStructure.patientDataStructure(data),
         };
@@ -234,6 +236,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.all,
         ...dataResponse
       };
@@ -242,8 +245,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -348,8 +351,9 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: messages.patient.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         }
       };
 
@@ -358,8 +362,9 @@ module.exports = {
       if(progressError) {
         return {
           error: progressError,
-          message: progressMessage,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', progressMessage),
         }
       }
 
@@ -367,6 +372,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.found,
         data: dataStructure.findPatientDataStructure(data),
       };
@@ -375,8 +381,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -423,8 +429,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
         };
       };
 
@@ -456,8 +463,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.therapist.errors.not_found,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
           };
         };
       }
@@ -467,13 +475,14 @@ module.exports = {
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
       resData.password = passwordTemp;
 
-      const { error:userPersonError, statusCode, message = messages.patient.errors.service.create, data  } = await userPerson.createUserPerson(resData, transaction);
+      const { error:userPersonError, statusCode, message, validationErrors, data  } = await userPerson.createUserPerson(resData, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
           error: userPersonError, 
+          statusCode,
           message,
-          statusCode
+          validationErrors,	
         };
       };
 
@@ -489,13 +498,14 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.patient.errors.service.create,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.patient.errors.service.create),
         };
       };
 
       // Create a HealthRecord
-      const { error:healthRecordError, statusCode: healthRecordStatusCode, message: healthRecordMessage, healthRecordCreated } = await createHealthRecord({
+      const { error:healthRecordError, statusCode: healthRecordStatusCode, message: healthRecordMessage, validationErrors: healthRecordValidationErrors, healthRecordCreated } = await createHealthRecord({
         teaDegreeId,
         phaseId,
         patientId: patientResponse.id,
@@ -505,7 +515,8 @@ module.exports = {
         return {
           error: healthRecordError,
           message: healthRecordMessage,
-          statusCode: healthRecordStatusCode                                                          
+          statusCode: healthRecordStatusCode,  
+          validationErrors: healthRecordValidationErrors                                                        
         }
       };
 
@@ -517,13 +528,14 @@ module.exports = {
           healthRecordId: healthRecordCreated.id
         }
 
-        const { error: observationError, message: observationMessage } = await createObservation( observationPayload,transaction);
+        const { error: observationError, message: observationMessage, validationErrors: observationValidationErrors } = await createObservation( observationPayload,transaction);
 
         if(observationError) {
           return {
             error: observationError,
+            statusCode: 409,
             message: observationMessage,
-            statusCode: 400
+            validationErrors: observationValidationErrors,
           }
         }
       }
@@ -539,8 +551,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: emailError,
-          message: emailMessage,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('sendEmail', emailMessage),
         }
       };
 
@@ -646,8 +659,9 @@ module.exports = {
       if(progressError) {
         return {
           error: progressError,
-          message: progressMessage,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', progressMessage),
         }
       }
 
@@ -655,6 +669,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.patient.success.create,
         data: dataStructure.findPatientDataStructure(newData),
       };
@@ -663,8 +678,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -684,8 +699,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.patient.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         };
       };
       
@@ -704,8 +720,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.not_found,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
           };
         };	
       };
@@ -738,14 +755,15 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.therapist.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
         };
       };
       }
 
 
-      const { error:userPersonError, statusCode, message = messages.patient.errors.service.update } = await userPerson.updateUserPerson({
+      const { error:userPersonError, statusCode, message, validationErrors } = await userPerson.updateUserPerson({
         ...resData,
         personId: patientExist.personId,
         userId: patientExist.userId,
@@ -754,8 +772,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: userPersonError,
+          statusCode,
           message,
-          statusCode
+          validationErrors,
         };
       };
 
@@ -774,8 +793,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.patient.errors.service.update,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.patient.errors.service.update),
           };
         };
       }
@@ -848,22 +868,48 @@ module.exports = {
               },
             ]
           },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
         ]
       });
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.update,
         data: dataStructure.findPatientDataStructure(newData),
       }
 
     } catch (error) {
-      await transaction.rollback();
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -882,19 +928,21 @@ module.exports = {
       if(!patientExist) {
         return {
           error: true,
-          message: messages.patient.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         };
       };
   
       // remove user 
-      const { error:userError, statusCode } = await deleteUser(patientExist.userId, transaction);
+      const { error:userError, statusCode, validationErrors } = await deleteUser(patientExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
+          statusCode,
           message: messages.patient.errors.service.delete,
-          statusCode
+          validationErrors,
         }
       };
 
@@ -911,8 +959,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.patient.errors.service.delete,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('delete', messages.patient.errors.service.delete),
         };
       };
 
@@ -921,6 +970,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.patient.success.delete,
       }
 
@@ -929,8 +979,8 @@ module.exports = {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.patient.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

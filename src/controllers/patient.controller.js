@@ -1,5 +1,4 @@
 const logger = require('@config/logger.config');
-const { messages, userPersonEntries } = require('@utils/index');
 const {
   all,
   findOne,
@@ -9,23 +8,25 @@ const {
   allPatientsWithoutTherapist,
 } = require('@services/patient.service');
 const { patientEntry, idEntry } = require('@validations/index');
+const { messages, userPersonEntries, formatJoiMessages } = require('../utils/index');
 
 module.exports = {
 
   async all(req,res) {
     try {
-      const { error, statusCode, message, ...resData } = await all(req.query,req.payload);
+      const { error, statusCode, message, validationErrors, ...resData } = await all(req.query,req.payload);
       if(error) {
         return res.status(statusCode).json({
           error,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         ...resData
       });
@@ -35,7 +36,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -43,19 +44,20 @@ module.exports = {
   async allPatientsWithoutTherapist(req,res) {
     try {
       
-      const { error, statusCode, message, ...resData } = await allPatientsWithoutTherapist(req.query);
+      const { error, statusCode, message, validationErrors, ...resData } = await allPatientsWithoutTherapist(req.query);
 
       if(error) {
         return res.status(statusCode).json({
           error,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         ...resData
       });
@@ -65,7 +67,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -77,22 +79,24 @@ module.exports = {
       const { error } = await idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       })
       
-      const { error:dataError, statusCode, message, data } = await findOne(req.params.id);
+      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -102,7 +106,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -114,32 +118,44 @@ module.exports = {
 
       // Patient joi validation
       const { error } = patientEntry.createPatientValidation({ tutorId, therapistId, phaseId, teaDegreeId, observations}); 
-      if(error) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: error.details[0].message
-      });
+
 
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
-      if(customError) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: customError
-      });
 
-      const { error:dataError, statusCode, message, data } = await create(req.body);
+      if(error || customError) {
+        const userPersonErrors = customError ? customError.details : [];
+        const patientErrors = error ? error.details : [];
+
+        const joinErrors = {
+          details: [
+            ...userPersonErrors,
+            ...patientErrors
+          ]
+        }
+
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(joinErrors),
+        });
+      }
+
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body);
       if(dataError) {
         return res.status(statusCode).json({  
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -148,7 +164,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -160,32 +176,42 @@ module.exports = {
       
       // Patient joi validation
       const { error } = patientEntry.updatePatientValidation({ id: req.params.id, therapistId, tutorId});
-      if(error) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: error.details[0].message
-      });
 
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
-      if(customError) return res.status(400).json({
-        error: true,
-        statusCode: 400,
-        message: customError
-      });
 
-      const { error:dataError, statusCode, message, data } = await update(req.params.id, req.body);
+      if(error || customError) {
+        const userPersonErrors = customError ? customError.details : [];
+        const patientErrors = error ? error.details : [];
+
+        const joinErrors = {
+          details: [
+            ...userPersonErrors,
+            ...patientErrors
+          ]
+        }
+
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(joinErrors),
+        });
+      }
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,	
+        statusCode,	
         message,
         data
       });
@@ -195,7 +221,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   },
@@ -206,22 +232,24 @@ module.exports = {
       const { error } = idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message } = await removePatient(req.params.id);
+      const { error:dataError, statusCode, message, validationErrors } = await removePatient(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -230,7 +258,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.patient.errors.controller}: ${error}`
+        message: messages.generalMessages.server,
       }); 
     }
   }

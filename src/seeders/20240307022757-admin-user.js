@@ -28,6 +28,7 @@ module.exports = {
             password: hashPassword,
             email: 'superadmin@hope.com',
             status: true,
+            userVerified: true,
             createdAt: new Date(
               date.toDateString(
                 date.getYear(),

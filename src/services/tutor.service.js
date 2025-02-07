@@ -4,6 +4,7 @@ const { TutorTherapist, User, Person, Role, UserRoles, Patient, sequelize } = re
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
+const { formatErrorMessages } = require('@utils/index');
 
 const { 
   deleteUser
@@ -77,6 +78,7 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 200,
           message: messages.tutor.success.all,
           data: dataStructure.tutorDataStructure(data),
         }
@@ -152,6 +154,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.tutor.success.all,
         ...dataResponse
       }
@@ -160,8 +163,8 @@ module.exports = {
       logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.tutor.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -231,13 +234,15 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          message: messages.tutor.errors.not_found,
           statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('findTutor', messages.tutor.errors.not_found),
         }
       };
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.tutor.success.found,
         data: dataStructure.findTutorDataStructure(data),
       }
@@ -271,8 +276,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.in_use.identificationNumber,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('identificationNumber', messages.therapist.errors.in_use.identificationNumber),
         };
       };
 
@@ -287,8 +293,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.in_use.phoneNumber,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('phoneNumber', messages.tutor.errors.in_use.phoneNumber),
         };
       };
 
@@ -304,8 +311,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.in_use.phoneNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('telephone', messages.tutor.errors.in_use.phoneNumber),
           };
         };
       }
@@ -316,13 +324,14 @@ module.exports = {
       resBody.roles = [5];
 
       // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, data } = await userPerson.createUserPerson(resBody, transaction);
+      const { error:userPersonError, message, statusCode, validationErrors, data } = await userPerson.createUserPerson(resBody, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
           error: userPersonError,
           message,
-          statusCode
+          statusCode,
+          validationErrors,
         };
       }
 
@@ -338,8 +347,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.service.create,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.tutor.errors.service.create),
         };
       };
 
@@ -354,8 +364,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: emailError,
-          message: emailMessage,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('sendEmail', emailMessage),
         }
       };
 
@@ -423,6 +434,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.tutor.success.create,
         data: dataStructure.findTutorDataStructure(newData),
       };
@@ -431,8 +443,8 @@ module.exports = {
       logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.tutor.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -468,8 +480,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.not_found,
           statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
         }
       };
 
@@ -496,8 +509,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.in_use.identificationNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('identificationNumber', messages.therapist.errors.in_use.identificationNumber),
           };
         };
       }
@@ -516,8 +530,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.in_use.phoneNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('phoneNumber', messages.tutor.errors.in_use.phoneNumber),
           };
         };
       }
@@ -536,15 +551,16 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.in_use.phoneNumber,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('telephone', messages.tutor.errors.in_use.phoneNumber),
           };
         };
       }
 
       // Validate and update User and Person
       if(resData) {
-        const { error:userPersonError, statusCode, message = messages.tutor.errors.service.update } = await userPerson.updateUserPerson({
+        const { error:userPersonError, statusCode, message, validationErrors } = await userPerson.updateUserPerson({
           ...resData,
           personId: tutorExist.personId,
           userId: tutorExist.userId,
@@ -553,8 +569,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: userPersonError,
+            statusCode,
             message,
-            statusCode
+            validationErrors,
           };
         };
       }
@@ -579,8 +596,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.tutor.errors.service.update,
-            statusCode: 400
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.tutor.errors.service.update),
           };
         };
       }
@@ -651,6 +669,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.tutor.success.update,
         data: dataStructure.findTutorDataStructure(newData),
       }
@@ -659,8 +678,8 @@ module.exports = {
       logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.tutor.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -679,19 +698,21 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.not_found,
           statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
         }
       };
 
       // remove User
-      const { error:userError, statusCode } = await deleteUser(tutorExist.userId, transaction);
+      const { error:userError, statusCode, validationErrors } = await deleteUser(tutorExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
+          statusCode,
           message: messages.tutor.errors.service.delete,
-          statusCode
+          validationErrors,
         }
       };
 
@@ -711,8 +732,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.tutor.errors.service.delete,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('delete', messages.tutor.errors.service.delete),
         };
       };
 
@@ -721,6 +743,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.tutor.success.delete,
       }
     } catch (error) {
@@ -728,8 +751,8 @@ module.exports = {
       logger.error(`${messages.tutor.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.tutor.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

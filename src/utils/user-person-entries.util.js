@@ -28,11 +28,6 @@ module.exports = {
       email,
       roles
     });
-    if(userError) {
-      return {
-        error: userError.details[0].message
-      }
-    };
 
     const { error:personError } = createPersonValidation({
       firstName,
@@ -44,9 +39,20 @@ module.exports = {
       birthday,
       gender
     });
-    if(personError) {
+
+    if(userError || personError) {
+      const getUserError = userError ? userError.details : [];
+      const getPersonError = personError ? personError.details : [];
+
+      const joinError = {
+        details: [
+          ...getUserError,
+          ...getPersonError
+        ]
+      }
+
       return {
-        error: personError.details[0].message
+        error: joinError
       }
     };
 
@@ -56,6 +62,11 @@ module.exports = {
   },
 
   userPersonUpdateValidation(data) {
+
+    // Variables
+    let userError;
+    let personError;                                       
+
     // destructuring Object
     const {
       username,
@@ -74,20 +85,16 @@ module.exports = {
     } = data;
 
     if(userId || username || email/*  || roles */) {
-      const { error:userError } = updateUserValidation({
+      const { error } = updateUserValidation({
         username,
         email,
         // roles
       });
-      if(userError) {
-        return {
-          error: userError.details[0].message
-        }
-      };
+      if(error)  userError = error;
     }
 
     if(personId || firstName || secondName || surname || secondSurname || imageProfile || address) {
-      const { error:personError } = updatePersonValidation({
+      const { error } = updatePersonValidation({
         firstName,
         secondName,
         surname,
@@ -97,12 +104,24 @@ module.exports = {
         birthday,
         gender
       });
-      if(personError) {
-        return {
-          error: personError.details[0].message
-        }
-      };
+      if(error) personError = error;
     }
+
+    if(userError || personError) {
+      const getUserError = userError ? userError.details : [];
+      const getPersonError = personError ? personError.details : [];
+
+      const joinError = {
+        details: [
+          ...getUserError,
+          ...getPersonError
+        ]
+      }
+
+      return {
+        error: joinError
+      }
+    };
 
     return {
       error: false
