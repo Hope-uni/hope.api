@@ -12,18 +12,36 @@ module.exports = {
   /* The `userDataStructure(data)` function is creating a new data structure for users by iterating
   over the input `data` array. It extracts specific information from each user object in the array
   and organizes it into a new structure. Here's a breakdown of what it does: */
-  userDataStructure(data) {
+  async userDataStructure(data) {
 
     const newData = [];
     
+     /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-await-in-loop */
     for (const iterator of data) {
       const rolesData = [];
 
       for (const role of iterator.UserRoles) {
         rolesData.push(role.Role);
+
+        if(role.Role.id === 3) {
+          const { data: therapistData } = await getTutorTherapist(iterator.id);
+          iterator.setDataValue('profileId', therapistData.profileId);
+        }
+        if(role.Role.id === 4) {
+          const { data: patientData } = await getPatient(iterator.id);
+          iterator.setDataValue('profileId', patientData.profileId);
+        }
+        if(role.Role.id === 5) {
+          const { data: tutorData } = await getTutorTherapist(iterator.id);;
+          iterator.setDataValue('profileId', tutorData.profileId);
+        } 
+
       }
+
       const element = {
         id: iterator.id,
+        profileId: iterator.dataValues.profileId,
         username: iterator.username,
         email: iterator.email,
         roles: rolesData
@@ -34,30 +52,47 @@ module.exports = {
     return newData;
   },
 
-  findUserDataStructure(data) {
+  async findUserDataStructure(data) {
 
     // Variables
     const rolesData = [];
     let isAdmin;
     let element;
 
+    /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-await-in-loop */
     for (const role of data.UserRoles) {
       if(role.Role.id === 2) {
         isAdmin = true;
       }
+
+      if(role.Role.id === 3) {
+        const { data: therapistData } = await getTutorTherapist(data.id);
+        data.setDataValue('profileId', therapistData.profileId);
+      }
+      if(role.Role.id === 4) {
+        const { data: patientData } = await getPatient(data.id);
+        data.setDataValue('profileId', patientData.profileId);
+      }
+      if(role.Role.id === 5) {
+        const { data: tutorData } = await getTutorTherapist(data.id);;
+        data.setDataValue('profileId', tutorData.profileId);
+      }
+
       rolesData.push(role.Role);
     }
 
     if(isAdmin) {
       element = {
-        username: data.username,
-        email: data.email
+        username: data.dataValues.username,
+        email: data.dataValues.email
       }
     } else {
       element = {
-        id: data.id,
-        username: data.username,
-        email: data.email,
+        id: data.dataValues.id,
+        profileId: data.dataValues.profileId,
+        username: data.dataValues.username,
+        email: data.dataValues.email,
         roles: rolesData
       }
     }
