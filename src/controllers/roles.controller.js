@@ -10,7 +10,7 @@ const {
   roleEntry,
   idEntry
 } = require('@validations/index');
-const { messages } = require('@utils/index');
+const { messages, formatJoiMessages } = require('@utils/index');
 
 module.exports = {
 
@@ -64,22 +64,23 @@ module.exports = {
       const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
       const { error: dataError, statusCode, message, data } = await findRole(req.params.id);
       if(dataError) {
-        return res.status(400).json({
+        return res.status(statusCode).json({
           error:dataError,
           statusCode,
           message
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -89,7 +90,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.controller}: ${error.message}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -106,22 +107,24 @@ module.exports = {
       const { error } = roleEntry.createRoleValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error: dataError, statusCode, message, data } = await createRole(req.body);
+      const { error: dataError, statusCode, message, validationErrors, data } = await createRole(req.body);
       if(dataError) {
-        return res.status(400).json({
+        return res.status(statusCode).json({
           error,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       };
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -131,7 +134,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.controller}: ${error.message}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -148,22 +151,24 @@ module.exports = {
       const { error } = roleEntry.updateRoleValidation({id:req.params.id,...req.body});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, data } = await updateRole(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updateRole(req.params.id,req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -173,7 +178,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.controller}: ${error.message}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -185,11 +190,12 @@ module.exports = {
    */
   async deleteRole(req,res) {
     try {
-      const { error } = idEntry.findRoleValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
       const { message, statusCode, error:dataError } = await deleteRole(req.params.id);
@@ -201,9 +207,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -212,7 +218,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.controller}: ${error.message}`,
+        message: messages.generalMessages.server,
       });
     }
   }

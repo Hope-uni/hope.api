@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { Patient, Person, TutorTherapist, User, UserRoles, Role, HealthRecord, TeaDegree, Phase, Observation } = require('@models/index');
 const logger = require('@config/logger.config');
-const { pagination, messages, dataStructure, formatErrorMessages } = require('../utils/index');
+const { pagination, messages, dataStructure } = require('../utils/index');
 
 /* eslint-disable radix */
 module.exports = {
@@ -35,8 +35,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 403,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('all', messages.patient.errors.service.forbidden),
+          message: messages.patient.errors.service.forbidden,
         }
       }
 
@@ -283,8 +282,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
+          message: messages.tutor.errors.not_found,
         }
       }
 
@@ -481,8 +479,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
+          message: messages.therapist.errors.not_found,
         }
       }
 

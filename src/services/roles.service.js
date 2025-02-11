@@ -2,7 +2,7 @@ const { Permission, Role } = require('@models/index');
 const logger = require('@config/logger.config');
 const { sequelize } = require('@models/index');
 const { Op } = require('sequelize');
-const { pagination, messages } = require('@utils/index');
+const { pagination, messages, formatErrorMessages } = require('@utils/index');
 
 module.exports = {
 
@@ -52,6 +52,7 @@ module.exports = {
   
         return {
           error: false,
+          statusCode: 200,
           message: messages.role.success.all,
           data
         };
@@ -98,6 +99,7 @@ module.exports = {
       const dataResponse = pagination.getPageData(data, query.page, limit);
       return {
         error: false,
+        statusCode: 200,
         message: messages.role.success.all,
         ...dataResponse
       };
@@ -107,7 +109,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       };
     }
   },
@@ -169,6 +171,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.role.success.found,
         data
       };
@@ -178,7 +181,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       };
     }
   },
@@ -208,8 +211,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.in_use.name,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('name', messages.role.errors.in_use.name),
         }
       };
 
@@ -227,8 +231,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            statusCode: 400,
-            message: messages.role.errors.permissions.not_found,
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('permissions', messages.role.errors.permissions.not_found),
           }
         }
       }
@@ -244,8 +249,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: `Rol no creado`,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.role.errors.service.create),
         }
       };
 
@@ -255,8 +261,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.service.create,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.role.errors.service.create),
         }
       };
 
@@ -292,6 +299,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.role.success.create,
         data: newRole
       };
@@ -302,7 +310,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       };
     }
   },
@@ -344,7 +352,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.role.errors.not_found,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('rol', messages.role.errors.not_found),
         };
       };
 
@@ -367,8 +376,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.in_use.name,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('name', messages.role.errors.in_use.name),
         };
       };
 
@@ -396,8 +406,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.role.errors.service.update,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('update', messages.role.errors.service.update),
         }
       };
 
@@ -431,17 +442,18 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.role.success.update,
         data: roleExist
       };
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.service.base}: ${error}`);	
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       };
     }
   },
@@ -505,17 +517,18 @@ module.exports = {
       await transaction.commit();
 
       return {
-        message: messages.role.success.delete,
         error: false,
+        statusCode: 200,
+        message: messages.role.success.delete,
       };
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(error.message);
+      logger.error(`${messages.role.errors.service.base}: ${error}`);	
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.role.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       };
     }
   }

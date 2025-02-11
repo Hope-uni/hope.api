@@ -1,6 +1,6 @@
 const { HealthRecordPhase, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
+const { messages, formatErrorMessages } = require('@utils/index');
 
 module.exports = {
 
@@ -23,8 +23,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: `${messages.healthRecordPhase.errors.already_exist}`,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('healthRecordPhase', messages.healthRecordPhase.errors.already_exist),
         }
       }
 
@@ -39,14 +40,16 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: `${messages.healthRecordPhase.errors.service.create}`,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.healthRecordPhase.errors.service.create),
         }
       }
 
       if(transactionRetrieved) {
         return {
           error: false,
+          statusCode: 200,
           message: messages.healthRecordPhase.success.create,
           data
         }
@@ -56,6 +59,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.healthRecordPhase.success.create,
         data
       }
@@ -65,8 +69,8 @@ module.exports = {
       logger.error(`${messages.healthRecordPhase.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.healthRecordPhase.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

@@ -1,7 +1,7 @@
 const { Category, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { messages, pagination } = require('@utils/index');
+const { messages, pagination, formatErrorMessages } = require('@utils/index');
 
 module.exports = {
   /* eslint-disable radix */
@@ -44,6 +44,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.category.success.all,
         ...dataResponse
       }
@@ -52,7 +53,7 @@ module.exports = {
       logger.error(`${messages.category.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.category.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
         statusCode: 500
       }
     }
@@ -91,7 +92,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: `${messages.category.errors.service.base}: ${error}`
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -112,7 +113,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: messages.category.errors.in_use.name,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('name', messages.category.errors.in_use.name),
         }
       }
 
@@ -128,8 +130,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.category.errors.in_use.icon,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('icon', messages.category.errors.in_use.icon),
         }
       }
 
@@ -147,7 +150,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: messages.category.errors.service.create,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.category.errors.service.create),
         }
       }
 
@@ -167,8 +171,8 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.category.success.create,
-        statusCode: 200,
         data
       }
 
@@ -177,8 +181,8 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: `${messages.category.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -199,7 +203,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.category.errors.not_found,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('category', messages.category.errors.not_found),
         }
       }
       
@@ -218,8 +223,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            statusCode: 400,
-            message: messages.category.errors.in_use.name,
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('name', messages.category.errors.in_use.name),
           }
         }
       }
@@ -241,7 +247,8 @@ module.exports = {
           return {
             error: true,
             statusCode: 400,
-            message: messages.category.errors.in_use.icon,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('icon', messages.category.errors.in_use.icon),
           }
         }
       }
@@ -263,8 +270,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.category.errors.service.update,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('update', messages.category.errors.service.update),
         }
       }
 
@@ -284,8 +292,8 @@ module.exports = {
 
       return {
         error: false,
-        message: messages.category.success.update,
         statusCode: 200,
+        message: messages.category.success.update,
         data
       }
 
@@ -294,8 +302,8 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: `${messages.category.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -336,7 +344,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
+          statusCode: 409,
           message: messages.category.errors.service.delete,
         }
       }
@@ -355,8 +363,8 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: `${messages.category.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

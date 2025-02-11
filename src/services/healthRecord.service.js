@@ -2,6 +2,7 @@ const { HealthRecord, Patient, TeaDegree, Phase, sequelize } = require('@models/
 const logger = require('@config/logger.config');
 const {
   messages,
+  formatErrorMessages
 } = require('@utils/index');
 const {
   createHealthRecordPhase
@@ -31,8 +32,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.teaDegree.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('teaDegree', messages.teaDegree.errors.not_found),
         };
       };
 
@@ -47,8 +49,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.phase.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('phase', messages.phase.errors.not_found),
         };
       };
 
@@ -64,8 +67,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            message: messages.patient.errors.not_found,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
           };
         };
       }
@@ -82,8 +86,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: `${messages.healthRecord.errors.service.create}`,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.healthRecord.errors.service.create),
         }
       }
 
@@ -93,20 +98,22 @@ module.exports = {
         healthRecordId: healthRecordCreated.id,
         phaseId
       }
-      const { error: dataError, message, statusCode } = await createHealthRecordPhase(assignPhaseBody, transaction);
+      const { error: dataError, message, validationErrors, statusCode } = await createHealthRecordPhase(assignPhaseBody, transaction);
 
       if(dataError) {
         await transaction.rollback();
         return {
           error: dataError,
           message,
-          statusCode
+          statusCode,
+          validationErrors
         }
       }
 
       if(transactionRetrieved) {
         return {
           error: false,
+          statusCode: 201,
           message: messages.healthRecord.success.create,
           healthRecordCreated,
         }
@@ -116,6 +123,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 201,
         message: messages.healthRecord.success.create,
         healthRecordCreated,
       }
@@ -125,8 +133,8 @@ module.exports = {
       logger.error(`${messages.healthRecord.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.healthRecord.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }
