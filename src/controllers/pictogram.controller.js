@@ -1,6 +1,7 @@
 const logger = require('@config/logger.config');
 const {
-  messages
+  messages,
+  formatJoiMessages
 } = require('@utils/index');
 const {
   allPictograms,
@@ -30,9 +31,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         ...data
       });
@@ -42,7 +43,7 @@ module.exports = {
       return res.status(500).json({
         error,
         statusCode: 500,
-        message: `${messages.pictogram.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -51,7 +52,12 @@ module.exports = {
     try {
 
       const { error } = idEntry.findOneValidation({ id: req.params.id });
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
       const { error:dataError, statusCode, message, data } = await findPictogram(req.params.id);
       if(dataError) {
@@ -62,9 +68,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -74,7 +80,7 @@ module.exports = {
       return res.status(500).json({
         error,
         statusCode: 500,
-        message: `${messages.pictogram.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -83,20 +89,26 @@ module.exports = {
     try {
       
       const { error } = pictogramEntry.createPictogramValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      const { error:dataError, statusCode, message, data } = await createPictogram(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await createPictogram(req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors	
         });
       };
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -106,7 +118,7 @@ module.exports = {
       return res.status(500).json({
         error,
         statusCode: 500,
-        message: `${messages.pictogram.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -115,20 +127,26 @@ module.exports = {
     try {
       
       const { error } = pictogramEntry.updatePictogramValidation({id: req.params.id, ...req.body});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      const { error:dataError, statusCode, message, data } = await updatePictogram(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updatePictogram(req.params.id,req.body);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message
+          message,
+          validationErrors	
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -138,7 +156,7 @@ module.exports = {
       return res.status(500).json({
         error,
         statusCode: 500,
-        message: `${messages.pictogram.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -147,7 +165,12 @@ module.exports = {
     try {
       
       const { error } = idEntry.findOneValidation({ id: req.params.id });
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
       const { error:dataError, statusCode, message } = await removePictogram(req.params.id);
       if(dataError) {
@@ -158,9 +181,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -169,7 +192,7 @@ module.exports = {
       return res.status(500).json({
         error,
         statusCode: 500,
-        message: `${messages.pictogram.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   }

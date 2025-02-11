@@ -7,6 +7,7 @@ const {
   removeCategory
 } = require('@services/category.service');
 const { categoryEntry, idEntry } = require('@validations/index');
+const { formatJoiMessages } = require('@utils/index');
 const messages = require('@utils/messages.utils');
 
 
@@ -25,9 +26,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -47,8 +48,9 @@ module.exports = {
       const { error } = idEntry.findOneValidation({ id:req.params.id });
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
       const { error:dataError, statusCode, message, data } = await findCategory(req.params.id);
@@ -60,9 +62,9 @@ module.exports = {
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -72,7 +74,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.category.errors.controller}: ${error}`
+        message: messages.generalMessages.server
       });
     }
   },
@@ -81,21 +83,27 @@ module.exports = {
     try {
       
       const { error } = categoryEntry.createCategoryValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      const { error:dataError, statusCode, message, data } = await createCategory(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await createCategory(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       }
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -105,7 +113,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.category.errors.controller}: ${error}`
+        message: messages.generalMessages.server
       });
     }
   },
@@ -114,21 +122,27 @@ module.exports = {
     try {
 
       const { error } = categoryEntry.updateCategoryValidation({id: req.params.id, ...req.body});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 400,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      const { error:dataError, statusCode, message, data } = await updateCategory(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updateCategory(req.params.id,req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -138,7 +152,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.category.errors.controller}: ${error}`
+        message: messages.generalMessages.server
       });
     }
   },
@@ -149,8 +163,9 @@ module.exports = {
       const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
       const { error:dataError, statusCode, message } = await removeCategory(req.params.id);
@@ -162,9 +177,9 @@ module.exports = {
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -173,7 +188,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.category.errors.controller}: ${error}`
+        message: messages.generalMessages.server
       });
     }
   }

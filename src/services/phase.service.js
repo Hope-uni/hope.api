@@ -1,7 +1,7 @@
 const { Phase, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
+const { messages, formatErrorMessages } = require('@utils/index');
 
 
 module.exports = {
@@ -37,7 +37,7 @@ module.exports = {
       return {
         statusCode: 500,
         error: true,
-        message: `${messages.phase.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -55,7 +55,8 @@ module.exports = {
         return {
           statusCode: 404,
           error: true,
-          message: `${messages.phase.errors.not_found}`,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('phase', messages.phase.errors.not_found),
         }
       }
       
@@ -74,9 +75,10 @@ module.exports = {
         if(nameExist) {
           await transaction.rollback();
           return {
-            statusCode: 400,
+            statusCode: 409,
             error: true,
-            message: `${messages.phase.errors.in_use.name}`,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('name', messages.phase.errors.in_use.name),
           }
         }
       };
@@ -97,9 +99,10 @@ module.exports = {
       if(!udpatePhaseResponse) {
         await transaction.rollback();
         return {
-          statusCode: 400,
+          statusCode: 409,
           error: true,
-          message: `${messages.phase.errors.service.update}`,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('update', messages.phase.errors.service.update),
         }
       };
 
@@ -119,6 +122,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: `${messages.phase.success.update}`,
         data,
       }
@@ -129,7 +133,7 @@ module.exports = {
       return {
         statusCode: 500,
         error: true,
-        message: `${messages.phase.errors.service.base}: ${error}`,
+        message: messages.generalMessages.server,
       }
     }
   }

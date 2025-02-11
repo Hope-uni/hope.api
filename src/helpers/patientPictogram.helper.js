@@ -503,8 +503,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -972,8 +972,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

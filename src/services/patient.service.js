@@ -352,8 +352,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
+          message: messages.patient.errors.not_found,
         }
       };
 
@@ -363,8 +362,7 @@ module.exports = {
         return {
           error: progressError,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('patient', progressMessage),
+          message: progressMessage,
         }
       }
 
@@ -528,12 +526,12 @@ module.exports = {
           healthRecordId: healthRecordCreated.id
         }
 
-        const { error: observationError, message: observationMessage, validationErrors: observationValidationErrors } = await createObservation( observationPayload,transaction);
+        const { error: observationError, message: observationMessage, validationErrors: observationValidationErrors, statusCode: observationStatusCode } = await createObservation( observationPayload,transaction);
 
         if(observationError) {
           return {
             error: observationError,
-            statusCode: 409,
+            statusCode: observationStatusCode,
             message: observationMessage,
             validationErrors: observationValidationErrors,
           }

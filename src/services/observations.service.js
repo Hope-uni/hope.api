@@ -1,6 +1,6 @@
 const { Observation, User, HealthRecord, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
+const { messages, formatErrorMessages } = require('@utils/index');
 
 module.exports = {
 
@@ -19,7 +19,8 @@ module.exports = {
           return {
             error: true,
             statusCode: 404,
-            message: messages.user.errors.not_found,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
           }
         }
         // Validate if healthRecord exist
@@ -29,7 +30,8 @@ module.exports = {
           return {
             error: true,
             statusCode: 404,
-            message: messages.healthRecord.errors.not_found,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('healthRecord', messages.healthRecord.errors.not_found),
           }
         }
       }
@@ -45,14 +47,16 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.observations.errors.service.create,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.observations.errors.service.create),
         }
       }
 
       if(transactionRetrieved) {
         return {
           error: false,
+          statusCode: 200,
           message: messages.observations.success.create,
           data
         }
@@ -63,6 +67,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.observations.success.create,
         data
       };
@@ -71,8 +76,8 @@ module.exports = {
       logger.error(`${messages.observations.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.observations.errors.service.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }

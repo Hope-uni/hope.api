@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, dataStructure } = require('@utils/index');
+const { messages, dataStructure, formatErrorMessages } = require('@utils/index');
 const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers/patientPictogram.helper');
 
 
@@ -20,8 +20,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -45,7 +45,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.patient.errors.not_found,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         }
       }
 
@@ -64,7 +65,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.pictogram.errors.not_found,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('pictogram', messages.pictogram.errors.not_found),
         }
       }
 
@@ -79,8 +81,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.pictogram.errors.in_use.name,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('name', messages.pictogram.errors.in_use.name),
         }
       }
 
@@ -100,7 +103,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 400,
-          message: messages.pictogram.errors.service.create,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.pictogram.errors.service.create),
         }
       }
 
@@ -142,8 +146,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -170,7 +174,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.patient.errors.not_found,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         }
       }
 
@@ -187,7 +192,8 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.pictogram.errors.service.pictogram_not_match,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('pictogram', messages.pictogram.errors.service.pictogram_not_match),
         }
       }
 
@@ -207,8 +213,9 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            statusCode: 400,
-            message: messages.pictogram.errors.in_use.name,
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('name', messages.pictogram.errors.in_use.name),
           }
         }
       }
@@ -233,8 +240,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 400,
-          message: messages.pictogram.errors.service.update,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('update', messages.pictogram.errors.service.update),
         }
       }
 
@@ -275,8 +283,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -336,8 +344,8 @@ module.exports = {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,
-        message: `${messages.pictogram.errors.service.base2}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }
