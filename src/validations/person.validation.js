@@ -44,7 +44,9 @@ module.exports = {
         'any.only': messages.person.fields.gender.only,
         'string.base': messages.person.fields.gender.base
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+        'object.unknown': messages.generalMessages.unknown_object,
+      });
     return schema.validate(data);
   },
 
@@ -81,7 +83,9 @@ module.exports = {
         'any.only': messages.person.fields.gender.only,
         'string.base': messages.person.fields.gender.base
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

@@ -29,7 +29,9 @@ module.exports = {
         'array.base': messages.role.fields.permissions.base,
         'array.unique': messages.user.fields.roles.unique,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -43,7 +45,9 @@ module.exports = {
         'string.email': messages.user.fields.email.format,
         'string.empty': messages.user.fields.email.empty,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -59,7 +63,9 @@ module.exports = {
         'number.base': messages.role.fields.id.base,
         'number.positive': messages.role.fields.id.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   }
 

@@ -265,8 +265,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('findTherapist', messages.therapist.errors.not_found),
+          message: messages.therapist.errors.not_found,
         }
       };
 
@@ -722,8 +721,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
+          message: messages.therapist.errors.not_found,
         }
       };
 
@@ -735,7 +733,6 @@ module.exports = {
           error: userError,
           statusCode,
           message: messages.therapist.errors.service.delete,
-          validationErrors: formatErrorMessages('delete', messages.therapist.errors.service.delete),
         }
       };
 
@@ -757,7 +754,6 @@ module.exports = {
           error: true,
           statusCode: 409,
           message: messages.therapist.errors.service.delete,
-          validationErrors: formatErrorMessages('delete', messages.therapist.errors.service.delete),
         };
       };
 
@@ -813,8 +809,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
+          message: messages.therapist.errors.not_found,
         };
       };
 
@@ -831,8 +826,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('patient', messages.patient.errors.service.no_registered),
+          message: messages.patient.errors.service.no_registered,
         }
       }
 
@@ -844,8 +838,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('patient', messages.therapist.errors.service.patient_to_assign),
+          message: messages.therapist.errors.service.patient_to_assign
         }
       }
 
@@ -858,8 +851,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.service.therapist_assigned),
+          message: messages.therapist.errors.service.therapist_assigned,
           data: therapistAssigned,
         }
       }
@@ -886,8 +878,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('therapist', messages.therapist.errors.service.therapist_not_assigned),
+            message: messages.therapist.errors.service.therapist_not_assigned,
           };
         }
       }));

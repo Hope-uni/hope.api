@@ -31,7 +31,9 @@ module.exports = {
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
         'string.base': messages.tutor.fields.phoneNumber.base
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
   
@@ -65,7 +67,9 @@ module.exports = {
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
         'string.base': messages.tutor.fields.phoneNumber.base
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

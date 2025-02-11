@@ -16,7 +16,9 @@ module.exports = {
         'string.base': messages.auth.fields.password.base,
         'string.empty': messages.auth.fields.password.empty
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -28,7 +30,9 @@ module.exports = {
         'string.base': messages.auth.fields.emailUsername.base,
         'string.empty': messages.auth.fields.emailUsername.empty,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -49,7 +53,9 @@ module.exports = {
           'any.only': messages.auth.fields.password.not_match,
           'any.required': messages.auth.fields.confirmPassword.required,
         })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -75,7 +81,9 @@ module.exports = {
           'any.only': messages.auth.fields.password.not_match,
           'any.required': messages.auth.fields.confirmPassword.required,
         })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   }
 

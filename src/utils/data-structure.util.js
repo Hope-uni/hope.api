@@ -84,8 +84,10 @@ module.exports = {
 
     if(isAdmin) {
       element = {
+        id: data.dataValues.id,
         username: data.dataValues.username,
-        email: data.dataValues.email
+        email: data.dataValues.email,
+        roles: rolesData
       }
     } else {
       element = {

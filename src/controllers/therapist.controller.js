@@ -1,6 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages, userPersonEntries } = require('@utils/index');
-const { formatJoiMessages, formatErrorMessages } = require('@utils/formatErrorMessages.util');
+const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
 const { therapistEntry, idEntry } = require('@validations/index');
 const {
   all,
@@ -9,21 +8,20 @@ const {
   update,
   removeTherapist,
   assignPatient,
-} = require('../services/therapist.service');
+} = require('@services/therapist.service');
 
 module.exports = {
 
   async all(req,res) {
     try {
       
-      const { error, message, statusCode, validationErrors, ...resData } = await all(req.query);
+      const { error, message, statusCode, ...resData } = await all(req.query);
 
       if(error) {
         return res.status(statusCode).json({
           error,
           statusCode,
           message,
-          formatErrorMessages,
         });
       };
 
@@ -52,19 +50,16 @@ module.exports = {
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
-        message: `BAD_REQUEST`, 
-        validationErrors: {
-          something: error.details[0].message
-        }
+        message: messages.generalMessages.bad_request, 
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id);
+      const { error:dataError, statusCode, message, data } = await findOne(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message,
-          validationErrors,
+          message
         });
       };
 
@@ -222,13 +217,12 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors } = await removeTherapist(req.params.id);
+      const { error:dataError, statusCode, message } = await removeTherapist(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
           message,
-          validationErrors,
         });
       };
       
@@ -259,14 +253,13 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, message, statusCode, validationErrors, data } = await assignPatient(req.body);
+      const { error:dataError, message, statusCode, data } = await assignPatient(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
           message,
-          validationErrors,
           data: data ?? ''
         });
       };

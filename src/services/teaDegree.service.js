@@ -23,6 +23,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.teaDegree.success.all,
         data,
       }
@@ -30,8 +31,8 @@ module.exports = {
       logger.error(`${messages.teaDegree.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.teaDegree.errors.service.base}: ${error}`,
         statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   }
