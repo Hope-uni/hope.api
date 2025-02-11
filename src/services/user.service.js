@@ -357,7 +357,7 @@ module.exports = {
         return {
           error: false,
           message: messages.user.success.create,
-          data: dataStructure.findUserDataStructure(newData)
+          data: await dataStructure.findUserDataStructure(newData)
         };
       };
 
@@ -600,7 +600,7 @@ module.exports = {
           error: false,
           statusCode: 200,
           message: messages.user.success.update,
-          data: dataStructure.findUserDataStructure(newData)
+          data: await dataStructure.findUserDataStructure(newData)
         };
       }
 
