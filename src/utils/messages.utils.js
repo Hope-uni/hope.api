@@ -8,6 +8,7 @@ const messages = {
     forbidden: 'FORBIDDEN',
     not_found: 'NOT_FOUND',
     conflict: 'CONFLICT',
+    unknown_object: 'Esta propiedad no está permitida',
   },
 
   // Auth Module

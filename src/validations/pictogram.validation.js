@@ -23,7 +23,9 @@ module.exports = {
         'number.base': messages.category.fields.id.base,
         'number.positive': messages.category.fields.id.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -47,7 +49,9 @@ module.exports = {
         'number.base': messages.category.fields.id.base,
         'number.positive': messages.category.fields.id.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

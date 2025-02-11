@@ -235,8 +235,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('findTutor', messages.tutor.errors.not_found),
+          message: messages.tutor.errors.not_found,
         }
       };
 
@@ -699,20 +698,18 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
+          message: messages.tutor.errors.not_found
         }
       };
 
       // remove User
-      const { error:userError, statusCode, validationErrors } = await deleteUser(tutorExist.userId, transaction);
+      const { error:userError, statusCode } = await deleteUser(tutorExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
         return {
           error: userError,
           statusCode,
           message: messages.tutor.errors.service.delete,
-          validationErrors,
         }
       };
 
@@ -733,8 +730,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('delete', messages.tutor.errors.service.delete),
+          message: messages.tutor.errors.service.delete,
         };
       };
 

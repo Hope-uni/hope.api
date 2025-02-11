@@ -17,7 +17,9 @@ module.exports = {
         'string.base': messages.category.fields.icon.base,
         'string.empty': messages.category.fields.icon.empty,
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -37,7 +39,9 @@ module.exports = {
         'string.base': messages.category.fields.icon.base,
         'string.empty': messages.category.fields.icon.empty,
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

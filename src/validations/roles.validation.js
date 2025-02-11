@@ -17,8 +17,8 @@ module.exports = {
         'number.base': messages.role.fields.permissions.number,
         'number.positive': messages.role.fields.permissions.positive,
       }),
-    }).unknown(false).messages({
-      'object.unknown': 'Una de las claves proporcionadas no está permitida',
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
     });
     return schema.validate(data);
   },
@@ -30,7 +30,9 @@ module.exports = {
         'number.base': messages.role.fields.id.base,
         'number.positive': messages.role.fields.id.positive,
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -50,7 +52,9 @@ module.exports = {
         'number.base': messages.role.fields.permissions.number,
         'number.positive': messages.role.fields.permissions.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

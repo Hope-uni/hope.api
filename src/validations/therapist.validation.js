@@ -25,7 +25,9 @@ module.exports = {
         'string.base': messages.therapist.fields.phoneNumber.base,
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
       }),
-    }).unknown(false).options({ abortEarly: false });
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
   
@@ -53,7 +55,9 @@ module.exports = {
         'string.base': messages.therapist.fields.phoneNumber.base,
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern
       }),
-    }).unknown(false).options({ abortEarly: false });
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -72,7 +76,9 @@ module.exports = {
         'array.min': messages.therapist.fields.patients.array_min,
         'array.base': messages.therapist.fields.patients.array,
       }),
-    }).unknown(false).options({ abortEarly: false });
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   }
 

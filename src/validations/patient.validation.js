@@ -28,7 +28,9 @@ module.exports = {
       observations: joi.string().empty(' ').messages({
         'string.base': messages.patient.fields.observations.base,
       })
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -47,7 +49,9 @@ module.exports = {
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 

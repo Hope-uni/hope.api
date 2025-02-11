@@ -24,7 +24,9 @@ module.exports = {
         'number.positive': messages.phase.fields.scoreActivities.positive,
         'number.max': messages.phase.fields.scoreActivities.max,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   }
 

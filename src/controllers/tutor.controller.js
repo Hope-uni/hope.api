@@ -58,13 +58,12 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id);
+      const { error:dataError, statusCode, message, data } = await findOne(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message,
-          validationErrors,
+          message
         });
       };
 
@@ -219,13 +218,12 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors } = await removeTutor(req.params.id);
+      const { error:dataError, statusCode, message } = await removeTutor(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
           message,
-          validationErrors,
         });
       };
 

@@ -19,9 +19,9 @@ module.exports = {
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data,
       });
@@ -30,8 +30,8 @@ module.exports = {
       logger.error(`${messages.teaDegree.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
-        message: `${messages.teaDegree.errors.controller}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       })
     }
   }

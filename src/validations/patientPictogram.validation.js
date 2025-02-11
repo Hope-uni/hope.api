@@ -27,7 +27,9 @@ module.exports = {
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -51,7 +53,9 @@ module.exports = {
         'string.base': messages.pictogram.fields.image.base,
         'string.empty': messages.pictogram.fields.image.empty,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   },
 
@@ -69,7 +73,9 @@ module.exports = {
         'string.base': messages.pictogram.fields.name.base,
         'string.empty': messages.pictogram.fields.name.empty,
       }),
-    }).unknown(false);
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
     return schema.validate(data);
   }
 
