@@ -1,5 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
+const { messages, formatJoiMessages } = require('@utils/index');
 const {
   login,
   forgotPassword,
@@ -23,23 +23,24 @@ module.exports = {
       const { error } = authEntry.loginValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });	
 
-      const { error:dataError, statusCode, message , data } = await login(req.body);
+      const { error:dataError, statusCode, message, data } = await login(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -49,7 +50,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -62,23 +63,24 @@ module.exports = {
       const { error } = authEntry.forgotPasswordValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message } = await forgotPassword(req.body);
+      const { error:dataError, statusCode, message} = await forgotPassword(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -87,7 +89,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -100,23 +102,25 @@ module.exports = {
       const { error } = authEntry.resetPasswordValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
-        statusCode: 400,
-        message: error.details[0].message,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, message, statusCode } = await resetPassword(req.body,req.payload);
+      const { error:dataError, message, statusCode, validationErrors } = await resetPassword(req.body,req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
     } catch (error) {
@@ -124,7 +128,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -133,22 +137,28 @@ module.exports = {
     try {
       
       const { error } = authEntry.changePasswordValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
 
-      const { error:dataError, message, statusCode } = await changePassword(req.body, req.payload);
+      const { error:dataError, message, statusCode, validationErrors } = await changePassword(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -157,7 +167,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -166,24 +176,43 @@ module.exports = {
     try {
 
       const { error: idError } = idEntry.findOneValidation({id:req.params.id});
-      if(idError) return res.status(400).json({error: idError.details[0].message});
 
       const { error } = authEntry.changePasswordValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
 
-      const { error:dataError, message, statusCode } = await changePasswordPatient(req.body, req.params.id);
+      if(error || idError) {
+        const idErrors = idError ? idError.details : [];
+        const changePasswordErrors = error ? error.details : [];
+
+        const joinErrors = {
+          details: [
+            ...idErrors,
+            ...changePasswordErrors
+          ]
+        }
+
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(joinErrors),
+        });
+
+      }
+
+      const { error:dataError, message, statusCode, validationErrors } = await changePasswordPatient(req.body, req.params.id);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -192,7 +221,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -211,9 +240,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -222,7 +251,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -241,7 +270,7 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
         statusCode,
         message,
@@ -253,7 +282,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -270,9 +299,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message
       });
 
@@ -281,7 +310,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.auth.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   }

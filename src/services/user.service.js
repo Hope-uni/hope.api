@@ -58,8 +58,9 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 200,
           message: messages.user.success.all,
-          data: dataStructure.userDataStructure(data),
+          data: await dataStructure.userDataStructure(data),
         }
       }
 
@@ -98,12 +99,13 @@ module.exports = {
       });
 
       // Structuring data
-      data.rows = dataStructure.userDataStructure(data.rows);
+      data.rows = await dataStructure.userDataStructure(data.rows);
 
       const dataResponse = getPageData(data, query.page, limit);
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.user.success.all,
         ...dataResponse
       };
@@ -135,8 +137,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+          message: messages.user.errors.not_found,
         }
       }
 
@@ -170,8 +171,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+          message: messages.user.errors.not_found,
         }
       };
 
@@ -179,7 +179,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.user.success.found,
-        data: dataStructure.findUserDataStructure(data),
+        data: await dataStructure.findUserDataStructure(data),
       };
 
     } catch (error) {
@@ -721,8 +721,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 404,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+            message: messages.user.errors.not_found,
           }
         };
 
@@ -742,9 +741,8 @@ module.exports = {
           await transaction.rollback();
           return {
             error: true,
-            statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('delete', messages.user.errors.service.delete), 
+            statusCode: 400,
+            message: messages.user.errors.service.delete, 
           };
         };
 
@@ -782,8 +780,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+          message: messages.user.errors.not_found,
         }
       };
 
@@ -802,9 +799,8 @@ module.exports = {
       if (!data) {
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('delete', messages.user.errors.service.delete),
+          statusCode: 400,
+          message: messages.user.errors.service.delete,
         };
       };
 
@@ -848,17 +844,15 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.rol_forbidden),
+          message: messages.user.errors.rol_forbidden,
         }
       }
 
       if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 4 || parseInt(roleId) === 5) {
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.role.errors.forbidden),
+          statusCode: 400,
+          message: messages.role.errors.forbidden,
         }
       }
 
@@ -914,8 +908,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+          message: messages.user.errors.not_found,
         }
       }
 
@@ -930,9 +923,8 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.role.errors.in_use.rol),
+          statusCode: 400,
+          message: messages.role.errors.in_use.rol,
         }
       }
 
@@ -944,9 +936,8 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.service.add_role),
+          statusCode: 400,
+          message: messages.user.errors.service.add_role,
         }
       }
 
@@ -992,18 +983,16 @@ module.exports = {
       if(parseInt(userId) === 1) {
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.service.delete_role_user),
+          statusCode: 400,
+          message: messages.user.errors.service.delete_role_user,
         }
       }
 
       if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 3 || parseInt(roleId) === 4) {
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.role.errors.unsign_rol),
+          statusCode: 400,
+          message: messages.role.errors.unsign_rol,
         }
       }
 
@@ -1054,8 +1043,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+          message: messages.user.errors.not_found,
         }
       }
 
@@ -1070,9 +1058,8 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.role.errors.unsign_rol),
+          statusCode: 400,
+          message: messages.role.errors.unsign_rol,
         }
       }
       
@@ -1088,8 +1075,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', `${messages.role.errors.not_found} para este usuario`),
+          message: `${messages.role.errors.not_found} para este usuario`,
         }
       }
 

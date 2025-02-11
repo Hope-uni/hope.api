@@ -12,7 +12,7 @@ const {
   idEntry,
   userEntry
 } = require('@validations/index');
-const messages = require('@utils/messages.utils');
+const { messages, formatJoiMessages } = require('@utils/index');
 
 
 module.exports = {
@@ -32,9 +32,9 @@ module.exports = {
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error,
-        statusCode: 200,
+        statusCode,
         message,
         ...resData
       });
@@ -44,7 +44,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -67,9 +67,9 @@ module.exports = {
         })
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error:dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -79,7 +79,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -91,19 +91,20 @@ module.exports = {
       // Joi Validation
       const { error } = userEntry.createUserValidation(req.body);
       if(error) return res.status(400).json({ error: error.details[0].message });
-      const { error:dataError, statusCode, message, data } = await createUser(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await createUser(req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         })
       };
 
-      return res.status(201).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 201,
+        statusCode,
         message,
         data
       });
@@ -113,7 +114,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -125,21 +126,27 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = userEntry.updateUserValidation({ ...req.body });
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
       
-      const { error:dataError, statusCode, message, data} = await updateUser(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data} = await updateUser(req.params.id,req.body);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -149,7 +156,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -160,20 +167,25 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = idEntry.findOneValidation({id: req.params.id});
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      const { error:dataError, statusCode, message} = await deleteUser(req.params.id);
+      const { error:dataError, statusCode, message } = await deleteUser(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
         });
       };
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: false,
-        statusCode: 200,
+        statusCode,
         message,
       });
     } catch (error) {
@@ -181,7 +193,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -192,20 +204,25 @@ module.exports = {
     try {
 
       const { error } = userEntry.roleUserValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
       const { error:dataError, statusCode, message, data } = await addRoleUser(req.body.userId,req.body.roleId);
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
         data
       });
@@ -215,7 +232,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   },
@@ -224,20 +241,25 @@ module.exports = {
     try {
       
       const { error } = userEntry.roleUserValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({ 
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
       const { error:dataError, statusCode, message } = await removeRoleUser(req.body.userId,req.body.roleId);
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
         });
       }
 
-      return res.status(200).json({
+      return res.status(statusCode).json({
         error: dataError,
-        statusCode: 200,
+        statusCode,
         message,
       });
     } catch (error) {
@@ -245,7 +267,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: `${messages.user.errors.controller}: ${error}`,
+        message: messages.generalMessages.server,
       });
     }
   }

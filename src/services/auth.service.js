@@ -7,8 +7,7 @@ const logger = require('@config/logger.config');
 const { secretKey, domain, userEmail } = require('@config/variables.config');
 const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const { jwtAccessExpiration } = require('@config/variables.config');
-const { messages } = require('@utils/index');
-const { dataStructure } = require('@utils/index');
+const { messages, formatErrorMessages, dataStructure } = require('@utils/index');
 
 module.exports = {
 
@@ -173,6 +172,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.login,
         data: {
           accessToken,
@@ -184,8 +184,8 @@ module.exports = {
       logger.error(` ${messages.auth.errors.service.login.base}: ${error}`);
       return {
         error: true,
-        message: ` ${messages.auth.errors.service.login.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -275,14 +275,15 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.forgot_password
       };
     } catch (error) {
       logger.error(`${messages.auth.errors.service.forgot_password.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.auth.errors.service.forgot_password.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -321,13 +322,15 @@ module.exports = {
       if(!userUpdate) {
         return {
           error: true,
-          message: messages.auth.errors.service.reset_password.update_password,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('reset_password', messages.auth.errors.service.reset_password.update_password),
         }
       };
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.reset_password
       }
 
@@ -335,8 +338,8 @@ module.exports = {
       logger.error(`${messages.auth.errors.service.reset_password.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.auth.errors.service.reset_password.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -406,6 +409,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.change_password
       }
 
@@ -415,8 +419,8 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: `${messages.auth.errors.service.change_password.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -453,8 +457,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.patient.errors.not_found,
-          statusCode: 404
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('change_password', messages.patient.errors.not_found),
         }
       }
 
@@ -490,8 +495,9 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.auth.errors.service.change_password.update_password,
-          statusCode: 400
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('change_password', messages.auth.errors.service.change_password.update_password),
         }
       }
 
@@ -500,6 +506,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.change_password
       }
     } catch (error) {
@@ -507,8 +514,8 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: `${messages.auth.errors.service.change_password.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -581,6 +588,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.me,
         data: await dataStructure.meDataStructure(data),
       }
@@ -589,8 +597,8 @@ module.exports = {
       logger.error(`${messages.auth.errors.service.me.base}: ${error}`);
       return {
         error: true,
-        message: `${messages.auth.errors.service.me.base}: ${error}`,
-        statusCode: 500
+        statusCode: 500,
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -704,6 +712,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message: messages.auth.success.refresh_auth,
         data:{
             accessToken: newAccessToken,
@@ -808,6 +817,7 @@ module.exports = {
 
       return {
         error: false,
+        statusCode: 200,
         message:  messages.auth.success.refresh_token
       }
 
