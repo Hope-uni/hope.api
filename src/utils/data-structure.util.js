@@ -368,13 +368,27 @@ module.exports = {
 
       const childAge = dates.getAge(iterator);
 
+      // phase
+      const getPhase = Object.keys(iterator.HealthRecord).includes('Phase') ? {
+        id: iterator.HealthRecord.Phase.id,
+        name: iterator.HealthRecord.Phase.name,
+        description: iterator.HealthRecord.Phase.description,
+      } : {};
+
+      // TeaDegree
+      const getTeaDegree = Object.keys(iterator.HealthRecord).includes('TeaDegree') ? {
+        id: iterator.HealthRecord.TeaDegree.id,
+        name: iterator.HealthRecord.TeaDegree.name,
+        description: iterator.HealthRecord.TeaDegree.description,
+      } : {};
+
       const element = {
         id: iterator.id,
         userId: iterator.userId,
         fullName: `${iterator.Person.firstName} ${iterator.Person.secondName ? iterator.Person.secondName : ''} ${iterator.Person.surname} ${iterator.Person.secondSurname ? iterator.Person.secondSurname : ''}`,
         age: childAge.Person.dataValues.age,
-        teaDegree: iterator.HealthRecord?.TeaDegree.name ?? '',
-        phase: iterator.HealthRecord?.Phase.name ?? '',
+        teaDegree: getTeaDegree,
+        phase: getPhase,
         image: iterator.Person.imageProfile,
         // Cantidad de logros
       }
@@ -418,6 +432,20 @@ module.exports = {
       }
     }) : [];
 
+    // phase 
+    const getPhase = Object.keys(data.HealthRecord).includes('Phase') ? {
+      id: data.HealthRecord.Phase.id,
+      name: data.HealthRecord.Phase.name,
+      description: data.HealthRecord.Phase.description,
+    } : {};
+
+    // TeaDegree
+    const getTeaDegree = Object.keys(data.HealthRecord).includes('TeaDegree') ? {
+      id: data.HealthRecord.TeaDegree.id,
+      name: data.HealthRecord.TeaDegree.name,
+      description: data.HealthRecord.TeaDegree.description,
+    } : {};
+
     return {
       id: data.id,
       userId: data.userId,
@@ -430,8 +458,8 @@ module.exports = {
       gender: data.Person.gender,
       age: childAge.Person.dataValues.age,
       username: data.User.username,
-      teaDegree: data.HealthRecord.TeaDegree.name ?? '',
-      currentPhase: data.HealthRecord.Phase.name ?? '',
+      teaDegree: getTeaDegree,
+      currentPhase: getPhase,
       phaseProgress: data.phaseProgress,
       email: data.User.email,
       birthday: data.Person.birthday,
