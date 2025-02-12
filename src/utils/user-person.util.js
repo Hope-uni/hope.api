@@ -62,7 +62,7 @@ module.exports = {
           error: true,
           statusCode: 409,
           message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
+          validationErrors: formatErrorMessages('Person', messages.person.errors.service.create),
         };
       };
 

@@ -1,4 +1,3 @@
-
 const { Phase, Patient, HealthRecord, TeaDegree, Observation } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages } = require('@utils/index');
@@ -72,9 +71,11 @@ module.exports = {
       let phaseIndex = 0;
       let phaseProgress = 0;
 
-      phaseIndex = data.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
+      if(patientData.HealthRecord !== null && patientData.HealthRecord.Phase !== null) {
+        phaseIndex = data.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
 
-      phaseProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2);
+        phaseProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2);
+      }
 
       return {
         error: false,

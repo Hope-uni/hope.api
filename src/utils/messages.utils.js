@@ -1,4 +1,3 @@
-
 const messages = {
   generalMessages: {
     base: `Hubo un problema con los datos ingresados. Verifique los datos e intente nuevamente`,
@@ -406,7 +405,7 @@ const messages = {
     errors: {
       service: {
         update: `La entidad persona que desea modificar no esta activa o no existe en el sistema`,
-        create: `Hubo un error al intentar crear el perfil de personal`,
+        create: `Hubo un error al intentar crear el perfil de la persona`,
       },
       not_found: `Persona no encontrada`,
     }

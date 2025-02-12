@@ -369,14 +369,14 @@ module.exports = {
       const childAge = dates.getAge(iterator);
 
       // phase
-      const getPhase = Object.keys(iterator.HealthRecord).includes('Phase') ? {
+      const getPhase = Object.keys(iterator).includes('HealthRecord') && iterator.HealthRecord !== null ? {
         id: iterator.HealthRecord.Phase.id,
         name: iterator.HealthRecord.Phase.name,
         description: iterator.HealthRecord.Phase.description,
       } : {};
 
       // TeaDegree
-      const getTeaDegree = Object.keys(iterator.HealthRecord).includes('TeaDegree') ? {
+      const getTeaDegree = Object.keys(iterator).includes('HealthRecord') && iterator.HealthRecord !== null ? {
         id: iterator.HealthRecord.TeaDegree.id,
         name: iterator.HealthRecord.TeaDegree.name,
         description: iterator.HealthRecord.TeaDegree.description,
@@ -424,7 +424,8 @@ module.exports = {
     }
 
    // Get the observations
-    const observationsGotit = Object.keys(data.HealthRecord).includes('Observations') ? data.HealthRecord.Observations.map((item) => {
+    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
+    ? data.HealthRecord.Observations.map((item) => {
       return {
         id: item.id,
         description: item.description,
@@ -433,14 +434,14 @@ module.exports = {
     }) : [];
 
     // phase 
-    const getPhase = Object.keys(data.HealthRecord).includes('Phase') ? {
+    const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.Phase.id,
       name: data.HealthRecord.Phase.name,
       description: data.HealthRecord.Phase.description,
     } : {};
 
     // TeaDegree
-    const getTeaDegree = Object.keys(data.HealthRecord).includes('TeaDegree') ? {
+    const getTeaDegree = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.TeaDegree.id,
       name: data.HealthRecord.TeaDegree.name,
       description: data.HealthRecord.TeaDegree.description,
