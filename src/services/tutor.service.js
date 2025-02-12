@@ -95,7 +95,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status', 'personId','userId']
+          exclude: ['createdAt','updatedAt','status', 'personId']
         },
         include: [
           {
