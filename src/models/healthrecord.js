@@ -1,4 +1,3 @@
-
 const {
   Model
 } = require('sequelize');
@@ -35,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
 
     HealthRecord.belongsTo(models.Phase, {
       foreignKey: 'phaseId',
+    });
+
+    HealthRecord.hasMany(models.AchievementsHealthRecord, {
+      foreignKey: 'healthRecordId',
     });
 
   }
