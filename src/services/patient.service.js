@@ -1,4 +1,3 @@
-
 const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');

@@ -348,14 +348,14 @@ module.exports = {
       resBody.roles = [3];
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message, data  } = await userPerson.createUserPerson(resBody,transaction);
+      const { error:userPersonError, statusCode, message, validationErrors, data  } = await userPerson.createUserPerson(resBody,transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
           message,
           statusCode,
           error: userPersonError,
-          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
+          validationErrors,
         };
       };
 
