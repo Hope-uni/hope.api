@@ -429,7 +429,8 @@ module.exports = {
       return {
         id: item.id,
         description: item.description,
-        userId: item.userId,
+        username: item.User.username,
+        createdAt: item.createdAt,
       }
     }) : [];
 
@@ -606,6 +607,65 @@ module.exports = {
         name: data.Pictogram.Category.name,
       }
     }
+  },
+
+  /*
+    * Activity Structure
+  */
+
+
+  activityDataStructure(data) {
+    // something here
+    const newData = [];
+
+    data.forEach((item) => {
+        newData.push({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          satisfactoryPoints: item.satisfactoryPoints,
+          phase: {
+            id: item.Phase.id,
+            name: item.Phase.name,
+            description: item.Phase.description,
+          },
+          assignments: item.PatientActivities !== null ?  item.PatientActivities.map((p) => {
+            return {
+              id: p.Patient.id,
+            }
+          }): []
+        })
+    });
+
+    return newData;
+  },
+
+
+  findActivityDataStructure(data) {
+
+    const newData = {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      satisfactoryPoints: data.satisfactoryPoints,
+      phase: {
+        id: data.Phase.id,
+        name: data.Phase.name,
+        description: data.Phase.description,
+      },
+      assignments: data.PatientActivities !== null ?  data.PatientActivities.map((p) => {
+        return {
+          id: p.Patient.id,
+        }
+      }): [],
+      activitySolution: {
+        pictogramsSolution: data.dataValues.pictograms,
+        textSolution: data.pictogramSentence
+      }
+    };
+
+    return newData;
+
   }
 
 

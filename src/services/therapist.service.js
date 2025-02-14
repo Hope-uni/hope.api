@@ -804,7 +804,8 @@ module.exports = {
           }
         ]
       });
-      if(!therapistExist) {
+
+      if(!therapistExist || therapistExist.User.UserRoles.length === 0) {
         await transaction.rollback();
         return {
           error: true,
@@ -844,7 +845,7 @@ module.exports = {
 
 
       // validate if therapist already assigned
-      const therapistAssigned = patientsExist.filter(item => item.therapistId !== null);
+      const therapistAssigned = patientsExist.every(item => item.therapistId !== null);
 
       if(therapistAssigned)  {
         await transaction.rollback();
@@ -852,7 +853,6 @@ module.exports = {
           error: true,
           statusCode: 409,
           message: messages.therapist.errors.service.therapist_assigned,
-          data: therapistAssigned,
         }
       }
 

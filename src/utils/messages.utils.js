@@ -30,14 +30,15 @@ const messages = {
         base: `Contraseña debe ser un texto válido`,
         empty: `Contraseña no debe estar vacía`,
         pattern: `Contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
-        not_match: `Contraseñas no coinciden`
+        not_match: `Contraseñas no coinciden`,
+        min: `Contraseña debe tener al menos 8 caracteres`,
       },
       newPassword: {
         required: `Nueva contraseña es requerida`,
         base: `Nueva contraseña debe ser un texto válido`,
         empty: `Nueva contraseña no debe estar vacía`,
         pattern: `Nueva contraseña debería tener entre 8 y 30 carácteres además de contener letras y números`,
-        not_match: `Contraseñas no coinciden`
+        not_match: `Contraseñas no coinciden`,
       },
       confirmPassword: {
         required: 'Confirmación de Contraseña es requerida' ,
@@ -259,7 +260,9 @@ const messages = {
       username: {
         required: `Nombre de usuario es requerido`,
         base: `Nombre de usuario debe ser un texto válido`,
-        empty: `Nombre de usuario no debe estar vacío`
+        empty: `Nombre de usuario no debe estar vacío`,
+        min: `El nombre de usuario debe tener como mínimo 6 y como máximo 16 caracteres`,
+        max: `El nombre de usuario debe tener como mínimo 6 y como máximo 16 caracteres`
       },
       email: {
         required: `Correo es requerido`,
@@ -405,7 +408,7 @@ const messages = {
     errors: {
       service: {
         update: `La entidad persona que desea modificar no esta activa o no existe en el sistema`,
-        create: `Hubo un error al intentar crear el perfil de la persona`,
+        create: `Hubo un error al intentar crear el perfil de personal`,
       },
       not_found: `Persona no encontrada`,
     }
@@ -483,7 +486,8 @@ const messages = {
         create: `Pictograma no creado`,
         update: `Pictograma no actualizado`,
         delete: `Pictograma no fue eliminado`,
-        pictogram_not_match: `El pictograma personalizado que intenta modificar no pertence al Paciente solicitante`
+        pictogram_not_match: `El pictograma personalizado que intenta modificar no pertence al Paciente solicitante`,
+        all: `Pictogramas no encontrados`,
       },
       not_found: `Pictograma no encontrado`,
       in_use: {
@@ -647,7 +651,76 @@ const messages = {
       create: `Observación creada`,
       update: `Observación actualizada`,
     }
-  }
+  },
+
+
+  activity: {
+    fields: {
+      id: {
+        required: `Identificador de la actividad es requerido`,
+        base: `Identificador de la actividad debe ser un número válido`,
+        positive: `Identificador de la actividad debe ser un número positivo`
+      },
+      name: {
+        required: `Nombre de la actividad es requerido`,
+        base: `Nombre de la actividad debe ser un texto válido`,
+        empty: `Nombre de la actividad no debe estar vacío`,
+        min: `Nombre de la actividad debe tener como mínimo 3 y como máximo 30 caracteres`,
+        max: `Nombre de la actividad debe tener como máximo 30 caracteres`
+      },
+      description: {
+        required: `Descripción de la actividad es requerido`,
+        base: `Descripción de la actividad debe ser un texto válido`,
+        empty: `Descripción de la actividad no debe estar vacío`,
+        min: `Descripción de la actividad debe tener como mínimo 6 y como máximo 255 caracteres`,
+        max: `Descripción de la actividad debe tener como mínimo 6 y como máximo 255 caracteres`
+      },
+      satisfactoryPoints: {
+        required: `Puntuación de satisfacción es requerida`,
+        base: `Puntuación de satisfacción debe ser un número válido`,
+        positive: `Puntuación de satisfacción debe ser un número positivo`,
+        max: `La puntuación de satisfacción debe ser menor o igual a 20`
+      },
+      pictogramSentence: {
+        required: `Sentencia de pictograma es requerida`,
+        base: `Los pictogramas deben ser válidos`,
+        array_min: `La cantidad de pictogramas debe ser mayor o igual a 1`,
+        number: `Los pictogramas deben ser números válidos`,
+        positive: `Los pictogramas deben ser números positivos`,
+        unique: `Los pictogramas deben ser únicos`,
+      },
+      satisfactorAttempts: {
+        required: `La cantidad de intentos satisfactorios es requerida`,
+        base: `La cantidad de intentos satisfactorios debe ser un número válido`,
+        positive: `La cantidad de intentos satisfactorios debe ser un número positivo`,
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de actividades`,
+      service: {
+        base: `Hubo un error en el servicio de actividades`,
+        create: `Actividad no creada`,
+        update: `Actividad no actualizada`,
+        delete: `Actividad no fue eliminada`,
+        all: `Actividades no encontradas`,
+        pictograms: `Los pictogramas seleccionados no son válidos`,
+      },
+      not_found: `Actividad no encontrada`,
+      in_use: {
+        name: `Nombre de actividad ya está en uso`,
+        description: `La descripción de la actividad hace referencia a una actividad ya existente`,
+        activityPatient: `La actividad seleccionada ya fue asignada al paciente`,
+        patientActivityAssigned: `El paciente ya tiene una actividad asignada`,
+      },
+    },
+    success: {
+      all: `Lista de Actividades`,
+      found: `Actividad encontrada`,
+      create: `Actividad creada`,
+      update: `Actividad actualizada`,
+      assigned: `Actividad asignada exitosamente`,
+    }
+  },
 }
 
 module.exports = messages;

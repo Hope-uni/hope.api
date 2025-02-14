@@ -143,7 +143,7 @@ module.exports = {
       }
 
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload);
       if(dataError) {
         return res.status(statusCode).json({  
           error:dataError,

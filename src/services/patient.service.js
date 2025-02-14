@@ -338,8 +338,14 @@ module.exports = {
               {
                 model: Observation,
                 attributes: {
-                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                }
+                  exclude: ['updatedAt', 'status', 'healthRecordId'],
+                },
+                include: [
+                  {
+                    model: User,
+                    attributes: ['username'],
+                  }
+                ]
               }
             ],
           }
@@ -384,7 +390,7 @@ module.exports = {
     }
   },
 
-  async create(body) {
+  async create(body, payload) {
     const transaction = await sequelize.transaction();
     try {
       
@@ -521,7 +527,7 @@ module.exports = {
       if(observations !== '') {
         const observationPayload = {
           description: observations,
-          userId: patientResponse.userId,
+          userId: payload.id,
           healthRecordId: healthRecordCreated.id
         }
 
