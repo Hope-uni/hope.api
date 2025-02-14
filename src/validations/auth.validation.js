@@ -61,11 +61,11 @@ module.exports = {
 
   changePasswordValidation(data) {
     const schema = joi.object().keys({
-      password: joi.string().required().pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
+      password: joi.string().required().min(8).messages({
         'any.required': messages.auth.fields.password.required,
         'string.base': messages.auth.fields.password.base,
         'string.empty': messages.auth.fields.password.empty,
-        'string.pattern.base': messages.auth.fields.password.pattern
+        'string.min': messages.auth.fields.password.min
       }),
       newPassword: joi.string().required().pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
         'any.required': messages.auth.fields.newPassword.required,
