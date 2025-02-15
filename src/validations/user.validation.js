@@ -5,10 +5,12 @@ module.exports = {
 
   createUserValidation(data) {
     const schema = joi.object().keys({
-      username: joi.string().required().messages({
+      username: joi.string().required().min(6).max(16).messages({
         'any.required': messages.user.fields.username.required,
         'string.base': messages.user.fields.username.base,
         'string.empty': messages.user.fields.username.empty,
+        'string.min': messages.user.fields.username.min,
+        'string.max': messages.user.fields.username.max,
       }),
       email: joi.string().email().required().messages({
         'any.required': messages.user.fields.email.required,

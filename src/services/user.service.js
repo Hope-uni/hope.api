@@ -356,6 +356,7 @@ module.exports = {
 
         return {
           error: false,
+          statusCode: 201,
           message: messages.user.success.create,
           data: await dataStructure.findUserDataStructure(newData)
         };

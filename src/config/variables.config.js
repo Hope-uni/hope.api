@@ -33,4 +33,6 @@ module.exports = {
 
   // Roles
   isAdmin: process.env.IS_ADMIN,
+  isTutor: process.env.IS_TUTOR,
+  isTherapist: process.env.IS_THERAPIST,
 }
