@@ -1,4 +1,3 @@
-
 const idEntry = require('./findById.validation');
 const authEntry = require('./auth.validation');
 const userEntry = require('./user.validation');
@@ -10,6 +9,7 @@ const categoryEntry = require('./category.validation');
 const pictogramEntry = require('./pictogram.validation');
 const patientPictogramsEntry = require('./patientPictogram.validation');
 const phaseEntry = require('./phase.validation');
+const activityEntry = require('./activity.validation');
 
 
 module.exports = {
@@ -24,4 +24,5 @@ module.exports = {
   pictogramEntry,
   patientPictogramsEntry,
   phaseEntry,
+  activityEntry,
 }

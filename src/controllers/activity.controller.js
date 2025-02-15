@@ -53,8 +53,7 @@ module.exports = {
       if(error) return res.status(400).json({ 
         error: true,
         statusCode: 422,
-        message: messages.generalMessages.bad_request,
-        validationErrors: formatJoiMessages(error),
+        message: error.details[0].message
       });
 
       const { error:dataError, statusCode, message, data } = await findOne(req.params.id);

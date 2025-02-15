@@ -515,6 +515,7 @@ module.exports = {
           }
         ]
       });
+
       if(!therapistExist) {
         await transaction.rollback();
         return {
