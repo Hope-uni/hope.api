@@ -1,6 +1,6 @@
 const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
-const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
+const { pagination, messages, userPerson, dataStructure, formatErrorMessages } = require('@utils/index');
 const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
 const { getProgress } = require('@helpers/healthRecord.helper');
 const { generatePassword } = require('@utils/generatePassword.util');
@@ -8,7 +8,6 @@ const { userSendEmail } = require('@helpers/user.helper');
 const { deleteUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
-const { formatErrorMessages } = require('../utils');
 
 
 
@@ -986,6 +985,6 @@ module.exports = {
         message: messages.generalMessages.server,
       }
     }
-  }
+  },
 
 }

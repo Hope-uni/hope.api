@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('@models/index');
+const { User, UserRoles, Role } = require('@models/index');
 const logger = require('@config/logger.config');
 const { secretKey } = require('@config/variables.config');
 
@@ -29,8 +29,25 @@ module.exports = {
       const userVerified = await User.findOne({
         where: {
           id: payload.id,
-          userVerified: true
-        }
+          userVerified: true,
+          status: true,
+        },
+        include: [
+            {
+              model: UserRoles,
+            attributes: {
+              exclude: ['userId', 'roleId','createdAt','updatedAt']
+            },
+            include: [
+              {
+                model: Role,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status']
+                },
+              }
+            ]
+          }
+        ]
       });
 
       if(!userVerified && req.originalUrl.split('/')[3] !== 'change-password') {
@@ -40,6 +57,7 @@ module.exports = {
           message: `Usuario no verificado`,
         });
       }
+
 
       req.payload = payload;
       next();

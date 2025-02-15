@@ -18,7 +18,7 @@ router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear pac
 
 router.put('/:id', verifyToken, rolePermissions(
   ['Superadmin','Admin','Terapeuta', 'Tutor'],
-  ['actualizar pacientes','update-patient-tutor','update-patient-therapist']
+  ['actualizar pacientes','modificar paciente-tutor','modificar paciente-terapeuta']
 ), updatePatient);
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar pacientes']), removePatient);
