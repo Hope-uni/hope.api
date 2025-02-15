@@ -19,7 +19,7 @@ router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear ter
 
 router.post('/assignPatient', verifyToken, rolePermissions(['Superadmin','Admin']), assignPatient);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['actualizar terapeutas']), updateTherapist);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['actualizar terapeutas', 'actualizar perfil']), updateTherapist);
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar terapeutas']), removeTherapist);
 

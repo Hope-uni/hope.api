@@ -373,14 +373,14 @@ module.exports = {
         id: iterator.HealthRecord.Phase.id,
         name: iterator.HealthRecord.Phase.name,
         description: iterator.HealthRecord.Phase.description,
-      } : {};
+      } : null;
 
       // TeaDegree
       const getTeaDegree = Object.keys(iterator).includes('HealthRecord') && iterator.HealthRecord !== null ? {
         id: iterator.HealthRecord.TeaDegree.id,
         name: iterator.HealthRecord.TeaDegree.name,
         description: iterator.HealthRecord.TeaDegree.description,
-      } : {};
+      } : null;
 
       const element = {
         id: iterator.id,
@@ -429,24 +429,24 @@ module.exports = {
       return {
         id: item.id,
         description: item.description,
-        username: item.User.username,
-        createdAt: item.createdAt,
+        username: item.User ? item.User.username : null,
+        createdAt: item.createdAt ? item.createdAt : null,
       }
-    }) : [];
+    }) : null;
 
     // phase 
     const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.Phase.id,
       name: data.HealthRecord.Phase.name,
       description: data.HealthRecord.Phase.description,
-    } : {};
+    } : null;
 
     // TeaDegree
     const getTeaDegree = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.TeaDegree.id,
       name: data.HealthRecord.TeaDegree.name,
       description: data.HealthRecord.TeaDegree.description,
-    } : {};
+    } : null;
 
     return {
       id: data.id,
@@ -481,8 +481,8 @@ module.exports = {
         image: data.tutor.Person.imageProfile,
         fullName: tutorFullName,
         username: data.tutor.User.username,
-        correo: data.tutor.User.email,
-        telefono: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
+        email: data.tutor.User.email,
+        telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
       },
       therapist: data.therapist ? {
         id: data.therapist.id,
@@ -492,7 +492,7 @@ module.exports = {
         username: data.therapist.User.username,
         email: data.therapist.User.email,
         phoneNumber: data.therapist.phoneNumber
-      } : '',
+      } : null,
     /*
         Informacion de la actividad asignada: {
           id
@@ -629,11 +629,11 @@ module.exports = {
             name: item.Phase.name,
             description: item.Phase.description,
           },
-          assignments: item.PatientActivities !== null ?  item.PatientActivities.map((p) => {
+          assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
             return {
               id: p.Patient.id,
             }
-          }): []
+          }): null
         })
     });
 
@@ -657,7 +657,7 @@ module.exports = {
         return {
           id: p.Patient.id,
         }
-      }): [],
+      }): null,
       activitySolution: {
         pictogramsSolution: data.dataValues.pictograms,
         textSolution: data.pictogramSentence
