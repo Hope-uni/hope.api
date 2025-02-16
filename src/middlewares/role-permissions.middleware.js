@@ -2,10 +2,11 @@ const { User, Role, Permission, UserRoles } = require('@models/index');
 
 module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
 
+  
   /* eslint-disable no-unused-vars */
-    /* eslint-disable array-callback-return */
-    /* eslint-disable no-restricted-syntax */
-    /* eslint-disable no-loop-func */
+  /* eslint-disable array-callback-return */
+  /* eslint-disable no-restricted-syntax */
+  /* eslint-disable no-loop-func */
   return async (request, response, next) => {
     const { id } = request.payload;
 

@@ -694,6 +694,10 @@ const messages = {
         base: `La cantidad de intentos satisfactorios debe ser un número válido`,
         positive: `La cantidad de intentos satisfactorios debe ser un número positivo`,
       },
+      restore: {
+        required: `Se debe indicar si se desea restaurar la actividad`,
+        base: `La condición de restauración debe ser un booleano válido`,
+      }
     },
     errors: {
       controller: `Hubo un error en el controlador de actividades`,
@@ -704,13 +708,22 @@ const messages = {
         delete: `Actividad no fue eliminada`,
         all: `Actividades no encontradas`,
         pictograms: `Los pictogramas seleccionados no son válidos`,
+        unassign_activity_patient: `La actividad no pudo ser desasignada del paciente`,
+        patient_activity_not_assigned: `La actividad seleccionada ya no está asignada al paciente`,
+        patient_activity_not_found: `La actividad seleccionada no está asignada al paciente`,
+        incorrect_answer: `Respuesta incorrecta`,
+        check_attempt: `La respuesta que has enviado no pudo ser verificada`,
+        delete_patient_activity: `La actividad no pudo ser eliminada del paciente`,
+        already_completed: `La actividad ya fue completada`,
       },
       not_found: `Actividad no encontrada`,
       in_use: {
         name: `Nombre de actividad ya está en uso`,
         description: `La descripción de la actividad hace referencia a una actividad ya existente`,
+        pictogramSentence: `La colección de pictogramas seleccionados hace referencia a una actividad ya existente`,
         activityPatient: `La actividad seleccionada ya fue asignada al paciente`,
-        patientActivityAssigned: `El paciente ya tiene una actividad asignada`,
+        patient_activity_assigned: `El paciente ya tiene una actividad asignada`,
+        patient_activity_unassigned: `La actividad seleccionada ya ha sido inhabilidata al paciente, ¿Desea volver a asignarla?`,
       },
     },
     success: {
@@ -718,7 +731,11 @@ const messages = {
       found: `Actividad encontrada`,
       create: `Actividad creada`,
       update: `Actividad actualizada`,
+      delete: `Actividad eliminada`,
       assigned: `Actividad asignada exitosamente`,
+      unassigned: `Actividad desasignada exitosamente`,
+      check_attempt: `Respuesta verificada exitosamente`,
+      reassign: `Actividad reasignada exitosamente`,
     }
   },
 }

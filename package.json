@@ -23,7 +23,8 @@
     "@validations": "./src/validations",
     "@views": "./src/view",
     "@events": "./src/events",
-    "@listeners": "./src/listeners"
+    "@listeners": "./src/listeners",
+    "@constants": "./src/constants"
   },
   "_moduleDirectories": [
     "node_modules_custom"

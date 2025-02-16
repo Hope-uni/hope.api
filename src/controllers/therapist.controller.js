@@ -8,6 +8,7 @@ const {
   update,
   removeTherapist,
   assignPatient,
+  allPatientsTherapist,
 } = require('@services/therapist.service');
 
 module.exports = {
@@ -39,6 +40,36 @@ module.exports = {
         statusCode: 500,
         message: messages.generalMessages.server,
       }); 
+    }
+  },
+
+  async allPatientsTherapist(req,res) {
+    try {
+      
+      const { error, message, statusCode, ...resData } = await allPatientsTherapist(req.query, req.payload);
+
+      if(error) {
+        return res.status(statusCode).json({
+          error,
+          statusCode,
+          message,
+        });
+      };
+
+      return res.status(statusCode).json({
+        error,
+        statusCode,
+        message,
+      ...resData
+      });
+
+    } catch (error) {
+      logger.error(`${messages.therapist.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      });
     }
   },
 

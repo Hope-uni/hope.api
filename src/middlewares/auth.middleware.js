@@ -58,6 +58,11 @@ module.exports = {
         });
       }
 
+      // add role to payload
+      if(userVerified) {
+        const roles = userVerified.UserRoles.map(item => item.Role.name);
+        payload.roles = roles;
+      }
 
       req.payload = payload;
       next();
