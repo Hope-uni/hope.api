@@ -43,6 +43,11 @@ module.exports = {
 
   updateActivityValidation(data) {
     const schema = joi.object().keys({
+      id: joi.number().positive().required().messages({
+        'any.required': messages.activity.fields.id.required,
+        'number.base': messages.activity.fields.id.base,
+        'number.positive': messages.activity.fields.id.positive,
+      }),
       name: joi.string().empty(' ').messages({
         'string.base': messages.activity.fields.name.base,
         'string.empty': messages.activity.fields.name.empty,
@@ -55,13 +60,16 @@ module.exports = {
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
       }),
-      pictogramSentence: joi.string().empty(' ').messages({
-        'string.base': messages.activity.fields.pictogramSentence.base,
-        'string.empty': messages.activity.fields.pictogramSentence.empty,
+      pictogramSentence: joi.array().items(joi.number().positive()).unique().min(1).empty(' ').messages({
+        'number.base': messages.activity.fields.pictogramSentence.base,
+        'number.positive': messages.activity.fields.pictogramSentence.positive,
+        'array.base': messages.activity.fields.pictogramSentence.base,
+        'array.min': messages.activity.fields.pictogramSentence.array_min,
+        'array.unique': messages.activity.fields.pictogramSentence.unique,
       }),
       phaseId: joi.number().positive().empty('  ').messages({
-        'number.base': messages.activity.fields.phaseId.base,
-        'number.positive': messages.activity.fields.phaseId.positive,
+        'number.base': messages.phase.fields.id.base,
+        'number.positive': messages.phase.fields.id.positive,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
@@ -70,7 +78,7 @@ module.exports = {
   },
 
 
-  assignActivityPatient(data) {
+  assignActivityPatientValidation(data) {
     const schema = joi.object().keys({
       activityId: joi.number().positive().required().messages({
         'any.required': messages.activity.fields.id.required,
@@ -82,10 +90,54 @@ module.exports = {
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      satisfactoryAttempts: joi.number().positive().required().messages({
-        'any.required': messages.activity.fields.satisfactorAttempts.required,
-        'number.base': messages.activity.fields.satisfactorAttempts.base,
-        'number.positive': messages.activity.fields.satisfactorAttempts.positive,
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
+
+
+  reassignActivityPatientValidation(data) {
+    const schema = joi.object().keys({
+      activityId: joi.number().positive().required().messages({
+        'any.required': messages.activity.fields.id.required,
+        'number.base': messages.activity.fields.id.base,
+        'number.positive': messages.activity.fields.id.positive,
+      }),
+      patientId: joi.number().positive().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+      restore: joi.boolean().messages({
+        'any.required': messages.activity.fields.restore.required,
+        'boolean.base': messages.activity.fields.restore.base,
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
+
+  checkActivityPatientValidation(data) {
+    const schema = joi.object().keys({
+      activityId: joi.number().positive().required().messages({
+        'any.required': messages.activity.fields.id.required,
+        'number.base': messages.activity.fields.id.base,
+        'number.positive': messages.activity.fields.id.positive,
+      }),
+      patientId: joi.number().positive().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+      attempt: joi.array().items(joi.number().positive()).unique().min(1).required().messages({
+        'any.required': messages.activity.fields.pictogramSentence.required,
+        'number.base': messages.activity.fields.pictogramSentence.base,
+        'number.positive': messages.activity.fields.pictogramSentence.positive,
+        'array.base': messages.activity.fields.pictogramSentence.base,
+        'array.min': messages.activity.fields.pictogramSentence.array_min,
+        'array.unique': messages.activity.fields.pictogramSentence.unique,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

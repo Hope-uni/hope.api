@@ -12,6 +12,8 @@ const modules = {
   pictogram: "pictogramas",
   customPictogram: "pictogramas-personalizados",
   phase: "fases",
+  teaDegree: "grados-de-tea",
+  activity: "actividades",
 }
 
 const permission = {
@@ -60,6 +62,10 @@ const customPermissions = [
     description: 'modificar paciente-tutor',
     group: 'tutor'
   },
+  {
+    description: 'asignar-actividad',
+    group: 'therapist'
+  }
 ]
 
 /* eslint-disable no-restricted-syntax */

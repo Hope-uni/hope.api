@@ -4,7 +4,8 @@ const {
   findOne,
   create,
   update,
-  removeTutor
+  removeTutor,
+  allPatientsTutor
 } = require('@services/tutor.service');
 const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
 const { tutorEntry, idEntry } = require('@validations/index');
@@ -19,6 +20,35 @@ module.exports = {
     try {
       
       const { error, message, statusCode, ...resData} = await all(req.query);
+      if(error) {
+        return res.status(statusCode).json({
+          error,
+          statusCode,
+          message
+        });
+      };
+
+      return res.status(statusCode).json({
+        error,
+        statusCode,
+        message,
+        ...resData
+      });
+
+    } catch (error) {
+      logger.error(`${messages.tutor.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }); 
+    }
+  },
+
+  async allPatientsTutor(req,res) {
+    try {
+      
+      const { error, message, statusCode, ...resData} = await allPatientsTutor(req.query, req.payload);
       if(error) {
         return res.status(statusCode).json({
           error,

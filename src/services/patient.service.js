@@ -1,7 +1,7 @@
+const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure, formatErrorMessages } = require('@utils/index');
-const { getPatients, getPatientsTutor, getPatientsTherapist } = require('@helpers/patient.helper');
 const { getProgress } = require('@helpers/healthRecord.helper');
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
@@ -18,23 +18,238 @@ module.exports = {
   /* eslint-disable consistent-return */
   async all(query, payload) {
     try {
+      
+      const userType = await User.findOne({
+        where: {
+          id: payload.id,
+          status: true,
+        },
+        include: [
+          {
+            model: UserRoles,
+            include: [
+              {
+                model: Role,
+                where: {
+                  id: {
+                    [Op.notIn]: [3,4,5]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      });
 
-      if(query.tutor) {
-        return await getPatientsTutor(query,payload);
+      if(!userType.UserRoles[0]) {
+        return {
+          error: true,
+          statusCode: 403,
+          message: messages.patient.errors.service.forbidden,
+        }
       }
 
-      if(query.therapist) {
-        return await getPatientsTherapist(query,payload);
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await Patient.findAll({
+          where: {
+            status: true,
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','personId']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: TutorTherapist,
+              as: 'tutor',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: TutorTherapist,
+              as: 'therapist',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: User,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                    }
+                  ]
+                },
+              ]
+            },
+            {
+              model: HealthRecord,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','patientId']
+              },
+              include: [
+                {
+                  model: TeaDegree,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Observation,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                  }
+                }
+              ],
+            }
+          ]
+        });
+
+        // Return Patient
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.patient.success.all,
+          data: dataStructure.patientDataStructure(data),
+        };
       }
 
-      return await getPatients(query, payload);
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Patient.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
+        where: {
+          status: true,
+        },
+        attributes: {
+          exclude: ['createdAt','updatedAt','status']
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+          },
+          {
+            model: TutorTherapist,
+            as: 'tutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: User,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','password']
+            },
+            include: [
+              {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              },
+            ]
+          },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                }
+              }
+            ],
+          }
+        ]
+      });
+
+      // get Patient structured
+      data.rows = dataStructure.patientDataStructure(data.rows);
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.patient.success.all,
+        ...dataResponse
+      };
 
     } catch (error) {
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
-        statusCode: 500,
         message: messages.generalMessages.server,
+        statusCode: 500,
       }
     }
   },

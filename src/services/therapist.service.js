@@ -5,6 +5,7 @@ const { pagination, userPerson, messages, dataStructure } = require('@utils/inde
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
 const { formatErrorMessages } = require('@utils/formatErrorMessages.util');
+const constants = require('@constants/role.constant');
 const { deleteUser } = require('./user.service');
 
 
@@ -171,6 +172,194 @@ module.exports = {
 
     } catch (error) {
       logger.error(`${messages.therapist.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }
+    }
+  },
+
+
+
+  async allPatientsTherapist(query, payload) {
+    try {
+      // Get Therapist
+      const therapistExist = await TutorTherapist.findOne({
+        where: {
+          userId: payload.id
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            },
+            include: [
+              {
+                model: UserRoles,
+                where: {
+                  roleId: 3,
+                },
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
+      if(!therapistExist || therapistExist.User.UserRoles[0].name === constants.THERAPIST_ROLE) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.therapist.errors.not_found,
+        }
+      }
+
+      
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await Patient.findAll({
+          where: {
+            status: true,
+            therapistId: therapistExist.id,
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','personId']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: TutorTherapist,
+              as: 'tutor',
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: User,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                    }
+                  ]
+                },
+              ]
+            },
+          ]
+        });
+
+        // Return Patient
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.patient.success.all,
+          data: dataStructure.patientDataStructure(data),
+        };
+      }
+
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Patient.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
+        where: {
+          status: true,
+          tutorId: therapistExist.id,
+        },
+        attributes: {
+          exclude: ['createdAt','updatedAt','status']
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+          },
+          {
+            model: TutorTherapist,
+            as: 'tutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            }
+          },
+          {
+            model: User,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','password']
+            },
+            include: [
+              {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              },
+            ]
+          },
+        ]
+      });
+
+      // get Patient structured
+      data.rows = dataStructure.patientDataStructure(data.rows);
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.patient.success.all,
+        ...dataResponse
+      };
+
+    } catch (error) {
+      logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,

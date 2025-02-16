@@ -4,12 +4,14 @@ const {
   findTutor,
   createTutor,
   update,
-  removeTutor
+  removeTutor,
+  allPatientsTutor
 } = require('@controllers/tutor.controller');
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
 router.get('/', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['listar tutores']), allTutors);
+router.get('/patients', verifyToken, rolePermissions(['Superadmin','Admin','Tutor'],['listar pacientes']), allPatientsTutor);
 router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['buscar tutores']), findTutor);
 router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear tutores']), createTutor);
 router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar tutores']), update);
