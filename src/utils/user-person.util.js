@@ -100,6 +100,7 @@ module.exports = {
         address,
         personId,
         userId,
+        birthday,
       } = body;
 
       // Update therapist's user
@@ -120,7 +121,7 @@ module.exports = {
       };
 
       // Update Person
-      if(firstName || secondName || surname || secondSurname || imageProfile || address) {
+      if(firstName || secondName || surname || secondSurname || imageProfile || address || birthday) {
         // validate if person exist
         const personExist = await Person.findOne({
           where: {
@@ -143,7 +144,8 @@ module.exports = {
           surname,
           secondSurname,
           imageProfile,
-          address
+          address,
+          birthday
         },{
           where: {
             id: personId

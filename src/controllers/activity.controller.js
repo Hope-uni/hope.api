@@ -98,7 +98,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error)
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -140,7 +140,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error)
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await updateActivity(req.params.id, req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updateActivity(req.params.id, req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -178,7 +178,7 @@ module.exports = {
         message: error.details[0].message
       });
 
-      const { error:dataError, statusCode, message } = await deleteActivity(req.params.id);
+      const { error:dataError, statusCode, message } = await deleteActivity(req.params.id, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({

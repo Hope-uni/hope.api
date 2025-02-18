@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
     Activity.belongsTo(models.Phase, {
       foreignKey: 'phaseId',
     });
+
+    Activity.belongsTo(models.User, {
+      foreignKey: 'userId',
+    });
   }
 
   return Activity;

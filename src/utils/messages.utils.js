@@ -4,9 +4,9 @@ const messages = {
     server: `Hubo un problema inesperado. Por favor, intente más tarde`,
     bad_request: 'BAD_REQUEST',
     unauthorized: 'UNAUTHORIZED',
-    forbidden: 'FORBIDDEN',
     not_found: 'NOT_FOUND',
     conflict: 'CONFLICT',
+    forbidden: `No tiene permiso para realizar esta acción`,
     unknown_object: 'Esta propiedad no está permitida',
   },
 
@@ -145,7 +145,7 @@ const messages = {
         not_role: `El rol que está asignando a Terapeuta es inadmisible`,
         therapist_assigned: `El paciente ya tiene asignado un terapeuta`,
         therapist_not_assigned: `Terapeuta no fue asignado al Paciente`,
-        patient_to_assign: `Uno de los pacientes que esta intentando asignar no existe, porfavor verifique que todos los pacientes esten en el sistema`,
+        patient_to_assign: `Uno de los pacientes que esta intentando asignar no existe, porfavor verifique que todos los pacientes esten en el sistema`,	
       },
       not_found: `Terapeuta no encontrado`,
       in_use: {

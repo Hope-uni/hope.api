@@ -1,7 +1,19 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const constants = require('@constants/role.constant');
-const { TutorTherapist, User, Person, Role, UserRoles, Patient, sequelize } = require('@models/index.js');
+const { 
+  TutorTherapist, 
+  User, 
+  Person, 
+  Role, 
+  UserRoles, 
+  Patient,
+  HealthRecord,
+  TeaDegree,
+  Phase,
+  Observation,
+  sequelize 
+} = require('@models/index.js');
 const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
@@ -378,7 +390,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','userId','personId']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -424,6 +436,32 @@ module.exports = {
               },
               {
                 model: User
+              },
+              {
+                model: HealthRecord,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status','patientId']
+                },
+                include: [
+                  {
+                    model: TeaDegree,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Phase,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Observation,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                    }
+                  }
+                ],
               }
             ]
           }
@@ -578,7 +616,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','userId','personId']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -634,7 +672,7 @@ module.exports = {
         error: false,
         statusCode: 201,
         message: messages.tutor.success.create,
-        data: dataStructure.findTutorDataStructure(newData),
+        data: dataStructure.tutorDataStructure(newData, true),
       };
     } catch (error) {
       await transaction.rollback();
@@ -811,7 +849,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','userId','personId']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -869,7 +907,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.tutor.success.update,
-        data: dataStructure.findTutorDataStructure(newData),
+        data: dataStructure.tutorDataStructure(newData, true),
       }
     } catch (error) {
       await transaction.rollback();
