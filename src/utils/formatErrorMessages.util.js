@@ -1,9 +1,7 @@
-
-
 const formatJoiMessages = (error) => {
 
   // variables
-  const newFormat = [];
+  let newFormat;
 
   const { details } = error;
 
@@ -14,7 +12,7 @@ const formatJoiMessages = (error) => {
     const obj = {};
     obj[path[0]] = message;
 
-    newFormat.push(obj);
+    newFormat = { ...newFormat, ...obj };
   });
 
   return newFormat;
