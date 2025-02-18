@@ -137,12 +137,12 @@ module.exports = {
         error: false,
         statusCode: 201,
         message: messages.pictogram.success.create,
-        data: dataStructure.customPictogramDataStructure(newData),
+        data: dataStructure.findCustomPictogramDataStructure(newData),
       }
 
 
     } catch (error) {
-      await transaction.rollback();
+      // await transaction.rollback();
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
         error: true,

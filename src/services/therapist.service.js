@@ -1,6 +1,18 @@
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
-const { TutorTherapist, Person, User, Role, UserRoles, Patient ,sequelize } = require('@models/index.js');
+const { 
+  TutorTherapist, 
+  Person, 
+  User, 
+  Role, 
+  UserRoles, 
+  Patient,
+  HealthRecord,
+  TeaDegree,
+  Phase,
+  Observation,
+  Activity,
+  sequelize } = require('@models/index');
 const { pagination, userPerson, messages, dataStructure } = require('@utils/index');
 const { generatePassword } = require('@utils/generatePassword.util');
 const { userSendEmail } = require('@helpers/user.helper');
@@ -50,7 +62,7 @@ module.exports = {
                 status: true,
               },
               attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
+                exclude: ['createdAt','updatedAt','password']
               },
               include: [
                 {
@@ -87,11 +99,19 @@ module.exports = {
           ],
         });
 
+        // validate if user status is true
+        const newData = [];
+        data.forEach((item) => {
+          if(item.User.status === true) {
+            newData.push(item);
+          }
+        });
+
         return {
           error: false,
           statusCode: 200,
           message: messages.therapist.success.all,
-          data: dataStructure.therapistDataStructure(data),
+          data: dataStructure.therapistDataStructure(newData),
         }
       }
       // Pagination
@@ -152,7 +172,10 @@ module.exports = {
               },
               {
                 model: User
-              }
+              },
+              /* {
+                model: 
+              } */
             ]
           }
         ],
@@ -218,8 +241,8 @@ module.exports = {
       if(!therapistExist || therapistExist.User.UserRoles[0].name === constants.THERAPIST_ROLE) {
         return {
           error: true,
-          statusCode: 404,
-          message: messages.therapist.errors.not_found,
+          statusCode: 403,
+          message: messages.generalMessages.forbidden
         }
       }
 
@@ -253,6 +276,9 @@ module.exports = {
             },
             {
               model: User,
+              where: {
+                status:true,
+              },
               attributes: {
                 exclude: ['createdAt','updatedAt','status','password']
               },
@@ -430,6 +456,20 @@ module.exports = {
                   }
                 ]
               },
+              {
+                model: Activity,
+                attributes: {
+                  exclude: ['createdAt','updatedAt']
+                },
+                include: [
+                  {
+                    model: Phase,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              }
             ]
           },
           {
@@ -443,10 +483,39 @@ module.exports = {
                 model: Person
               },
               {
-                model: User
+                model: User,
+                where: {
+                  status: true,
+                }
+              },
+              {
+                model: HealthRecord,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status','patientId']
+                },
+                include: [
+                  {
+                    model: TeaDegree,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Phase,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Observation,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                    }
+                  }
+                ],
               }
             ]
-          }
+          },
         ],
       });
 
@@ -636,7 +705,10 @@ module.exports = {
                 model: Person
               },
               {
-                model: User
+                model: User,
+                where: {
+                  status: true,
+                }
               }
             ]
           }
@@ -647,7 +719,7 @@ module.exports = {
         error: false,
         statusCode: 201,
         message: messages.therapist.success.create,
-        data: dataStructure.findTherapistDataStructure(newData)
+        data: dataStructure.therapistDataStructure(newData, true)
       }
 
     } catch (error) {
@@ -823,7 +895,7 @@ module.exports = {
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt','status']
+              exclude: ['createdAt','updatedAt','status','birthday']
             },
           },
           {
@@ -832,7 +904,7 @@ module.exports = {
               status: true,
             },
             attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
+              exclude: ['createdAt','updatedAt','password']
             },
             include: [
               {
@@ -873,7 +945,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.therapist.success.update,
-        data: dataStructure.findTherapistDataStructure(data),
+        data: dataStructure.therapistDataStructure(data, true),
       };
     } catch (error) {
       await transaction.rollback();

@@ -84,7 +84,7 @@ module.exports = {
       gender
     } = data;
 
-    if(userId || username || email/*  || roles */) {
+    if(userId || username || email) {
       const { error } = updateUserValidation({
         username,
         email,

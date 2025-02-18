@@ -11,7 +11,7 @@ module.exports = {
         'string.min': messages.person.fields.firstName.min,
         'string.empty': messages.person.fields.firstName.empty,
       }),
-      secondName: joi.string().empty(' ').min(3,'utf8').messages({
+      secondName: joi.string().empty(' ').allow('').min(3,'utf8').messages({
         'string.base': messages.person.fields.secondName.base,
         'string.min': messages.person.fields.secondName.min
       }),
@@ -21,7 +21,7 @@ module.exports = {
         'string.min': messages.person.fields.surname.min,
         'string.empty': messages.person.fields.surname.empty,
       }),
-      secondSurname: joi.string().empty(' ').min(3,'utf8').messages({
+      secondSurname: joi.string().empty(' ').allow('').min(3,'utf8').messages({
         'string.base': messages.person.fields.secondSurname.base,
         'string.min': messages.person.fields.secondSurname.min
       }),
@@ -56,7 +56,7 @@ module.exports = {
         'string.base': messages.person.fields.firstName.base,
         'string.min': messages.person.fields.firstName.min,
       }),
-      secondName: joi.string().empty(' ').min(3,'utf8').messages({
+      secondName: joi.string().empty(' ').allow('').min(3,'utf8').messages({
         'string.base': messages.person.fields.secondSurname.base,
         'string.min': messages.person.fields.secondSurname.min
       }),
@@ -64,7 +64,7 @@ module.exports = {
         'string.base': messages.person.fields.surname.base,
         'string.min': messages.person.fields.surname.min,
       }),
-      secondSurname: joi.string().empty(' ').min(3,'utf8').messages({
+      secondSurname: joi.string().empty(' ').allow('').min(3,'utf8').messages({
         'string.base': messages.person.fields.secondSurname.base,
         'string.min': messages.person.fields.secondSurname.min
       }),

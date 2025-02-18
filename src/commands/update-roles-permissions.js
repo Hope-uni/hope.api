@@ -21,8 +21,16 @@ async function assignPermissionsRoles() {
       'buscarme',
       'modificar paciente-terapeuta',
       'listar pictogramas',
-      'buscar pictogramas'
+      'buscar pictogramas',
       // 'listar pictogramas-personalizados',
+      'listar actividades',
+      'buscar actividades',
+      'crear actividades',
+      'actualizar actividades',
+      'borrar actividades',
+      'desasignar actividades',
+      'asignar actividades',
+      'verificar respuesta de actividades',
     ]
 
     const tutorPermissions = [

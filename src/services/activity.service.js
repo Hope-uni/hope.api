@@ -134,7 +134,7 @@ module.exports = {
     }
   },
 
-  async create({ name, description, satisfactoryPoints, pictogramSentence, phaseId }) {
+  async create({ name, description, satisfactoryPoints, pictogramSentence, phaseId }, payload) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -205,7 +205,8 @@ module.exports = {
         description,
         satisfactoryPoints,
         pictogramSentence: formatPictogramSentence,
-        phaseId
+        phaseId,
+        userId: payload.id,
       },{transaction});
 
       if(!data) {
@@ -240,7 +241,7 @@ module.exports = {
   },
 
 
-  async updateActivity(id,body) {
+  async updateActivity(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
       
@@ -248,6 +249,7 @@ module.exports = {
       const activityExist = await Activity.findOne({
         where: {
           id,
+          userId: payload.id,
           status: true
         }
       });
@@ -727,7 +729,7 @@ module.exports = {
     }
   },
 
-  async deleteActivity(id) {
+  async deleteActivity(id, payload) {
     const transaction = await sequelize.transaction();
     try {
       
@@ -735,6 +737,7 @@ module.exports = {
       const activityExist = await Activity.findOne({
         where: {
           id,
+          userId: payload.id,
           status: true
         }
       });

@@ -1,6 +1,7 @@
 const { User, Role, UserRoles, sequelize } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
+const constants = require('@constants/role.constant');
 const { Op } = require('sequelize');
 const { paginationValidation, getPageData} = require('@utils/pagination.util');
 const { isAdmin } = require('@config/variables.config');
@@ -167,7 +168,7 @@ module.exports = {
         ]
       });
 
-      if(!data) {
+      if(!data || data.UserRoles.length === 0) {
         return {
           error: true,
           statusCode: 404,
@@ -474,7 +475,10 @@ module.exports = {
       // Destructuring data
       const {roles, ...resBody} = body;
       
-      // User Exist
+      // this is when you try to create a user directly
+      if(!transaction) {
+
+        // User Exist
       const userExist = await User.findOne({
         where: {
           [Op.and]: [
@@ -490,10 +494,29 @@ module.exports = {
               status: true,
             }
           ],
-          
-        }
+        },
+        include: [
+          {
+            model: UserRoles,
+            where: {
+              userId: id,
+              roleId: 2
+            },
+            attributes: {
+              exclude: ['userId','createdAt','updatedAt']
+            },
+            include: [
+              {
+                model: Role,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status']
+                },
+              }
+            ]
+          }
+        ]
       });
-      if(!userExist) {
+      if(!userExist || userExist.UserRoles.length === 0) {
         return {
           error: true,
           statusCode: 404,
@@ -501,9 +524,23 @@ module.exports = {
           validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
         }
       };
-      
-      // this is when you try to create a user directly
-      if(!transaction) {
+
+        // Valdiate if user is admin
+        const userAdminValidation = await UserRoles.findOne({
+          where: {
+            userId: id,
+            roleId: 2,
+          }
+        });
+
+        if(!userAdminValidation) {
+          return {
+            error: true,
+            statusCode: 404,
+            messages: messages.user.errors.not_found,
+          }
+        }
+
         transaction = await sequelize.transaction();
         // Username Validation
         if(resBody.username) {
@@ -698,7 +735,8 @@ module.exports = {
             {
               model: UserRoles,
               where: {
-                userId: id
+                userId: id,
+                roleId: 2,
               },
               attributes: {
                 exclude: ['userId', 'roleId','createdAt','updatedAt']
@@ -707,7 +745,8 @@ module.exports = {
                 {
                   model: Role,
                   where: {
-                    name: 'Admin'
+                    id: 2,
+                    name: constants.ADMIN_ROLE,
                   },
                   attributes: {
                     exclude: ['createdAt','updatedAt','status']
@@ -717,7 +756,7 @@ module.exports = {
             }
           ]
         });
-        if(!userExist) {
+        if(!userExist || userExist.UserRoles.length === 0) {
           await transaction.rollback();
           return {
             error: true,
