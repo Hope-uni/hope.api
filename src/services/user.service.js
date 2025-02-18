@@ -42,19 +42,12 @@ module.exports = {
           include: [
             {
               model: UserRoles,
-              where: {
-                roleId: 2
-              },
               attributes: {
                 exclude: ['userId', 'roleId','createdAt','updatedAt']
               },
               include: [
                 {
                   model: Role,
-                  where: {
-                    id: 2,
-                    name: constants.ADMIN_ROLE,
-                  },
                   attributes: {
                     exclude: ['createdAt','updatedAt','status']
                   },
@@ -97,10 +90,6 @@ module.exports = {
             include: [
               {
                 model: Role,
-                where: {
-                  id: 2,
-                  name: constants.ADMIN_ROLE,
-                },
                 attributes: {
                   exclude: ['createdAt','updatedAt','status']
                 },
@@ -164,19 +153,12 @@ module.exports = {
         include: [
           {
             model: UserRoles,
-            where: {
-              roleId: 2
-            },
             attributes: {
               exclude: ['userId', 'roleId','createdAt','updatedAt']
             },
             include: [
               {
                 model: Role,
-                where: {
-                  id: 2,
-                  name: constants.ADMIN_ROLE,
-                },
                 attributes: {
                   exclude: ['createdAt','updatedAt','status']
                 },
