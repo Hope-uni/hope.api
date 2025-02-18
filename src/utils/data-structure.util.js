@@ -130,7 +130,6 @@ module.exports = {
         username: data.User.username,
         email: data.User.email,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
-        telephone: data.telephone ? `${data.telephone}` : null,
         childrenInCharge: data.patientTherapist.length > 0 ? data.patientTherapist.length : null,
         image: data.Person.imageProfile ?? null,
       };
@@ -157,7 +156,6 @@ module.exports = {
           username: iterator.User.username,
           email: iterator.User.email,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
-          telephone: iterator.telephone ? `${iterator.telephone}` : null,
           childrenInCharge: iterator.patientTherapist.length > 0 ? iterator.patientTherapist.length : null,
           image: iterator.Person.imageProfile
         };
@@ -432,8 +430,9 @@ module.exports = {
         fullName: `${iterator.Person.firstName} ${iterator.Person.secondName ? iterator.Person.secondName : ''} ${iterator.Person.surname} ${iterator.Person.secondSurname ? iterator.Person.secondSurname : ''}`,
         age: childAge.Person.dataValues.age,
         teaDegree: getTeaDegree,
-        phase: getPhase,
+        currentPhase: getPhase,
         image: iterator.Person.imageProfile,
+        achievementCount: 0,
         // Cantidad de logros
       }
       newData.push(element);
@@ -512,6 +511,7 @@ module.exports = {
       telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
       address: data.Person.address,
       observations: observationsGotit,
+      achievements: null,
       
       /*
         Lista de logros Conseguidos: {
@@ -546,6 +546,7 @@ module.exports = {
           progreso
         }
       */
+      currentActivity: null,
       /*
         Lista de actividades completadas relacionadas al paciente: {
           id
@@ -554,6 +555,7 @@ module.exports = {
           fase
         }
       */
+      activities: null,
       /*
         Lista de Pictogramas personalizados del Paciente: {
           id
@@ -561,6 +563,7 @@ module.exports = {
           nombre
         }
       */
+      pictograms: null,
     } 
   },
 
