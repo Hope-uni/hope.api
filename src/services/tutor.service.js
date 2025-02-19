@@ -907,7 +907,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.tutor.success.update,
-        data: dataStructure.tutorDataStructure(newData, true),
+        data: dataStructure.updateTutorDataStructure(newData),
       }
     } catch (error) {
       await transaction.rollback();

@@ -660,7 +660,7 @@ module.exports = {
           id: therapistData.id
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','userId','personId']
+          exclude: ['createdAt','updatedAt','status','personId']
         },
         include: [
           {
@@ -895,7 +895,7 @@ module.exports = {
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt','status','birthday']
+              exclude: ['createdAt','updatedAt','status']
             },
           },
           {
@@ -945,7 +945,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.therapist.success.update,
-        data: dataStructure.therapistDataStructure(data, true),
+        data: dataStructure.updateTherapistDataStructure(data),
       };
     } catch (error) {
       await transaction.rollback();

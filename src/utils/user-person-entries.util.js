@@ -9,9 +9,7 @@ module.exports = {
     // destructuring Object
     const {
       username,
-      password,
       email,
-      roles,
       firstName,
       secondName,
       surname,
@@ -24,9 +22,7 @@ module.exports = {
 
     const { error:userError } = createUserValidation({
       username,
-      password,
-      email,
-      roles
+      email
     });
 
     const { error:personError } = createPersonValidation({

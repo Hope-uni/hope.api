@@ -26,7 +26,7 @@ module.exports = {
         'string.base': messages.tutor.fields.phoneNumber.base
       }),
       telephone: joi.string().pattern(
-        new RegExp('^(5|7|8)[0-9]{7}$')
+        new RegExp('^(2)[0-9]{7}$')
       ).messages({
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
         'string.base': messages.tutor.fields.phoneNumber.base
@@ -62,7 +62,7 @@ module.exports = {
         'string.base': messages.tutor.fields.phoneNumber.base
       }),
       telephone: joi.string().pattern(
-        new RegExp('^(5|7|8)[0-9]{7}$')
+        new RegExp('^(2)[0-9]{7}$')
       ).messages({
         'string.pattern.base': messages.tutor.fields.phoneNumber.pattern,
         'string.base': messages.tutor.fields.phoneNumber.base

@@ -18,19 +18,6 @@ module.exports = {
         'string.email': messages.user.fields.email.format,
         'string.empty': messages.user.fields.email.empty
       }),
-      /* eslint-disable prefer-regex-literals */
-      password: joi.string().empty(' ').pattern(new RegExp("^[a-zA-z0-9]{8,30}$")).messages({
-        'string.empty': messages.user.fields.password.empty,
-        'string.base': messages.user.fields.password.base,
-        'string.pattern.base': messages.user.fields.password.pattern
-      }),
-      roles: joi.array().items(joi.number().positive()).unique().min(1).empty(' ').messages({
-        'number.base': messages.user.fields.roles.base,
-        'number.positive': messages.user.fields.roles.positive,
-        'array.min': messages.role.fields.permissions.array_min,
-        'array.base': messages.role.fields.permissions.base,
-        'array.unique': messages.user.fields.roles.unique,
-      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
