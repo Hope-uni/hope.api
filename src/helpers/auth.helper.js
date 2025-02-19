@@ -34,9 +34,16 @@ module.exports = {
         }
       }
 
+      // Full Name validation
+      let fullName = `${patientResponse.Person.firstName} ${patientResponse.Person.secondName} ${patientResponse.Person.surname} ${patientResponse.Person.secondSurname}`; // Patient
+      if(!patientResponse.Person.secondName || !patientResponse.Person.secondSurname) {
+        fullName = `${patientResponse.Person.firstName} ${patientResponse.Person.surname}`;
+      }
+
       /// Building the json response structure
       const newPatientStructure = {
         profileId: patientResponse.id,
+        fullName,
         firstName: patientResponse.Person.firstName,
         secondName: patientResponse.Person.secondName,
         surname: patientResponse.Person.surname,
@@ -92,17 +99,24 @@ module.exports = {
         }
       }
 
+      // Therapist Fullname validation
+      let fullName = `${tutorTherapistResponse.Person.firstName} ${tutorTherapistResponse.Person.secondName} ${tutorTherapistResponse.Person.surname} ${tutorTherapistResponse.Person.secondSurname}`;
+      if(!tutorTherapistResponse.Person.secondName || !tutorTherapistResponse.Person.secondSurname) {
+        fullName = `${tutorTherapistResponse.Person.firstName} ${tutorTherapistResponse.Person.surname}`;
+      }
+
       /// Building the json response structure
       const newTutorTherapistStructure = {
         profileId: tutorTherapistResponse.id,
+        fullName,
         firstName: tutorTherapistResponse.Person.firstName,
         secondName: tutorTherapistResponse.Person.secondName,
         surname: tutorTherapistResponse.Person.surname,
         secondSurname: tutorTherapistResponse.Person.secondSurname,
         image: tutorTherapistResponse.Person.imageProfile,
         identificationNumber: tutorTherapistResponse.identificationNumber,
-        phoneNumber: tutorTherapistResponse.phoneNumber,
-        telephone: tutorTherapistResponse.telephone,
+        phoneNumber: tutorTherapistResponse.phoneNumber ? `${tutorTherapistResponse.phoneNumber}` : null,
+        telephone: tutorTherapistResponse.telephone ? `${tutorTherapistResponse.telephone}` : null,
         address: tutorTherapistResponse.Person.address,
         birthday: tutorTherapistResponse.Person.birthday,
         gender: tutorTherapistResponse.Person.gender,
