@@ -16,7 +16,7 @@ router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta
 
 router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear tutores']), createTutor);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar tutores']), update);
+router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin', 'Tutor'],['actualizar tutores', 'actualizar perfil']), update);
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar tutores']), removeTutor);
 

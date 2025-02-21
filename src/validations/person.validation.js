@@ -71,11 +71,13 @@ module.exports = {
         'string.min': messages.person.fields.secondSurname.min
       }),
       imageProfile: joi.string().empty(' ').messages({
-        'string.base': messages.person.fields.imageProfile.base
+        'string.base': messages.person.fields.imageProfile.base,
+        'string.empty': messages.person.fields.imageProfile.empty,
       }),
       address: joi.string().empty(' ').min(3,'utf8').messages({
         'string.base': messages.person.fields.address.base,
         'string.min': messages.person.fields.address.min,
+        'string.empty': messages.person.fields.address.empty,
       }),
       birthday: joi.date().iso().min('01-01-1900').empty(' ').messages({
         'date.min': messages.person.fields.birthday.min,
@@ -83,7 +85,8 @@ module.exports = {
       }),
       gender: joi.string().valid('Femenino','femenino','Masculino','masculino').empty(' ').messages({
         'any.only': messages.person.fields.gender.only,
-        'string.base': messages.person.fields.gender.base
+        'string.base': messages.person.fields.gender.base,
+        'string.empty': messages.person.fields.gender.empty,
       })
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
