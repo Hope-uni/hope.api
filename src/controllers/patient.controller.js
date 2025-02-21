@@ -8,7 +8,7 @@ const {
   allPatientsWithoutTherapist,
 } = require('@services/patient.service');
 const { patientEntry, idEntry } = require('@validations/index');
-const { messages, userPersonEntries, formatJoiMessages } = require('../utils/index');
+const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
 
 module.exports = {
 

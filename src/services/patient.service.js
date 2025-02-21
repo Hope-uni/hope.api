@@ -1,11 +1,23 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { Patient, TutorTherapist, User, Role, Person, UserRoles, HealthRecord, TeaDegree, Phase, Observation, sequelize } = require('@models/index.js');
-const { pagination, messages, userPerson, dataStructure, formatErrorMessages } = require('@utils/index');
-const { getProgress } = require('@helpers/healthRecord.helper');
-const { generatePassword } = require('@utils/generatePassword.util');
-const { userSendEmail } = require('@helpers/user.helper');
-const { deleteUser } = require('./user.service');
+const { 
+  Patient, 
+  TutorTherapist, 
+  User, 
+  Role, 
+  Person, 
+  UserRoles,
+  HealthRecord, 
+  TeaDegree, 
+  Phase, 
+  Observation, 
+  PatientActivity,
+  Activity, 
+  sequelize 
+} = require('@models/index.js');
+const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
+const { getProgress, userSendEmail } = require('@helpers/index');
+const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
 
@@ -53,7 +65,7 @@ module.exports = {
         const data = await Patient.findAll({
           where: {
             status: true,
-          },
+          }, 
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -63,6 +75,25 @@ module.exports = {
               attributes: {
                 exclude: ['createdAt','updatedAt','status']
               },
+            },
+            {
+              model: User,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt','updatedAt','status']
+                      },
+                    }
+                  ]
+                },
+              ]
             },
             {
               model: TutorTherapist,
@@ -85,25 +116,6 @@ module.exports = {
                 model: Person,
                 attributes: ['id', 'firstName', 'surname']
               }
-            },
-            {
-              model: User,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
             },
             {
               model: HealthRecord,
@@ -498,22 +510,10 @@ module.exports = {
             ]
           },
           {
-            model: TutorTherapist,
-            as: 'therapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person,
-              },
-              {
-                model: User,
-              }
-            ]
-          },
-          {
             model: User,
+            where: {
+              status: true
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
@@ -529,6 +529,37 @@ module.exports = {
                   }
                 ]
               },
+            ]
+          },
+          {
+            model: PatientActivity,
+            attributes: {
+              exclude: ['createdAt','updatedAt']
+            },
+            include: [
+              {
+                model: Activity,
+                include: [
+                  {
+                    model: Phase,
+                  }
+                ]
+              }
+            ],
+          },
+          {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
             ]
           },
           {
@@ -576,7 +607,7 @@ module.exports = {
       };
 
       // Get Progress of the Patient about his phase level and activities score
-      const { error:progressError, message: progressMessage, phaseProgress } = await getProgress(data.id);
+      const { error:progressError, message: progressMessage, generalProgress } = await getProgress(data.id);
       if(progressError) {
         return {
           error: progressError,
@@ -584,8 +615,7 @@ module.exports = {
           message: progressMessage,
         }
       }
-
-      data.phaseProgress = phaseProgress;
+      data.generalProgress = generalProgress;
 
       return {
         error: false,
@@ -692,7 +722,7 @@ module.exports = {
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
       resData.password = passwordTemp;
 
-      const { error:userPersonError, statusCode, message, validationErrors, data  } = await userPerson.createUserPerson(resData, transaction);
+      const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser(resData, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -888,7 +918,7 @@ module.exports = {
         error: false,
         statusCode: 201,
         message: messages.patient.success.create,
-        data: dataStructure.findPatientDataStructure(newData),
+        data: dataStructure.patientDataStructure(newData, true),
       };
     } catch (error) {
       await transaction.rollback();
@@ -979,12 +1009,13 @@ module.exports = {
       };
       }
 
-
-      const { error:userPersonError, statusCode, message, validationErrors } = await userPerson.updateUserPerson({
-        ...resData,
+      const { error:userPersonError, statusCode, message, validationErrors } = await updateUser(patientExist.userId,
+        {
+          ...resData,
         personId: patientExist.personId,
-        userId: patientExist.userId,
-      }, transaction);
+      }, 
+      transaction,
+    );
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -994,7 +1025,6 @@ module.exports = {
           validationErrors,
         };
       };
-
 
       if(tutorId || therapistId) {
         const patientResponse = await Patient.update({
@@ -1106,8 +1136,13 @@ module.exports = {
               {
                 model: Observation,
                 attributes: {
-                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                }
+                  exclude: ['updatedAt', 'status', 'userId', 'healthRecordId'],
+                },
+                include: [
+                  {
+                    model: User
+                  }
+                ]
               }
             ],
           }
@@ -1118,7 +1153,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.patient.success.update,
-        data: dataStructure.findPatientDataStructure(newData),
+        data: dataStructure.updatePatientDataStructure(newData),
       }
 
     } catch (error) {

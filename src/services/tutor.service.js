@@ -14,13 +14,12 @@ const {
   Observation,
   sequelize 
 } = require('@models/index.js');
-const { pagination, messages, userPerson, dataStructure } = require('@utils/index');
-const { generatePassword } = require('@utils/generatePassword.util');
-const { userSendEmail } = require('@helpers/user.helper');
-const { formatErrorMessages } = require('@utils/index');
-
+const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
+const { userSendEmail } = require('@helpers/index');
 const { 
-  deleteUser
+  deleteUser,
+  createUser,
+  updateUser,
 } = require('./user.service');
 
 module.exports = {
@@ -266,6 +265,9 @@ module.exports = {
               },
               {
                 model: User,
+                where: {
+                  status: true
+                },
                 attributes: {
                   exclude: ['createdAt','updatedAt','status','password']
                 },
@@ -339,6 +341,9 @@ module.exports = {
             },
             {
               model: User,
+              where: {
+                status: true,
+              },
               attributes: {
                 exclude: ['createdAt','updatedAt','status','password']
               },
@@ -560,7 +565,7 @@ module.exports = {
       resBody.roles = [5];
 
       // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, validationErrors, data } = await userPerson.createUserPerson(resBody, transaction);
+      const { error:userPersonError, message, statusCode, validationErrors, data } = await createUser(resBody, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -796,10 +801,9 @@ module.exports = {
 
       // Validate and update User and Person
       if(resData) {
-        const { error:userPersonError, statusCode, message, validationErrors } = await userPerson.updateUserPerson({
+        const { error:userPersonError, statusCode, message, validationErrors } = await updateUser(tutorExist.userId,{
           ...resData,
-          personId: tutorExist.personId,
-          userId: tutorExist.userId,
+          personId: tutorExist.personId
         }, transaction);
         if(userPersonError) {
           await transaction.rollback();

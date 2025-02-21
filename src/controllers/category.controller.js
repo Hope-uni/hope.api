@@ -7,8 +7,7 @@ const {
   removeCategory
 } = require('@services/category.service');
 const { categoryEntry, idEntry } = require('@validations/index');
-const { formatJoiMessages } = require('@utils/index');
-const messages = require('@utils/messages.utils');
+const { formatJoiMessages, messages } = require('@utils/index');
 
 
 module.exports = {

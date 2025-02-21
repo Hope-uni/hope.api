@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
-const { Activity, Phase, PatientActivity, Patient, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
+const { Activity, Phase, PatientActivity, Patient, sequelize } = require('@models/index');
 const { 
   formatErrorMessages, 
   messages,
@@ -9,7 +9,7 @@ const {
 const { 
   validatePictogram,
   getPictograms 
-} = require('@helpers/activity.helper');
+} = require('@helpers/index');
 
 
 module.exports = {
@@ -537,8 +537,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('activityPatient', messages.activity.errors.in_use.patient_activity_assigned),
+          message: messages.activity.errors.in_use.patient_activity_assigned,
         }
       }
 

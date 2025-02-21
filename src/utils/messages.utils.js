@@ -386,7 +386,8 @@ const messages = {
         min: `Segundo Apellido debe tener como minimo 3 caracteres`
       },
       imageProfile: {
-        base: `Imagen de perfil debe ser un texto válido`
+        base: `Imagen de perfil debe ser un texto válido`,
+        empty: `Imagen de perfil no debe estar vacía`,
       },
       address: {
         required: `Dirección es requerida`,
@@ -402,7 +403,8 @@ const messages = {
       gender: {
         required: 'Sexo debe ser especificado',
         only: 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
-        base: 'Sexo debe ser un texto valido '
+        base: 'Sexo debe ser un texto valido',
+        empty: 'Sexo no puede estar vacío'
       }
     },
     errors: {

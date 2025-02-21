@@ -13,28 +13,14 @@ const {
   Observation,
   Activity,
   sequelize } = require('@models/index');
-const { pagination, userPerson, messages, dataStructure } = require('@utils/index');
-const { generatePassword } = require('@utils/generatePassword.util');
-const { userSendEmail } = require('@helpers/user.helper');
-const { formatErrorMessages } = require('@utils/formatErrorMessages.util');
+const { pagination, generatePassword, messages, dataStructure, formatErrorMessages } = require('@utils/index');
+const { userSendEmail } = require('@helpers/index');
 const constants = require('@constants/role.constant');
-const { deleteUser } = require('./user.service');
+const { deleteUser, createUser, updateUser } = require('./user.service');
 
 
 module.exports = {
 
-  /**
-   * The function `all` retrieves paginated data of therapists with related person, user, role, and
-   * permission information while handling errors gracefully.
-   * @param query - The `all` function you provided is an asynchronous function that retrieves data
-   * from the database using pagination and includes related models. The function handles errors and
-   * logs them using a logger.
-   * @returns The `all` function returns an object with the following properties:
-   * - `error`: A boolean value indicating if an error occurred (false if no error, true if there was
-   * an error).
-   * - Other properties include the paginated data from the database query, such as `count`, `rows`,
-   * and pagination information like `page` and `totalPages`.
-   */
   /* eslint-disable radix */
   /* eslint-disable consistent-return */
   /* eslint-disable no-plusplus */
@@ -352,6 +338,9 @@ module.exports = {
           },
           {
             model: User,
+            where: {
+              status: true
+            },
             attributes: {
               exclude: ['createdAt','updatedAt','status','password']
             },
@@ -606,7 +595,7 @@ module.exports = {
       resBody.roles = [3];
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message, validationErrors, data  } = await userPerson.createUserPerson(resBody,transaction);
+      const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser(resBody,transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -841,10 +830,9 @@ module.exports = {
 
       // User and Person update
       if(resBody) {
-        const { error:userPersonError, statusCode, message, validationErrors  } = await userPerson.updateUserPerson({
+        const { error:userPersonError, statusCode, message, validationErrors  } = await updateUser(therapistExist.userId,{
           ...resBody,
           personId: therapistExist.personId,
-          userId: therapistExist.userId
         }, transaction);
         if(userPersonError) {
           await transaction.rollback();

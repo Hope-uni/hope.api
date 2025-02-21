@@ -1,15 +1,23 @@
-const { User, Role, UserRoles, sequelize } = require('@models/index.js');
+const { 
+  User, 
+  Role, 
+  UserRoles,
+  Person, 
+  sequelize 
+} = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
 const constants = require('@constants/role.constant');
 const { Op } = require('sequelize');
-const { paginationValidation, getPageData} = require('@utils/pagination.util');
 const { isAdmin } = require('@config/variables.config');
-const { userSendEmail } = require('@helpers/user.helper');
-const messages = require('@utils/messages.utils');
-const dataStructure = require('@utils/data-structure.util');
-const { generatePassword } = require('@utils/generatePassword.util');
-const { formatErrorMessages } = require('@utils/formatErrorMessages.util');
+const { userSendEmail } = require('@helpers/index');
+const {
+  messages,
+  dataStructure,
+  formatErrorMessages,
+  generatePassword,
+  pagination,
+} = require('@utils/index');
 
 
 module.exports = {
@@ -66,7 +74,7 @@ module.exports = {
       }
 
       // Pagination
-      const { limit, offset } = paginationValidation(query.page,query.size);
+      const { limit, offset } = pagination.paginationValidation(query.page,query.size);
       
       const data = await User.findAndCountAll({
         limit,
@@ -102,7 +110,7 @@ module.exports = {
       // Structuring data
       data.rows = await dataStructure.userDataStructure(data.rows);
 
-      const dataResponse = getPageData(data, query.page, limit);
+      const dataResponse = pagination.getPageData(data, query.page, limit);
 
       return {
         error: false,
@@ -453,12 +461,36 @@ module.exports = {
         }
       }
 
+      // Person creation
+      const personData = await Person.create({
+        firstName: resBody.firstName,
+        secondName: resBody.secondName,
+        surname: resBody.surname,
+        secondSurname: resBody.secondSurname,
+        imageProfile: resBody.imageProfile,
+        address: resBody.address,
+        birthday: resBody.birthday,
+        gender: resBody.gender
+      },{transaction});
+      if(!personData) {
+        logger.error(messages.person.errors.service.create);
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('Person', messages.person.errors.service.create),
+        };
+      };
+
       return {
         error: false,
         statusCode: 201,
         message: messages.user.success.create,
-        data,
-      };
+        data: {
+          userId: data.id,
+          personId: personData.id
+        }
+      }
     } catch (error) {
       logger.error(`${messages.user.errors.service.base}: ${error}`);
       return {
@@ -473,57 +505,69 @@ module.exports = {
   async updateUser(id, body, transaction) {
     try {
       // Destructuring data
-      const {roles, ...resBody} = body;
+      const {
+        roles,
+        firstName,
+        secondName,
+        surname,
+        secondSurname,
+        imageProfile,
+        address,
+        birthday,
+        gender,
+        personId, 
+        ...resBody
+      } = body;
       
       // this is when you try to create a user directly
       if(!transaction) {
 
         // User Exist
-      const userExist = await User.findOne({
-        where: {
-          [Op.and]: [
-            {
-              id
-            },
-            {
-              id: {
-                [Op.ne]: 1
-              }
-            },
-            {
-              status: true,
-            }
-          ],
-        },
-        include: [
-          {
-            model: UserRoles,
-            where: {
-              userId: id,
-              roleId: 2
-            },
-            attributes: {
-              exclude: ['userId','createdAt','updatedAt']
-            },
-            include: [
+        const userExist = await User.findOne({
+          where: {
+            [Op.and]: [
               {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
+                id
+              },
+              {
+                id: {
+                  [Op.ne]: 1
+                }
+              },
+              {
+                status: true,
               }
-            ]
+            ],
+          },
+          include: [
+            {
+              model: UserRoles,
+              where: {
+                userId: id,
+                roleId: 2
+              },
+              attributes: {
+                exclude: ['userId','createdAt','updatedAt']
+              },
+              include: [
+                {
+                  model: Role,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  },
+                }
+              ]
+            }
+          ]
+        });
+        if(!userExist || userExist.UserRoles.length === 0) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
           }
-        ]
-      });
-      if(!userExist || userExist.UserRoles.length === 0) {
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
-        }
-      };
+        };
 
         // Valdiate if user is admin
         const userAdminValidation = await UserRoles.findOne({
@@ -701,11 +745,53 @@ module.exports = {
         }
       };
 
+      // This quote is for updating person
+      if(firstName || secondName || surname || secondSurname || imageProfile || address || birthday || gender) {
+        // validate if person exist
+        const personExist = await Person.findOne({
+          where: {
+            id: personId
+          }
+        });
+        if(!personExist) {
+          logger.error(messages.person.errors.not_found);
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.person.errors.not_found),
+          };
+        }
+
+        const personData = await Person.update({
+          firstName,
+          secondName,
+          surname,
+          secondSurname,
+          imageProfile,
+          address,
+          birthday,
+          gender
+        },{
+          where: {
+            id: personId
+          }
+        },{transaction});
+        if(!personData) {
+          logger.error(messages.person.errors.service.update);
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('update', messages.person.errors.service.update),
+          };
+        };
+      };
+
       return {
         error: false,
         statusCode: 200,
         message: messages.user.success.update,
-        data,
       };
 
     } catch (error) {
