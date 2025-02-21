@@ -69,17 +69,17 @@ module.exports = {
       // Building the percentage
       const totalPhases = data.count;
       let phaseIndex = 0;
-      let phaseProgress = 0;
+      let generalProgress = 0;
 
       if(patientData.HealthRecord !== null && patientData.HealthRecord.Phase !== null) {
         phaseIndex = data.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
 
-        phaseProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2);
+        generalProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2);
       }
 
       return {
         error: false,
-        phaseProgress,
+        generalProgress,
       }
 
     } catch (error) {
