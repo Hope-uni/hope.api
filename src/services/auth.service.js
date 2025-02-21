@@ -4,9 +4,8 @@ const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { secretKey, domain, userEmail } = require('@config/variables.config');
-const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
-const { jwtAccessExpiration } = require('@config/variables.config');
+const { jwtAccessExpiration, secretKey, domain, userEmail } = require('@config/variables.config');
+const { transporter, handlebarsOption } = require('@helpers/index');
 const { messages, formatErrorMessages, dataStructure } = require('@utils/index');
 
 module.exports = {

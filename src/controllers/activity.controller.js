@@ -14,7 +14,7 @@ const {
   deleteActivity,
   assingActivityPatient,
   reAssignActivity, 
-} = require('../services/activity.service');
+} = require('@services/activity.service');
 
 
 

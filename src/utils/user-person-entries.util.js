@@ -1,5 +1,5 @@
-const { createPersonValidation, updatePersonValidation } = require('../validations/person.validation');
-const { createUserValidation, updateUserValidation } = require('../validations/user.validation');
+const { createPersonValidation, updatePersonValidation } = require('@validations/person.validation');
+const { createUserValidation, updateUserValidation } = require('@validations/user.validation');
 
 
 module.exports = {
@@ -67,7 +67,6 @@ module.exports = {
     const {
       username,
       email,
-      // roles,
       firstName,
       secondName,
       surname,
@@ -89,7 +88,7 @@ module.exports = {
       if(error)  userError = error;
     }
 
-    if(personId || firstName || secondName || surname || secondSurname || imageProfile || address) {
+    if(personId || firstName || secondName || surname || secondSurname || imageProfile || address || birthday || gender) {
       const { error } = updatePersonValidation({
         firstName,
         secondName,

@@ -1,5 +1,9 @@
-const dates = require('./dates.util');
-const { getPatient, getTutorTherapist } = require('../helpers/auth.helper');
+const { getPatient, getTutorTherapist } = require('@helpers/auth.helper');
+const dates = require('../dates.util');
+const {
+  patientDataStructure,
+  activityDataStructure
+} = require('./index');
 
 /* eslint-disable no-restricted-syntax */
 module.exports = {
@@ -170,43 +174,7 @@ module.exports = {
 
     if(data.patientTherapist) {
       for (const patient of data.patientTherapist) {
-
-        // Get age from Patient
-        const childAge = dates.getAge(patient);
-
-        // Full Name validation
-        let fullName = `${patient.Person.firstName} ${patient.Person.secondName} ${patient.Person.surname} ${patient.Person.secondSurname}`;
-        if(!patient.Person.secondName || !patient.Person.secondSurname) {
-          fullName = `${patient.Person.firstName} ${patient.Person.surname}`;
-        }
-
-         // phase 
-          const getPhase = Object.keys(patient).includes('HealthRecord') && patient.HealthRecord !== null ? {
-            id: patient.HealthRecord.Phase.id,
-            name: patient.HealthRecord.Phase.name,
-            description: patient.HealthRecord.Phase.description,
-          } : null;
-
-        // TeaDegree
-        const getTeaDegree = Object.keys(patient).includes('HealthRecord') && patient.HealthRecord !== null ? {
-          id: patient.HealthRecord.TeaDegree.id,
-          name: patient.HealthRecord.TeaDegree.name,
-          description: patient.HealthRecord.TeaDegree.description,
-        } : null;
-        
-        const childInfo = {
-          id: patient.id,
-          userId: patient.userId,
-          fullName,
-          age: childAge.Person.dataValues.age,
-          teaDegree: getTeaDegree,
-          currentPhase: getPhase,
-          achievementCount: 0,
-          image: patient.Person.imageProfile ?? null,
-          // Grado de autismo
-          // cantidad de logros
-        }
-        children.push(childInfo);
+        children.push(patientDataStructure.all(patient));
       }
     }
 
@@ -240,8 +208,8 @@ module.exports = {
       activities: data.User.Activities.length > 0 ? data.User.Activities.filter((condition) => condition.status === true).map((item) => ({
         id: item.id,
         name: item.name,
-        satisfactoryPoints: item.satisfactoryPoints,
         description: item.description,
+        satisfactoryPoints: item.satisfactoryPoints,
         phase: {
           id: item.Phase.id,
           name: item.Phase.name,
@@ -342,44 +310,7 @@ module.exports = {
 
     if(data.patientTutor) {
       for (const patient of data.patientTutor) {
-        
-        // Get age from Patient
-        const childAge = dates.getAge(patient);
-
-        // Full Name validation
-        let fullName = `${patient.Person.firstName} ${patient.Person.secondName} ${patient.Person.surname} ${patient.Person.secondSurname}`;
-        if(!patient.Person.secondName || !patient.Person.secondSurname) {
-          fullName = `${patient.Person.firstName} ${patient.Person.surname}`;
-        }
-
-        // phase 
-        const getPhase = Object.keys(patient).includes('HealthRecord') && patient.HealthRecord !== null ? {
-          id: patient.HealthRecord.Phase.id,
-          name: patient.HealthRecord.Phase.name,
-          description: patient.HealthRecord.Phase.description,
-        } : null;
-
-      // TeaDegree
-      const getTeaDegree = Object.keys(patient).includes('HealthRecord') && patient.HealthRecord !== null ? {
-        id: patient.HealthRecord.TeaDegree.id,
-        name: patient.HealthRecord.TeaDegree.name,
-        description: patient.HealthRecord.TeaDegree.description,
-      } : null;
-
-        const childInfo = {
-          id: patient.id,
-          userId: patient.userId,
-          fullName,
-          age: childAge.Person.dataValues.age,
-          teaDegree: getTeaDegree,
-          currentPhase: getPhase,
-          achievementCount: 0,
-          image: patient.Person.imageProfile ?? null,
-          // Grado de Autismo
-          // Fase
-          // Cantidad de logros
-        }
-        children.push(childInfo);
+        children.push(patientDataStructure.all(patient));
       }
     }
 
@@ -448,42 +379,22 @@ module.exports = {
   patients by iterating over the input `data` array. It extracts specific information from each
   patient object in the array and organizes it into a new structure. Here's a breakdown of what it
   does: */
-  patientDataStructure(data) {
+  patientDataStructure(data, create = false) {
     // Variables
     const newData = [];
+    let createDataStructure;
 
-    for (const iterator of data) {
-
-      const childAge = dates.getAge(iterator);
-
-      // phase
-      const getPhase = Object.keys(iterator).includes('HealthRecord') && iterator.HealthRecord !== null ? {
-        id: iterator.HealthRecord.Phase.id,
-        name: iterator.HealthRecord.Phase.name,
-        description: iterator.HealthRecord.Phase.description,
-      } : null;
-
-      // TeaDegree
-      const getTeaDegree = Object.keys(iterator).includes('HealthRecord') && iterator.HealthRecord !== null ? {
-        id: iterator.HealthRecord.TeaDegree.id,
-        name: iterator.HealthRecord.TeaDegree.name,
-        description: iterator.HealthRecord.TeaDegree.description,
-      } : null;
-
-      const element = {
-        id: iterator.id,
-        userId: iterator.userId,
-        fullName: `${iterator.Person.firstName} ${iterator.Person.secondName ? iterator.Person.secondName : ''} ${iterator.Person.surname} ${iterator.Person.secondSurname ? iterator.Person.secondSurname : ''}`,
-        age: childAge.Person.dataValues.age,
-        teaDegree: getTeaDegree,
-        currentPhase: getPhase,
-        achievementCount: 0,
-        image: iterator.Person.imageProfile,
-        // Cantidad de logros
-      }
-      newData.push(element);
+    if(create) {
+      createDataStructure = patientDataStructure.all(data);
     }
-    return newData;
+
+    if(!create) {
+      for (const iterator of data) {
+        newData.push(patientDataStructure.all(iterator));
+      }
+    }
+
+    return create ? createDataStructure : newData;
   },
 
   findPatientDataStructure(data) {
@@ -545,17 +456,19 @@ module.exports = {
       secondName: data.Person.secondName,
       surname: data.Person.surname,
       secondSurname: data.Person.secondSurname,
-      gender: data.Person.gender,
+      gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       age: childAge.Person.dataValues.age,
-      image: data.Person.imageProfile,
+      image: data.Person.imageProfile ?? null,
       username: data.User.username,
       email: data.User.email,
       birthday: data.Person.birthday,
+      address: data.Person.address,
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
-      phaseProgress: data.phaseProgress,
-      telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
-      address: data.Person.address,
+      progress: {
+        generalProgress: data.generalProgress,
+        phaseProgress: 0,
+      },
       observations: observationsGotit,
       achievements: null,
       
@@ -565,23 +478,24 @@ module.exports = {
           Imagen
         }
       */
-      tutor: {
+      tutor: data.tutor ?  {
         id: data.tutor.id,
         userId: data.tutor.userId,
-        image: data.tutor.Person.imageProfile,
+        image: data.tutor.Person.imageProfile ?? null,
         fullName: tutorFullName,
-        username: data.tutor.User.username,
         email: data.tutor.User.email,
-        telephone: data.tutor.telephone ? data.tutor.telephone : data.tutor.phoneNumber,
-      },
+        username: data.tutor.User.username,
+        phoneNumber: data.tutor.phoneNumber ? `${data.tutor.phoneNumber}` : null,
+        telephone: data.tutor.telephone ? `${data.tutor.telephone}` : null,
+      } : null,
       therapist: data.therapist ? {
         id: data.therapist.id,
         userId: data.therapist.userId,
         image: data.therapist.Person.imageProfile,
         fullName: therapistFullName,
-        username: data.therapist.User.username,
         email: data.therapist.User.email,
-        phoneNumber: data.therapist.phoneNumber
+        username: data.therapist.User.username,
+        phoneNumber: data.therapist.phoneNumber ? `${data.therapist.phoneNumber}` : null,
       } : null,
     /*
         Informacion de la actividad asignada: {
@@ -592,7 +506,21 @@ module.exports = {
           progreso
         }
       */
-      currentActivity: null,
+      currentActivity: data.PatientActivities.length > 0 ? {
+        ...data.PatientActivities.filter(item => item.isCompleted === false).map(item => ({
+          id: item.id,
+          name: item.Activity.name ?? null,
+          satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
+          satisfactoryAttempts: item.satisfactoryAttempts ?? null,
+          progress: (item.satisfactoryAttempts / item.Activity.satisfactoryPoints) * 100,
+          description: item.Activity.description ?? null,
+          phase: {
+            id: item.Activity.Phase.id,
+            name: item.Activity.Phase.name,
+            description: item.Activity.Phase.description,
+          },
+        }))[0]
+      } : null,
       /*
         Lista de actividades completadas relacionadas al paciente: {
           id
@@ -601,7 +529,7 @@ module.exports = {
           fase
         }
       */
-      activities: null,
+      activities: data.PatientActivities.length > 0 ? activityDataStructure.allPatientActivities(data) : null,
       /*
         Lista de Pictogramas personalizados del Paciente: {
           id
@@ -611,6 +539,37 @@ module.exports = {
       */
       pictograms: null,
     } 
+  },
+
+
+  updatePatientDataStructure(data) {
+
+    // Get the observations
+    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
+    ? data.HealthRecord.Observations.map((item) => {
+      return {
+        id: item.id,
+        description: item.description,
+        username: item.User ? item.User.username : null,
+        createdAt: item.createdAt ? item.createdAt : null,
+      }
+    }) : null;
+
+    return {
+      id: data.id,
+      firstName: data.Person.firstName,
+      secondName: data.Person.secondName ?? null,
+      surname: data.Person.surname,
+      secondSurname: data.Person.secondSurname ?? null,
+      gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
+      age: dates.getAge(data).Person.dataValues.age,
+      image: data.Person.imageProfile ?? null,
+      username: data.User.username,
+      email: data.User.email,
+      birthday: data.Person.birthday,
+      address: data.Person.address ?? null,
+      observations: observationsGotit,
+    }
   },
 
   /*

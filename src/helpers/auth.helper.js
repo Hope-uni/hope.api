@@ -1,6 +1,6 @@
 const { Patient, TutorTherapist, Person } = require('@models/index');
 const logger = require('@config/logger.config');
-const messages = require('@utils/messages.utils');
+const { messages } = require('@utils/index');
 
 
 module.exports = {

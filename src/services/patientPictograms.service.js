@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages, dataStructure, formatErrorMessages } = require('@utils/index');
-const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers/patientPictogram.helper');
+const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers/index');
 
 
 module.exports = {

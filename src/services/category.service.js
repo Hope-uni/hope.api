@@ -1,5 +1,5 @@
-const { Category, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
+const { Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages, pagination, formatErrorMessages } = require('@utils/index');
 

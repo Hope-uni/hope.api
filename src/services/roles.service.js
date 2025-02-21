@@ -1,7 +1,7 @@
 const { Permission, Role } = require('@models/index');
+const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { sequelize } = require('@models/index');
-const { Op } = require('sequelize');
 const { pagination, messages, formatErrorMessages } = require('@utils/index');
 
 module.exports = {

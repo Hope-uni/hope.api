@@ -1,8 +1,8 @@
 const logger = require('@config/logger.config');
-const { transporter, handlebarsOption } = require('@helpers/mailer.helper');
 const hbs = require('nodemailer-express-handlebars');
-const messages = require('@utils/messages.utils');
-const { domain, userEmail } = require('../config/variables.config');
+const {messages} = require('@utils/index');
+const { domain, userEmail } = require('@config/variables.config');
+const { transporter, handlebarsOption } = require('./mailer.helper');
 
 
 module.exports = {
