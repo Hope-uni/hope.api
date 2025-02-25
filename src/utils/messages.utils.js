@@ -69,7 +69,7 @@ const messages = {
         },
         change_password: {
           base: `Hubo un error en el servicio "Cambiar Contraseña"`,
-          incorrect_password: `Contraseña anterior incorrecta`,
+          incorrect_password: `Contraseña actual incorrecta`,
           update_password: `Hubo un error al momento de cambiar la contraseña`,
         },
         change_default_password: {

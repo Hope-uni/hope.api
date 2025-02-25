@@ -38,7 +38,7 @@ module.exports = {
         ]
       });
 
-      // If there is not UserRoles This would means the user who is trying to get the data is Superadmin or Admin.
+      // if there is UserRoles This means the user who is trying to get the data is the Patient;
       if(userType.UserRoles[0]) {
         // get Patient
         patientResponse = await Patient.findOne({
@@ -59,7 +59,7 @@ module.exports = {
         }
       };
 
-      // if there is UserRoles This would mean the user who is trying to get the data is the Patient;
+      // If there is not UserRoles This means the user who is trying to get the data is Superadmin or Admin.
       if(!userType.UserRoles[0]) {
         if(!patientId) {
           return {
@@ -509,20 +509,7 @@ module.exports = {
     }
   },
 
-  /**
-   * This function retrieves pictograms for a specific patient's tutor based on various criteria such
-   * as category, name, and pagination.
-   * @param query - The `query` parameter in the `getPictogramsPatientTutor` function is used to pass
-   * any query parameters for filtering or pagination purposes. It can include properties like `page`
-   * for the page number, `size` for the number of items per page, `categoryId` for filtering by
-   * @param payload - The `payload` parameter in the `getPictogramsPatientTutor` function represents
-   * the data of the user making the request. It typically contains information such as the user's ID,
-   * role, and any other relevant details needed for authentication and authorization purposes. In this
-   * specific function, the `payload
-   * @returns The function `getPictogramsPatientTutor` returns an object with various properties based
-   * on the conditions and data retrieved during the execution of the function. The possible properties
-   * that can be returned are:
-   */
+  
   async getPictogramsPatientTutor(payload, { patientId, categoryId, pictogramName, page, size }) {
     try {
 

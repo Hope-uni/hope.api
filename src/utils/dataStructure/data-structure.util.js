@@ -628,7 +628,7 @@ module.exports = {
 
       if(item.Pictogram) {
         const element = {
-          id: item.id,
+          id: item.Pictogram.id,
           name: item.name,
           imageUrl: item.imageUrl,
           Category: {
