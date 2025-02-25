@@ -15,7 +15,7 @@ module.exports = {
   async all(req,res) {
     try {
       
-      const { error, message, statusCode, data } = await allCategories(req.query);
+      const { error, message, statusCode, ...data } = await allCategories(req.query);
 
       if(error) {
         return res.status(statusCode).json({
@@ -29,7 +29,7 @@ module.exports = {
         error,
         statusCode,
         message,
-        data
+        ...data
       });
 
     } catch (error) {

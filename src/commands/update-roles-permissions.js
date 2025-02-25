@@ -30,7 +30,6 @@ async function assignPermissionsRoles() {
       'borrar actividades',
       'desasignar actividades',
       'asignar actividades',
-      'verificar respuesta de actividades',
     ]
 
     const tutorPermissions = [
@@ -43,6 +42,10 @@ async function assignPermissionsRoles() {
       'crear pictogramas-personalizados',
       'actualizar pictogramas-personalizados',
       'borrar pictogramas-personalizados',
+    ]
+
+    const patientPermissions = [
+      'listar pictogramas-personalizados',
     ]
 
     for(let i=0; i<permissionsData.length; i++) {
@@ -77,6 +80,23 @@ async function assignPermissionsRoles() {
         }
       });
 
+      // Patient
+      if(patientPermissions.includes(permissionsData[i].description)) {
+        RolesPermission.findOne({
+          where: {
+            roleId: 4,
+            permissionId: permissionsData[i].id
+          }
+        }).then((exist) => {
+          if(!exist) {
+            RolesPermission.create({
+              roleId: 4,
+              permissionId: permissionsData[i].id
+            });
+          }
+        });
+      }
+
       //  Therapist
       if(therapistPermissions.includes(permissionsData[i].description)) {
         RolesPermission.findOne({
@@ -110,6 +130,7 @@ async function assignPermissionsRoles() {
           }
         });
       }
+
 
     }
   } catch (error) {

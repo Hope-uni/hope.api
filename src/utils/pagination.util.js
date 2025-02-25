@@ -16,6 +16,7 @@ module.exports = {
   },
 
   getPageData(dataResponse, pageNumber, limit) {
+
     if(+pageNumber <= 0) {
       pageNumber = 1;
     }
