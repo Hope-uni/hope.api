@@ -1,15 +1,10 @@
 const getFullName = (data) => {
-
-  const fullName = [
+  return [
     data.firstName,
     data.secondName,
     data.surname,
     data.secondSurname
   ].filter(item => !!item).join(" ");
-
-
-  return fullName;
-
 }
 
 
