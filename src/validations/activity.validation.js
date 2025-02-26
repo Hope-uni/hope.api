@@ -23,12 +23,13 @@ module.exports = {
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
         'number.max': messages.activity.fields.satisfactoryPoints.max,	
       }),
-      pictogramSentence: joi.array().items(joi.number().positive()).unique().min(1).messages({
+      pictogramSentence: joi.array().max(20).items(joi.number().positive()).unique().min(1).messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
         'array.min': messages.activity.fields.pictogramSentence.array_min,
         'array.unique': messages.activity.fields.pictogramSentence.unique,
+        'array.max': messages.activity.fields.pictogramSentence.max,
       }),
       phaseId: joi.number().required().positive().messages({
         'any.required': messages.phase.fields.id.required,
@@ -60,12 +61,13 @@ module.exports = {
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
       }),
-      pictogramSentence: joi.array().items(joi.number().positive()).unique().min(1).empty(' ').messages({
+      pictogramSentence: joi.array().max(20).items(joi.number().positive()).unique().min(1).empty(' ').messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
         'array.min': messages.activity.fields.pictogramSentence.array_min,
         'array.unique': messages.activity.fields.pictogramSentence.unique,
+        'array.max': messages.activity.fields.pictogramSentence.max,
       }),
       phaseId: joi.number().positive().empty('  ').messages({
         'number.base': messages.phase.fields.id.base,
@@ -131,13 +133,14 @@ module.exports = {
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      attempt: joi.array().items(joi.number().positive()).unique().min(1).required().messages({
+      attempt: joi.array().max(20).items(joi.number().positive()).unique().min(1).required().messages({
         'any.required': messages.activity.fields.pictogramSentence.required,
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
         'array.min': messages.activity.fields.pictogramSentence.array_min,
         'array.unique': messages.activity.fields.pictogramSentence.unique,
+        'array.max': messages.activity.fields.pictogramSentence.max,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

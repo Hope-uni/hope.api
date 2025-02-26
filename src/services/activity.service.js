@@ -469,7 +469,7 @@ module.exports = {
         }
       }
 
-      // Activity Patient Exist
+      // PatientActivity Exist
       const activityPatientExist = await PatientActivity.findOne({
         where: {
           activityId,
@@ -496,11 +496,31 @@ module.exports = {
       });
 
       if(verifyPatientActivityisUnassigned) {
-        await transaction.rollback();
+
+        const reassignActivity = await PatientActivity.update({
+          status: true,
+          satisfactoryAttempts: 0,
+        },{
+          where: {
+            activityId,
+            patientId,
+            status: false,
+          },
+        });
+
+        if(!reassignActivity) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.activity.errors.service.create,
+          }
+        }
+
         return {
-          error: true,
+          error: false,
           statusCode: 200,
-          message: messages.activity.errors.in_use.patient_activity_unassigned,
+          message: messages.activity.success.create,
         }
       }
 
@@ -570,155 +590,6 @@ module.exports = {
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`${messages.activity.errors.service.base}: ${error}`);
-      return {
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server,
-      }
-    }
-  },
-
-  async reAssignActivity({ activityId, patientId, restore }) {
-    const transaction = await sequelize.transaction();
-    try {
-      
-      // Activity exist validation
-      const activityExist = await Activity.findOne({
-        where: {
-          id: activityId,
-          status: true
-        }
-      });
-      if(!activityExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.activity.errors.not_found,
-        }
-      }
-      
-      // Patient exist validation
-      const patientExist = await Patient.findOne({
-        where: {
-          id: patientId,
-          status: true
-        }
-      });
-      if(!patientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.patient.errors.not_found,
-        }
-      }
-
-
-      // Verify if the activity is assigned to the patient
-      const activityPatientExist = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          status: false
-        }
-      });
-
-      if(!activityPatientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.patient_activity_not_assigned,
-        }
-      }
-
-      // Validate if activity is completed
-      const activityCompleted = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          isCompleted: true,
-          status: true,
-        }
-      });
-
-      if(activityCompleted) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.already_completed,
-        }
-      }
-
-      // Validate if patient has another activity assigned.
-      const patientActivityAssigned = await PatientActivity.findOne({
-        where: {
-          patientId,
-          isCompleted: false,
-          status: true,
-        }
-      });
-
-      if(patientActivityAssigned) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.patient_activity_assigned,
-        }
-      }
-
-      // reassign the activity
-      let reassignActivity;
-
-      if(restore) {
-        reassignActivity = await PatientActivity.update({
-          status: true,
-          satisfactoryAttempts: 0,
-        },{
-          where: {
-            activityId,
-            patientId,
-            status: false,
-          },
-          transaction
-        });  
-      } else {
-        reassignActivity = await PatientActivity.update({
-          status: true,
-        },{
-          where: {
-            activityId,
-            patientId,
-            status: false,
-          },
-          transaction
-        });
-      }
-
-
-      if(!reassignActivity) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.reassign,
-        }
-      }
-
-      // Commit transaction
-      await transaction.commit();
-
-      return {
-        error: false,
-        statusCode: 200,
-        message: messages.activity.success.reassign,
-      }
-
-    } catch (error) {
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,
