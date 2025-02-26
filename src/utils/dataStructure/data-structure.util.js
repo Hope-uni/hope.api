@@ -1,9 +1,10 @@
 const { getPatient, getTutorTherapist } = require('@helpers/auth.helper');
-const dates = require('../dates.util');
 const {
   patientDataStructure,
-  activityDataStructure
-} = require('./index');
+  activityDataStructure,
+  getFullName,
+} = require('@utils/dataStructure');
+const dates = require('../dates.util');
 
 /* eslint-disable no-restricted-syntax */
 module.exports = {
@@ -124,16 +125,12 @@ module.exports = {
     let createDataStructure;
 
     if(create) {
-      let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
-      if(!data.Person.secondName || !data.Person.secondSurname) {
-        fullName = `${data.Person.firstName} ${data.Person.surname}`;
-      }
       
       createDataStructure = {
         id: data.id,
         userId: data.userId,
         image: data.Person.imageProfile ?? null,
-        fullName,
+        fullName: getFullName(data.Person),
         email: data.User.email,
         username: data.User.username,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
@@ -144,16 +141,11 @@ module.exports = {
     if(!create) {
       for (const iterator of data) {
   
-        let fullName = `${iterator.Person.firstName} ${iterator.Person.secondName} ${iterator.Person.surname} ${iterator.Person.secondSurname}`;
-        if(!iterator.Person.secondName || !iterator.Person.secondSurname) {
-          fullName = `${iterator.Person.firstName} ${iterator.Person.surname}`;
-        }
-        
         const element = {
           id: iterator.id,
           userId: iterator.userId,
           image: iterator.Person.imageProfile ?? null,
-          fullName,
+          fullName: getFullName(iterator.Person),
           email: iterator.User.email,
           username: iterator.User.username,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
@@ -178,19 +170,13 @@ module.exports = {
       }
     }
 
-    // Therapist Fullname validation
-    let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
-    if(!data.Person.secondName || !data.Person.secondSurname) {
-      fullName = `${data.Person.firstName} ${data.Person.surname}`;
-    }
-
     // Get age from therapist 
     const therapistAge = dates.getAge(data);
 
     const element = {
       id: data.id,
       userId: data.userId,
-      fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName ?? null,
       surname: data.Person.surname,
@@ -257,17 +243,12 @@ module.exports = {
     let createDataStructure;
 
     if(create) {
-      // Tutor Fullname validatio
-      let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
-      if(!data.Person.secondName || !data.Person.secondSurname) {
-        fullName = `${data.Person.firstName} ${data.Person.surname}`;
-      }
 
       createDataStructure = {
         id: data.id,
         userId: data.userId ?? null,
         image: data.Person.imageProfile ?? null,
-        fullName,
+        fullName: getFullName(data.Person),
         email: data.User.email ?? null,
         username: data.User.username,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
@@ -280,17 +261,11 @@ module.exports = {
     if(!create) {
       for(const iterator of data) {
 
-        // Tutor Fullname validatio
-        let fullName = `${iterator.Person.firstName} ${iterator.Person.secondName} ${iterator.Person.surname} ${iterator.Person.secondSurname}`;
-        if(!iterator.Person.secondName || !iterator.Person.secondSurname) {
-          fullName = `${iterator.Person.firstName} ${iterator.Person.surname}`;
-        }
-  
         const element = {
           id: iterator.id,
           userId: iterator.userId,
           image: iterator.Person.imageProfile ?? null,
-          fullName,
+          fullName: getFullName(iterator.Person),
           email: iterator.User.email ?? null,
           username: iterator.User.username,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
@@ -317,16 +292,10 @@ module.exports = {
     // Get Age from Tutor
     const tutorAge = dates.getAge(data);
 
-    // Tutor Fullname validation
-    let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`;
-    if(!data.Person.secondName || !data.Person.secondSurname) {
-      fullName = `${data.Person.firstName} ${data.Person.surname}`;
-    }
-
     const element = {
       id: data.id,
       userId: data.userId ?? null,
-      fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName ?? null,
       surname: data.Person.surname,
@@ -398,30 +367,9 @@ module.exports = {
   },
 
   findPatientDataStructure(data) {
-    
-    // Variables
-    let therapistFullName;
 
     // get Age from Patient
     const childAge = dates.getAge(data);
-
-    // Full Name validation
-    let fullName = `${data.Person.firstName} ${data.Person.secondName} ${data.Person.surname} ${data.Person.secondSurname}`; // Patient
-    if(!data.Person.secondName || !data.Person.secondSurname) {
-      fullName = `${data.Person.firstName} ${data.Person.surname}`;
-    }
-
-    let tutorFullName = `${data.tutor.Person.firstName} ${data.tutor.Person.secondName} ${data.tutor.Person.surname} ${data.tutor.Person.secondSurname}`; // Tutor
-    if(!data.tutor.Person.secondName || !data.tutor.Person.secondSurname) {
-      tutorFullName = `${data.tutor.Person.firstName} ${data.tutor.Person.surname}`;
-    }
-
-    if(data.therapist) {
-      therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.secondName} ${data.therapist.Person.surname} ${data.therapist.Person.secondSurname}`; // Therapist
-      if(!data.therapist.Person.secondName || !data.therapist.Person.secondSurname) {
-        therapistFullName = `${data.therapist.Person.firstName} ${data.therapist.Person.surname}`;
-      }
-    }
 
    // Get the observations
     const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
@@ -451,7 +399,7 @@ module.exports = {
     return {
       id: data.id,
       userId: data.userId,
-      fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName,
       surname: data.Person.surname,
@@ -482,7 +430,7 @@ module.exports = {
         id: data.tutor.id,
         userId: data.tutor.userId,
         image: data.tutor.Person.imageProfile ?? null,
-        fullName: tutorFullName,
+        fullName: getFullName(data.tutor.Person),
         email: data.tutor.User.email,
         username: data.tutor.User.username,
         phoneNumber: data.tutor.phoneNumber ? `${data.tutor.phoneNumber}` : null,
@@ -492,7 +440,7 @@ module.exports = {
         id: data.therapist.id,
         userId: data.therapist.userId,
         image: data.therapist.Person.imageProfile,
-        fullName: therapistFullName,
+        fullName: getFullName(data.therapist.Person),
         email: data.therapist.User.email,
         username: data.therapist.User.username,
         phoneNumber: data.therapist.phoneNumber ? `${data.therapist.phoneNumber}` : null,
@@ -537,7 +485,7 @@ module.exports = {
           nombre
         }
       */
-      pictograms: null,
+      pictograms: data.pictograms ?? null,
     } 
   },
 
@@ -659,6 +607,28 @@ module.exports = {
         name: data.Pictogram.Category.name,
       }
     }
+  },
+
+  patientPictogramDataStructure(data) {
+    // Variables
+    const newData = [];
+
+    for (const item of data) {
+
+      const element = {
+        id: item.id,
+        name: item.name,
+        imageUrl: item.imageUrl,
+        Category: {
+          id: item.Pictogram.Category.id,
+          name: item.Pictogram.Category.name,
+          icon: item.Pictogram.Category.icon,
+        }
+      }
+      newData.push(element);
+    }
+
+    return newData;
   },
 
   /*

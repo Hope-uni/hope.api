@@ -285,6 +285,32 @@ module.exports = {
                   },
                 ]
               },
+              {
+                model: HealthRecord,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status','patientId']
+                },
+                include: [
+                  {
+                    model: TeaDegree,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Phase,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt'],
+                    }
+                  },
+                  {
+                    model: Observation,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                    }
+                  }
+                ],
+              }
             ]
           });
   
@@ -361,6 +387,32 @@ module.exports = {
                 },
               ]
             },
+            {
+              model: HealthRecord,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','patientId']
+              },
+              include: [
+                {
+                  model: TeaDegree,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt'],
+                  }
+                },
+                {
+                  model: Observation,
+                  attributes: {
+                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                  }
+                }
+              ],
+            }
           ]
         });
   

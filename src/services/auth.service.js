@@ -244,7 +244,7 @@ module.exports = {
       });
 
       // Create Url
-      const url = `${domain}/reset-password?token=${encodeURIComponent(emailToken)}&email=${body.email}`;
+      const url = `${domain}/reset-password?token=${encodeURIComponent(emailToken)}`;
       
       // Template file with Nodemailer
       transporter.use('compile', hbs(handlebarsOption));
