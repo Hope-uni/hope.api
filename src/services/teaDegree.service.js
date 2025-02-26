@@ -16,7 +16,7 @@ module.exports = {
       if(!data) {
         return {
           error: true,
-          statusCode: 404,
+          statusCode: 200,
           message: messages.teaDegree.errors.service.all,
         }
       }

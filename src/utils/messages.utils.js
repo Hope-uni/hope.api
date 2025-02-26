@@ -489,6 +489,7 @@ const messages = {
         update: `Pictograma no actualizado`,
         delete: `Pictograma no fue eliminado`,
         pictogram_not_match: `El pictograma personalizado que intenta modificar no pertence al Paciente solicitante`,
+        pictogram_used: `El pictograma que desea reemplazar ya tiene una personalización asociada`,
         all: `Pictogramas no encontrados`,
       },
       not_found: `Pictograma no encontrado`,
@@ -498,6 +499,7 @@ const messages = {
     },
     success: {
       all: `Lista de Pictogramas`,
+      all_patient_pictograms: `Lista de Pictogramas del Paciente`,
       found: `Pictograma encontrado`,
       create: `Pictograma creado`,
       update: `Pictograma actualizado`,

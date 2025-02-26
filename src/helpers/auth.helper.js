@@ -1,6 +1,7 @@
 const { Patient, TutorTherapist, Person } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages } = require('@utils/index');
+const { getFullName } = require('@utils/dataStructure/index');
 
 
 module.exports = {
@@ -34,16 +35,10 @@ module.exports = {
         }
       }
 
-      // Full Name validation
-      let fullName = `${patientResponse.Person.firstName} ${patientResponse.Person.secondName} ${patientResponse.Person.surname} ${patientResponse.Person.secondSurname}`; // Patient
-      if(!patientResponse.Person.secondName || !patientResponse.Person.secondSurname) {
-        fullName = `${patientResponse.Person.firstName} ${patientResponse.Person.surname}`;
-      }
-
       /// Building the json response structure
       const newPatientStructure = {
         profileId: patientResponse.id,
-        fullName,
+        fullName: getFullName(patientResponse).fullName,
         firstName: patientResponse.Person.firstName,
         secondName: patientResponse.Person.secondName,
         surname: patientResponse.Person.surname,
@@ -99,16 +94,10 @@ module.exports = {
         }
       }
 
-      // Therapist Fullname validation
-      let fullName = `${tutorTherapistResponse.Person.firstName} ${tutorTherapistResponse.Person.secondName} ${tutorTherapistResponse.Person.surname} ${tutorTherapistResponse.Person.secondSurname}`;
-      if(!tutorTherapistResponse.Person.secondName || !tutorTherapistResponse.Person.secondSurname) {
-        fullName = `${tutorTherapistResponse.Person.firstName} ${tutorTherapistResponse.Person.surname}`;
-      }
-
       /// Building the json response structure
       const newTutorTherapistStructure = {
         profileId: tutorTherapistResponse.id,
-        fullName,
+        fullName: getFullName(tutorTherapistResponse).fullName,
         firstName: tutorTherapistResponse.Person.firstName,
         secondName: tutorTherapistResponse.Person.secondName,
         surname: tutorTherapistResponse.Person.surname,

@@ -16,7 +16,7 @@ const {
   sequelize 
 } = require('@models/index.js');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
-const { getProgress, userSendEmail } = require('@helpers/index');
+const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers/index');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
@@ -605,6 +605,11 @@ module.exports = {
           message: messages.patient.errors.not_found,
         }
       };
+
+      const { error, data:pictogramData } = await getCustomPictograms({ patientResponse: data });
+      if(!error) {
+        data.pictograms = pictogramData;
+      }
 
       // Get Progress of the Patient about his phase level and activities score
       const { error:progressError, message: progressMessage, generalProgress } = await getProgress(data.id);

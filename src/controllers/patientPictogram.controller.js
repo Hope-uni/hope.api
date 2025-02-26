@@ -5,6 +5,7 @@ const {
 } = require('@utils/index');
 const {
   all,
+  allCustomPictograms,
   createPatientPictogram,
   updatePatientPictogram,
   removePatientPictogram,
@@ -31,6 +32,46 @@ module.exports = {
       });
 
       const { error:dataError, message, statusCode, ...resData } = await all(req.query, req.payload);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message,
+        ...resData
+      });
+
+    } catch (error) {
+      logger.error(`${messages.pictogram.errors.controller2}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: `${messages.pictogram.errors.controller2}: ${error}`
+      });
+    }
+  },
+
+  async allCustomPictograms(req,res) {
+    try {
+      
+      // validate each field from the request except the paginations fields and the tutor enum
+      const { page, size, tutor, ...resQuery } = req.query;
+
+      const { error } = patientPictogramsEntry.patientPictogramsFilterValidation(resQuery);
+      if( error ) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: error.details[0].message,
+      });
+
+      const { error:dataError, message, statusCode, ...resData } = await allCustomPictograms(req.query, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
