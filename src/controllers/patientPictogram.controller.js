@@ -21,7 +21,7 @@ module.exports = {
     try {
       
       // validate each field from the request except the paginations fields and the tutor enum
-      const { page, size, tutor, ...resQuery } = req.query;
+      const { page, size, ...resQuery } = req.query;
 
       const { error } = patientPictogramsEntry.patientPictogramsFilterValidation(resQuery);
       if( error ) return res.status(400).json({
@@ -62,7 +62,7 @@ module.exports = {
     try {
       
       // validate each field from the request except the paginations fields and the tutor enum
-      const { page, size, tutor, ...resQuery } = req.query;
+      const { page, size, ...resQuery } = req.query;
 
       const { error } = patientPictogramsEntry.patientPictogramsFilterValidation(resQuery);
       if( error ) return res.status(400).json({
