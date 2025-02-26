@@ -1,10 +1,10 @@
 const { getPatient, getTutorTherapist } = require('@helpers/auth.helper');
-const dates = require('../dates.util');
 const {
   patientDataStructure,
   activityDataStructure,
   getFullName,
-} = require('./index');
+} = require('@utils/dataStructure');
+const dates = require('../dates.util');
 
 /* eslint-disable no-restricted-syntax */
 module.exports = {
@@ -130,7 +130,7 @@ module.exports = {
         id: data.id,
         userId: data.userId,
         image: data.Person.imageProfile ?? null,
-        fullName: getFullName(data).fullName,
+        fullName: getFullName(data.Person),
         email: data.User.email,
         username: data.User.username,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
@@ -145,7 +145,7 @@ module.exports = {
           id: iterator.id,
           userId: iterator.userId,
           image: iterator.Person.imageProfile ?? null,
-          fullName: getFullName(iterator).fullName,
+          fullName: getFullName(iterator.Person),
           email: iterator.User.email,
           username: iterator.User.username,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
@@ -176,7 +176,7 @@ module.exports = {
     const element = {
       id: data.id,
       userId: data.userId,
-      fullName: getFullName(data).fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName ?? null,
       surname: data.Person.surname,
@@ -248,7 +248,7 @@ module.exports = {
         id: data.id,
         userId: data.userId ?? null,
         image: data.Person.imageProfile ?? null,
-        fullName: getFullName(data).fullName,
+        fullName: getFullName(data.Person),
         email: data.User.email ?? null,
         username: data.User.username,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
@@ -265,7 +265,7 @@ module.exports = {
           id: iterator.id,
           userId: iterator.userId,
           image: iterator.Person.imageProfile ?? null,
-          fullName: getFullName(iterator).fullName,
+          fullName: getFullName(iterator.Person),
           email: iterator.User.email ?? null,
           username: iterator.User.username,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
@@ -295,7 +295,7 @@ module.exports = {
     const element = {
       id: data.id,
       userId: data.userId ?? null,
-      fullName: getFullName(data).fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName ?? null,
       surname: data.Person.surname,
@@ -371,13 +371,6 @@ module.exports = {
     // get Age from Patient
     const childAge = dates.getAge(data);
 
-    // Get fullname
-    const {
-      fullName,
-      tutorFullName,
-      therapistFullName,
-    } = getFullName(data, true);
-
    // Get the observations
     const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
     ? data.HealthRecord.Observations.map((item) => {
@@ -406,7 +399,7 @@ module.exports = {
     return {
       id: data.id,
       userId: data.userId,
-      fullName,
+      fullName: getFullName(data.Person),
       firstName: data.Person.firstName,
       secondName: data.Person.secondName,
       surname: data.Person.surname,
@@ -437,7 +430,7 @@ module.exports = {
         id: data.tutor.id,
         userId: data.tutor.userId,
         image: data.tutor.Person.imageProfile ?? null,
-        fullName: tutorFullName ?? null,
+        fullName: getFullName(data.tutor.Person),
         email: data.tutor.User.email,
         username: data.tutor.User.username,
         phoneNumber: data.tutor.phoneNumber ? `${data.tutor.phoneNumber}` : null,
@@ -447,7 +440,7 @@ module.exports = {
         id: data.therapist.id,
         userId: data.therapist.userId,
         image: data.therapist.Person.imageProfile,
-        fullName: therapistFullName ?? null,
+        fullName: getFullName(data.therapist.Person),
         email: data.therapist.User.email,
         username: data.therapist.User.username,
         phoneNumber: data.therapist.phoneNumber ? `${data.therapist.phoneNumber}` : null,
