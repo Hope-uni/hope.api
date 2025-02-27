@@ -23,7 +23,7 @@ module.exports = {
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
         'number.max': messages.activity.fields.satisfactoryPoints.max,	
       }),
-      pictogramSentence: joi.array().max(20).items(joi.number().positive()).unique().min(1).messages({
+      pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
@@ -61,7 +61,7 @@ module.exports = {
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
       }),
-      pictogramSentence: joi.array().max(20).items(joi.number().positive()).unique().min(1).empty(' ').messages({
+      pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).empty(' ').messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
@@ -133,7 +133,7 @@ module.exports = {
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      attempt: joi.array().max(20).items(joi.number().positive()).unique().min(1).required().messages({
+      attempt: joi.array().max(30).items(joi.number().positive()).unique().min(1).required().messages({
         'any.required': messages.activity.fields.pictogramSentence.required,
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
