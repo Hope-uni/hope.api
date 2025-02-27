@@ -38,7 +38,7 @@ module.exports = {
       /// Building the json response structure
       const newPatientStructure = {
         profileId: patientResponse.id,
-        fullName: getFullName(patientResponse).fullName,
+        fullName: getFullName(patientResponse.Person),
         firstName: patientResponse.Person.firstName,
         secondName: patientResponse.Person.secondName,
         surname: patientResponse.Person.surname,
@@ -97,7 +97,7 @@ module.exports = {
       /// Building the json response structure
       const newTutorTherapistStructure = {
         profileId: tutorTherapistResponse.id,
-        fullName: getFullName(tutorTherapistResponse).fullName,
+        fullName: getFullName(tutorTherapistResponse.Person),
         firstName: tutorTherapistResponse.Person.firstName,
         secondName: tutorTherapistResponse.Person.secondName,
         surname: tutorTherapistResponse.Person.surname,
