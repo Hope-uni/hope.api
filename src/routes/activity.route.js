@@ -8,9 +8,8 @@ const {
   unAssignActivity,
   deleteActivity,
   updateActivity,
-  reAssignActivity,
 } = require('@controllers/activity.controller');
-const { verifyToken, rolePermissions } = require('@middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares');
 
 
 router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['listar actividades']), allActivities);
@@ -20,7 +19,6 @@ router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta
 router.post('/assign', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['asignar actividades']), assignActivity);
 router.post('/unassign', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['desasignar actividades']), unAssignActivity);
 router.post('/check', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Paciente'],['verificar respuesta de actividades']), checkActivityPatient);
-router.post('/reassign', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['reasignar actividades']), reAssignActivity);
 
 router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['actualizar actividades']), updateActivity);
 

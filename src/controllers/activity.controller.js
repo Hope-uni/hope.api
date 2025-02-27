@@ -12,8 +12,7 @@ const {
   unAssignActivityPatient,
   checkActivityAnswer,
   deleteActivity,
-  assingActivityPatient,
-  reAssignActivity, 
+  assingActivityPatient
 } = require('@services/activity.service');
 
 
@@ -276,42 +275,6 @@ module.exports = {
     }
   },
 
-
-  async reAssignActivity(req,res) {
-    try {
-      
-      const { error } = activityEntry.reassignActivityPatientValidation(req.body);
-      if(error) return res.status(400).json({ 
-        error: true,
-        statusCode: 422,
-        message: error.details[0].message
-      });
-
-      const { error:dataError, statusCode, message } = await reAssignActivity(req.body);
-
-      if(dataError) {
-        return res.status(statusCode).json({
-          error: dataError,
-          statusCode,
-          message
-        })
-      };
-
-      return res.status(statusCode).json({
-        error: dataError,
-        statusCode,
-        message
-      });
-
-    } catch (error) {
-      logger.error(`${messages.activity.errors.controller}: ${error}`);
-      return res.status(500).json({
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server
-      });
-    }
-  },
 
   async checkActivityPatient(req,res) {
     try {

@@ -692,6 +692,7 @@ const messages = {
         number: `Los pictogramas deben ser números válidos`,
         positive: `Los pictogramas deben ser números positivos`,
         unique: `Los pictogramas deben ser únicos`,
+        max: `La actividad sobrepasa el limite de pictogramas permitidos`,
       },
       satisfactorAttempts: {
         required: `La cantidad de intentos satisfactorios es requerida`,
