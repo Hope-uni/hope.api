@@ -10,7 +10,7 @@ const {
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta', 'Tutor'],['listar pacientes']), all);
+router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar pacientes']), all);
 router.get('/patients-therapist', verifyToken, rolePermissions(['Superadmin','Admin']), allPatientsWithoutTherapist);
 router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['buscar pacientes']), findPatient);
 
@@ -23,4 +23,4 @@ router.put('/:id', verifyToken, rolePermissions(
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar pacientes']), removePatient);
 
-module.exports = router;  
+module.exports = router;

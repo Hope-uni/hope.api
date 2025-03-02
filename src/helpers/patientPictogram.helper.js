@@ -9,18 +9,7 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
     // Pictogram Variable
     let pictogramData;
     const customPatientPictograms = [];
-    /* const {
-      categoryId, 
-      pictogramName, 
-      patientResponse
-    } =  */
 
-    /* The above JavaScript code is checking if the variables `categoryId` and `pictogramName` are
-    falsy (undefined, null, 0, false, empty string, etc.). If both variables are falsy, it then
-    executes a database query using Sequelize ORM to find all pictograms where the `status` is
-    true. It retrieves specific attributes from the Pictogram table while excluding `createdAt`,
-    `updatedAt`, and `status` fields. It also includes the Category model and retrieves only the
-    `id` and `name` attributes from the Category table. The result of this query is stored */
     if(!categoryId && !pictogramName) {
       pictogramData = await Pictogram.findAll({
         where: {
@@ -133,7 +122,7 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
     /* eslint-disable no-restricted-syntax */
     /* eslint-disable no-await-in-loop */
     for (const pictogram of pictogramData) {
-      
+
       const patientPictogramResponse = await PatientPictogram.findOne({
         where: {
           status: true,
@@ -228,7 +217,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
     const customPatientPictograms = [];
 
     /*
-      If user is superAdmin or admin this means UserRoles will be undefined, because [Op.notIn]: [1,2] does not 
+      If user is superAdmin or admin this means UserRoles will be undefined, because [Op.notIn]: [1,2] does not
       allow search roles with id 1 and id 2.
     */
     const userType = await User.findOne({
@@ -307,13 +296,13 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
 
       // const { getCustomPictograms } = this;
       return await getCustomPictograms({categoryId, pictogramName, patientResponse});
-  
+
 
     }
 
     // Pictograms with Pagination
     let pictogramResponse;
-    
+
     const { limit, offset } = pagination.paginationValidation(page, size);
 
 
@@ -437,7 +426,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
 
     // Filter for custom pictograms
     for (const pictogram of pictogramResponse.rows) {
-      
+
       const patientPictogramResponse = await PatientPictogram.findOne({
         where: {
           status: true,
@@ -508,7 +497,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
 
     }
 
-    // Adding Custom pictograms and structuring 
+    // Adding Custom pictograms and structuring
     pictogramResponse.rows = dataStructure.customPictogramDataStructure(customPatientPictograms);
 
     const dataResponse = pagination.getPageData(pictogramResponse, page, limit);
@@ -573,7 +562,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
 
     // Pictograms with Pagination
     let pictogramResponse;
-    
+
     const { limit, offset } = pagination.paginationValidation(page, size);
 
     // Without categoryId and pictogramName
@@ -697,7 +686,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
 
     // Filter for custom pictograms
     for (const pictogram of pictogramResponse.rows) {
-      
+
       const patientPictogramResponse = await PatientPictogram.findOne({
         where: {
           status: true,
@@ -721,7 +710,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
         ]
       });
 
-      
+
       /* The code is checking if a `categoryId` exists. If it does, it then checks if
       `patientPictogramResponse` is falsy and if the `pictogram.Category.id` is equal to the
       `categoryId`. If both conditions are met, the `pictogram` is pushed into the

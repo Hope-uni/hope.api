@@ -37,13 +37,13 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
   async allPatientsWithoutTherapist(req,res) {
     try {
-      
+
       const { error, statusCode, message, validationErrors, ...resData } = await allPatientsWithoutTherapist(req.query);
 
       if(error) {
@@ -74,7 +74,7 @@ module.exports = {
 
   async findPatient(req,res) {
     try {
-      
+
       // joi validation
       const { error } = await idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
@@ -83,8 +83,8 @@ module.exports = {
         message: messages.generalMessages.bad_request,
         validationErrors: formatJoiMessages(error),
       })
-      
-      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id);
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await findOne(req.params.id, req.payload);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
@@ -107,7 +107,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -117,7 +117,7 @@ module.exports = {
       const { tutorId, therapistId, phaseId, teaDegreeId, observations, ...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId, phaseId, teaDegreeId, observations}); 
+      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId, phaseId, teaDegreeId, observations});
 
 
       // User and Person joi validation
@@ -145,7 +145,7 @@ module.exports = {
 
       const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload);
       if(dataError) {
-        return res.status(statusCode).json({  
+        return res.status(statusCode).json({
           error:dataError,
           statusCode,
           message,
@@ -165,7 +165,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -173,7 +173,7 @@ module.exports = {
     try {
       // Destructuring Object
       const { therapistId, tutorId,...resBody } = req.body;
-      
+
       // Patient joi validation
       const { error } = patientEntry.updatePatientValidation({ id: req.params.id, therapistId, tutorId});
 
@@ -211,7 +211,7 @@ module.exports = {
 
       return res.status(statusCode).json({
         error: dataError,
-        statusCode,	
+        statusCode,
         message,
         data
       });
@@ -222,7 +222,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -259,7 +259,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   }
 

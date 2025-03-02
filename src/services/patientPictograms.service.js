@@ -1,8 +1,8 @@
 const { Op } = require('sequelize');
-const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, sequelize } = require('@models/index');
+const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, sequelize } = require('@models');
 const logger = require('@config/logger.config');
-const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils/index');
-const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers/index');
+const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils');
+const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers');
 const constants = require('@constants/role.constant');
 
 
@@ -12,7 +12,10 @@ module.exports = {
     try {
 
       // Variables
-      let patientResponse; // this variabe will get all the patient data for the different validations
+      let whereCondition = {
+        id: patientId,
+        status: true,
+      }
 
       // Validate if patient id was provided
       if(!patientId || patientId === null || patientId.trim() === "") {
@@ -22,26 +25,6 @@ module.exports = {
           statusCode: 400,
         }
       }
-
-      // get Patient
-      patientResponse = await Patient.findOne({
-        where: {
-          id: patientId,
-          status: true,
-        },
-        attributes: {
-          exclude: ['createdAt','updatedAt','status']
-        },
-        include: [
-          {
-            model: User,
-            where: {
-              status: true,
-            }
-          }
-        ]
-      });
-
       // Get Tutor
       if(payload.roles.includes(constants.TUTOR_ROLE)) {
         const tutorExist = await TutorTherapist.findOne({
@@ -57,28 +40,29 @@ module.exports = {
           }
         }
 
-        // get Patient
-        patientResponse = await Patient.findOne({
-          where: {
-            id: patientId,
-            status: true,
-            tutorId: tutorExist.id,
-          },
-          attributes: {
-            exclude: ['createdAt','updatedAt','status']
-          },
-          include: [
-            {
-              model: User,
-              where: {
-                status: true,
-              }
-            }
-          ]
-        });
+        // udpate whereCondition
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorExist.id
+        }
       }
 
-      
+      // get Patient
+      const patientResponse = await Patient.findOne({
+        where: whereCondition,
+        attributes: {
+          exclude: ['createdAt','updatedAt','status']
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          }
+        ]
+      });
+
       if(!patientResponse) {
         return {
           error: true,
@@ -119,12 +103,12 @@ module.exports = {
             message: messages.pictogram.errors.service.all,
           }
         }
-  
+
         return {
           error: false,
           statusCode: 200,
           message: messages.pictogram.success.all,
-          data: dataStructure.patientPictogramDataStructure(data),
+          data: dataStructure.customPictogramDataStructure(data),
         }
       }
 
@@ -157,7 +141,7 @@ module.exports = {
       });
 
       // Structuring the data form the request
-      data.rows = dataStructure.patientPictogramDataStructure(data.rows);
+      data.rows = dataStructure.customPictogramDataStructure(data.rows);
 
       const dataResponse = pagination.getPageData(data, page, limit);
 
@@ -215,7 +199,7 @@ module.exports = {
   async createPatientPictogram(body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // get Patient
       const patientResponse = await Patient.findOne({
         where: {
@@ -362,7 +346,7 @@ module.exports = {
 
       // Destructuring data in order to get oly the fields to modify
       const { patientId, ...resBody } = body;
-      
+
       // get Patient
       const patientResponse = await Patient.findOne({
         where: {
@@ -497,7 +481,7 @@ module.exports = {
   async removePatientPictogram(id) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       const patientPictogramExist = await PatientPictogram.findOne({
         where: {
           id,

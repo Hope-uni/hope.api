@@ -1,22 +1,23 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { 
-  Patient, 
-  TutorTherapist, 
-  User, 
-  Role, 
-  Person, 
+const {
+  Patient,
+  TutorTherapist,
+  User,
+  Role,
+  Person,
   UserRoles,
-  HealthRecord, 
-  TeaDegree, 
-  Phase, 
-  Observation, 
+  HealthRecord,
+  TeaDegree,
+  Phase,
+  Observation,
   PatientActivity,
-  Activity, 
-  sequelize 
+  Activity,
+  sequelize
 } = require('@models/index.js');
-const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
-const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers/index');
+const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils');
+const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
+const constants = require('@constants/role.constant');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
@@ -30,7 +31,7 @@ module.exports = {
   /* eslint-disable consistent-return */
   async all(query, payload) {
     try {
-      
+
       const userType = await User.findOne({
         where: {
           id: payload.id,
@@ -65,7 +66,7 @@ module.exports = {
         const data = await Patient.findAll({
           where: {
             status: true,
-          }, 
+          },
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -363,7 +364,7 @@ module.exports = {
           data: dataStructure.patientDataStructure(data),
         };
       }
-      
+
       const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
       const data = await Patient.findAndCountAll({
@@ -476,14 +477,40 @@ module.exports = {
     }
   },
 
-  async findOne(id) {
+  async findOne(id, payload) {
     try {
-      
+
+      // Variables
+      let whereCondition = {
+        id,
+        status: true,
+      }
+
+      // Validate if the user logged is Therapist, if this true, we validate searching just patients assigned to him.
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+        // Find the therapist
+        const therapistResponse = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          }
+        });
+
+        if(!therapistResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        whereCondition = {
+          ...whereCondition,
+          therapistId: therapistResponse.id
+        }
+      }
+
       const data = await Patient.findOne({
-        where: {
-          id,
-          status: true
-        },
+        where: whereCondition,
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
@@ -597,7 +624,7 @@ module.exports = {
         ]
       });
 
-      
+
       if(!data) {
         return {
           error: true,
@@ -642,17 +669,17 @@ module.exports = {
   async create(body, payload) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Destructuring Data
-      const { 
-        tutorId, 
-        therapistId, 
-        phaseId, 
-        teaDegreeId, 
-        observations = '', 
-        ...resData 
+      const {
+        tutorId,
+        therapistId,
+        phaseId,
+        teaDegreeId,
+        observations = '',
+        ...resData
       } = body;
-      
+
 
       // Tutor Exist validation
       const tutorExist = await TutorTherapist.findOne({
@@ -731,10 +758,10 @@ module.exports = {
       if(userPersonError) {
         await transaction.rollback();
         return {
-          error: userPersonError, 
+          error: userPersonError,
           statusCode,
           message,
-          validationErrors,	
+          validationErrors,
         };
       };
 
@@ -767,8 +794,8 @@ module.exports = {
         return {
           error: healthRecordError,
           message: healthRecordMessage,
-          statusCode: healthRecordStatusCode,  
-          validationErrors: healthRecordValidationErrors                                                        
+          statusCode: healthRecordStatusCode,
+          validationErrors: healthRecordValidationErrors
         }
       };
 
@@ -956,7 +983,7 @@ module.exports = {
           validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         };
       };
-      
+
       // Destructuring Object
       const { tutorId, therapistId,...resData } = body;
 
@@ -976,7 +1003,7 @@ module.exports = {
             message: messages.generalMessages.base,
             validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
           };
-        };	
+        };
       };
 
       if(therapistId) {
@@ -1018,7 +1045,7 @@ module.exports = {
         {
           ...resData,
         personId: patientExist.personId,
-      }, 
+      },
       transaction,
     );
       if(userPersonError) {
@@ -1174,7 +1201,7 @@ module.exports = {
   async removePatient(id) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // validate if patient exist
       const patientExist = await Patient.findOne({
         where: {
@@ -1190,8 +1217,8 @@ module.exports = {
           validationErrors: formatErrorMessages('patient', messages.patient.errors.not_found),
         };
       };
-  
-      // remove user 
+
+      // remove user
       const { error:userError, statusCode, validationErrors } = await deleteUser(patientExist.userId, transaction);
       if(userError) {
         await transaction.rollback();
