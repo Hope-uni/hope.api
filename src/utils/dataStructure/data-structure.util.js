@@ -2,8 +2,7 @@ const { getPatient, getTutorTherapist } = require('@helpers/auth.helper');
 const {
   patientDataStructure,
   activityDataStructure,
-  getFullName,
-  pictogramDataStructure
+  getFullName
 } = require('@utils/dataStructure');
 const dates = require('../dates.util');
 
@@ -643,31 +642,48 @@ module.exports = {
     * Activity Structure
   */
 
-
-  activityDataStructure(data) {
+  activityDataStructure(data, create = false) {
     // something here
     const newData = [];
+    let createDataStructure;
 
-    data.forEach((item) => {
-        newData.push({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          satisfactoryPoints: item.satisfactoryPoints,
-          phase: {
-            id: item.Phase.id,
-            name: item.Phase.name,
-            description: item.Phase.description,
-          },
-          assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
-            return {
-              id: p.Patient.id,
-            }
-          }): null
-        })
-    });
+    if(create) {
+      createDataStructure = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        satisfactoryPoints: data.satisfactoryPoints,
+        phase: {
+          id: data.Phase.id,
+          name: data.Phase.name,
+          description: data.Phase.description,
+        },
+      }
+    }
 
-    return newData;
+    if(!create) {
+      data.forEach((item) => {
+          newData.push({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            satisfactoryPoints: item.satisfactoryPoints,
+            phase: {
+              id: item.Phase.id,
+              name: item.Phase.name,
+              description: item.Phase.description,
+            },
+            assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
+              return {
+                id: p.Patient.id,
+              }
+            }): null
+          })
+      });
+    }
+
+
+    return create ? createDataStructure : newData;
   },
 
 

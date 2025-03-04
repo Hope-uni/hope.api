@@ -65,6 +65,14 @@ const customPermissions = [
   {
     description: 'asignar-actividad',
     group: 'therapist'
+  },
+  {
+    description: 'desasignar-actividad',
+    group: 'therapist'
+  },
+  {
+    description: 'verify-activity-answer',
+    group: 'activity'
   }
 ]
 
