@@ -582,6 +582,7 @@ module.exports = {
           category: {
             id: item.Pictogram.Category.id,
             name: item.Pictogram.Category.name,
+            icon: item.Pictogram.Category.icon ?? null,
           }
         }
 
@@ -596,6 +597,7 @@ module.exports = {
           category: {
             id: item.Category.id,
             name: item.Category.name,
+            icon: item.Category.icon ?? null,
           }
         }
         newData.push(element);
@@ -613,6 +615,21 @@ module.exports = {
       category: {
         id: data.Pictogram.Category.id,
         name: data.Pictogram.Category.name,
+        icon: data.Pictogram.Category.icon ?? null,
+      }
+    }
+  },
+
+
+  findPictogramDataStructure(data) {
+    return {
+      id: data.id,
+      name: data.name,
+      imageUrl: data.imageUrl,
+      category: {
+        id: data.Category.id,
+        name: data.Category.name,
+        icon: data.Category.icon ?? null,
       }
     }
   },
@@ -630,7 +647,7 @@ module.exports = {
         category: {
           id: item.Pictogram.Category.id,
           name: item.Pictogram.Category.name,
-          icon: item.Pictogram.Category.icon,
+          icon: item.Pictogram.Category.icon ?? null,
         }
       }
       newData.push(element);
