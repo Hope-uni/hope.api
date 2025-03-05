@@ -2,7 +2,7 @@ const { getPatient, getTutorTherapist } = require('@helpers/auth.helper');
 const {
   patientDataStructure,
   activityDataStructure,
-  getFullName,
+  getFullName
 } = require('@utils/dataStructure');
 const dates = require('../dates.util');
 
@@ -20,7 +20,7 @@ module.exports = {
   async userDataStructure(data) {
 
     const newData = [];
-    
+
      /* eslint-disable no-restricted-syntax */
     /* eslint-disable no-await-in-loop */
     for (const iterator of data) {
@@ -29,7 +29,7 @@ module.exports = {
       if(iterator.UserRoles.length > 0) {
         for (const role of iterator.UserRoles) {
           rolesData.push(role.Role);
-  
+
           if(role.Role.id === 3) {
             const { data: therapistData } = await getTutorTherapist(iterator.id);
             iterator.setDataValue('profileId', therapistData.profileId);
@@ -41,8 +41,8 @@ module.exports = {
           if(role.Role.id === 5) {
             const { data: tutorData } = await getTutorTherapist(iterator.id);;
             iterator.setDataValue('profileId', tutorData.profileId);
-          } 
-  
+          }
+
         }
       }
 
@@ -74,7 +74,7 @@ module.exports = {
         if(role.Role.id === 2) {
           isAdmin = true;
         }
-  
+
         if(role.Role.id === 3) {
           const { data: therapistData } = await getTutorTherapist(data.id);
           data.setDataValue('profileId', therapistData.profileId);
@@ -87,7 +87,7 @@ module.exports = {
           const { data: tutorData } = await getTutorTherapist(data.id);
           data.setDataValue('profileId', tutorData.profileId);
         }
-  
+
         rolesData.push(role.Role);
       }
     }
@@ -125,7 +125,7 @@ module.exports = {
     let createDataStructure;
 
     if(create) {
-      
+
       createDataStructure = {
         id: data.id,
         userId: data.userId,
@@ -140,7 +140,7 @@ module.exports = {
 
     if(!create) {
       for (const iterator of data) {
-  
+
         const element = {
           id: iterator.id,
           userId: iterator.userId,
@@ -151,7 +151,7 @@ module.exports = {
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
           childrenInCharge: iterator.patientTherapist.length > 0 ? iterator.patientTherapist.length : null,
         };
-  
+
         newData.push(element);
       }
     }
@@ -170,7 +170,7 @@ module.exports = {
       }
     }
 
-    // Get age from therapist 
+    // Get age from therapist
     const therapistAge = dates.getAge(data);
 
     const element = {
@@ -255,7 +255,7 @@ module.exports = {
         telephone: data.telephone ? `${data.telephone}` : null,
         childrenInCharge: data.patientTutor.length > 0 ? data.patientTutor.length : null,
       }
-      
+
     }
 
     if(!create) {
@@ -278,7 +278,7 @@ module.exports = {
 
     return create ? createDataStructure : newData;
   },
-  
+
   findTutorDataStructure(data) {
 
     const children = [];
@@ -335,7 +335,7 @@ module.exports = {
       telephone: data.telephone ? `${data.telephone}` : null,
       address: data.Person.address ?? null,
     }
-    
+
 
   },
 
@@ -372,7 +372,7 @@ module.exports = {
     const childAge = dates.getAge(data);
 
    // Get the observations
-    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
+    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null
     ? data.HealthRecord.Observations.map((item) => {
       return {
         id: item.id,
@@ -382,7 +382,7 @@ module.exports = {
       }
     }) : null;
 
-    // phase 
+    // phase
     const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.Phase.id,
       name: data.HealthRecord.Phase.name,
@@ -419,7 +419,7 @@ module.exports = {
       },
       observations: observationsGotit,
       achievements: null,
-      
+
       /*
         Lista de logros Conseguidos: {
           Nombre
@@ -486,14 +486,14 @@ module.exports = {
         }
       */
       pictograms: data.pictograms ?? null,
-    } 
+    }
   },
 
 
   updatePatientDataStructure(data) {
 
     // Get the observations
-    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null 
+    const observationsGotit = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && Object.keys(data.HealthRecord.Observations) !== null
     ? data.HealthRecord.Observations.map((item) => {
       return {
         id: item.id,
@@ -579,7 +579,7 @@ module.exports = {
           id: item.Pictogram.id,
           name: item.name,
           imageUrl: item.imageUrl,
-          Category: {
+          category: {
             id: item.Pictogram.Category.id,
             name: item.Pictogram.Category.name,
           }
@@ -589,9 +589,17 @@ module.exports = {
       }
 
       if(!item.Pictogram) {
-        newData.push(item);
+        const element = {
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl,
+          category: {
+            id: item.Category.id,
+            name: item.Category.name,
+          }
+        }
+        newData.push(element);
       }
-
     }
 
     return newData;
@@ -602,7 +610,7 @@ module.exports = {
       id: data.id,
       name: data.name,
       imageUrl: data.imageUrl,
-      Category: {
+      category: {
         id: data.Pictogram.Category.id,
         name: data.Pictogram.Category.name,
       }
@@ -619,7 +627,7 @@ module.exports = {
         id: item.id,
         name: item.name,
         imageUrl: item.imageUrl,
-        Category: {
+        category: {
           id: item.Pictogram.Category.id,
           name: item.Pictogram.Category.name,
           icon: item.Pictogram.Category.icon,
@@ -630,36 +638,52 @@ module.exports = {
 
     return newData;
   },
-
   /*
     * Activity Structure
   */
 
-
-  activityDataStructure(data) {
+  activityDataStructure(data, create = false) {
     // something here
     const newData = [];
+    let createDataStructure;
 
-    data.forEach((item) => {
-        newData.push({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          satisfactoryPoints: item.satisfactoryPoints,
-          phase: {
-            id: item.Phase.id,
-            name: item.Phase.name,
-            description: item.Phase.description,
-          },
-          assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
-            return {
-              id: p.Patient.id,
-            }
-          }): null
-        })
-    });
+    if(create) {
+      createDataStructure = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        satisfactoryPoints: data.satisfactoryPoints,
+        phase: {
+          id: data.Phase.id,
+          name: data.Phase.name,
+          description: data.Phase.description,
+        },
+      }
+    }
 
-    return newData;
+    if(!create) {
+      data.forEach((item) => {
+          newData.push({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            satisfactoryPoints: item.satisfactoryPoints,
+            phase: {
+              id: item.Phase.id,
+              name: item.Phase.name,
+              description: item.Phase.description,
+            },
+            assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
+              return {
+                id: p.Patient.id,
+              }
+            }): null
+          })
+      });
+    }
+
+
+    return create ? createDataStructure : newData;
   },
 
 

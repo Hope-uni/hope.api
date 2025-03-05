@@ -15,7 +15,7 @@ module.exports = {
 
   async all(req,res) {
     try {
-      
+
       const { error, message, statusCode, ...resData } = await all(req.query);
 
       if(error) {
@@ -39,13 +39,13 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
   async allPatientsTherapist(req,res) {
     try {
-      
+
       const { error, message, statusCode, ...resData } = await allPatientsTherapist(req.query, req.payload);
 
       if(error) {
@@ -76,12 +76,12 @@ module.exports = {
 
   async findTherapist(req,res) {
     try {
-      
+
       const { error } = idEntry.findOneValidation({id:req.params.id});
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
-        message: messages.generalMessages.bad_request, 
+        message: messages.generalMessages.bad_request,
         validationErrors: formatJoiMessages(error),
       });
 
@@ -107,14 +107,14 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
 
   async createTherapist(req,res) {
     try {
-      
+
       // destructuring object
       const { phoneNumber, identificationNumber, ...resBody } = req.body;
 
@@ -167,7 +167,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -175,7 +175,7 @@ module.exports = {
   therapist's information. Here is a breakdown of what the function is doing: */
   async updateTherapist(req,res) {
     try {
-      
+
       // destructuring obejct
       const { phoneNumber, identificationNumber,...resBody } = req.body;
 
@@ -184,7 +184,7 @@ module.exports = {
 
       // Therapist joi validation
       const { error } = therapistEntry.updateTherapistValidation({id:req.params.id, phoneNumber, identificationNumber });
-      
+
       if(error || customError) {
         const personError = customError ? customError.details : [];
         const therapistError = error ? error.details : [];
@@ -228,7 +228,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -238,10 +238,10 @@ module.exports = {
   function is doing: */
   async removeTherapist(req,res) {
     try {
-      
+
       // joi validation
       const { error } = idEntry.findOneValidation({id:req.params.id});
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -256,7 +256,7 @@ module.exports = {
           message,
         });
       };
-      
+
       return res.status(statusCode).json({
         error: dataError,
         statusCode,
@@ -269,15 +269,15 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
   async assignPatient(req, res) {
     try {
-      
+
       const { error } = therapistEntry.assignPatientValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -290,8 +290,7 @@ module.exports = {
         return res.status(statusCode).json({
           error:dataError,
           statusCode,
-          message,
-          data: data ?? ''
+          message
         });
       };
 
@@ -307,7 +306,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   }
 

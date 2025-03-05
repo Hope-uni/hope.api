@@ -32,6 +32,7 @@ module.exports = {
         page_count:totalPages,
         page,
         page_size: data.length,
+        size: limit,
       },
     }
 

@@ -1,23 +1,79 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { Activity, Phase, PatientActivity, Patient, sequelize } = require('@models/index');
-const { 
-  formatErrorMessages, 
+const {
+  Activity,
+  Phase,
+  PatientActivity,
+  Patient,
+  TutorTherapist,
+  HealthRecord,
+  User,
+  sequelize
+} = require('@models/index');
+const {
+  formatErrorMessages,
   messages,
-  dataStructure 
-} = require('@utils/index');
-const { 
+  dataStructure,
+  pagination
+} = require('@utils');
+const {
   validatePictogram,
-  getPictograms 
-} = require('@helpers/index');
+  getPictograms
+} = require('@helpers');
+const constants = require('@constants/role.constant');
 
 
 module.exports = {
 
-  async all() {
+  /* eslint-disable radix */
+  async all(query) {
     try {
 
-      const data = await Activity.findAll({
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await Activity.findAll({
+          where: {
+            status: true,
+          },
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','phaseId', 'pictogramSentence']
+          },
+          include: [
+            {
+              model: Phase,
+              attributes: ['id', 'name', 'description'],
+            },
+            {
+              model: PatientActivity,
+              attributes: ['id'],
+              include: [
+                {
+                  model: Patient,
+                  attributes: ['id'],
+                }
+              ]
+            }
+          ]
+        });
+
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.activity.success.all,
+          data: data.length > 0
+          ? dataStructure.activityDataStructure(data)
+          : [],
+        };
+      }
+
+      const {
+        limit,
+        offset
+      } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Activity.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
         where: {
           status: true,
         },
@@ -44,17 +100,23 @@ module.exports = {
 
       if(!data) {
         return {
-          error: true,
-          statusCode: 404,
-          message: messages.activity.errors.service.all,
+          error: false,
+          statusCode: 200,
+          message: messages.activity.success.all,
+          ...data
         }
-      };
+      }
+
+      // get Activity structure
+      data.rows = dataStructure.activityDataStructure(data.rows);
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
 
       return {
         error: false,
         statusCode: 200,
         message: messages.activity.success.all,
-        data: dataStructure.activityDataStructure(data),
+        ...dataResponse
       };
 
     } catch (error) {
@@ -70,7 +132,7 @@ module.exports = {
 
   async findOne(id) {
     try {
-      
+
       const data = await Activity.findOne({
         where: {
           id,
@@ -222,175 +284,10 @@ module.exports = {
       // Commit transaction
       await transaction.commit();
 
-      return {
-        error: false,
-        statusCode: 201,
-        message: messages.activity.success.create,
-        data
-      };
-
-    } catch (error) {
-      await transaction.rollback();
-      logger.error(`${messages.activity.errors.service.base}: ${error}`);
-      return {
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server,
-      }
-    }
-  },
-
-
-  async updateActivity(id,body, payload) {
-    const transaction = await sequelize.transaction();
-    try {
-      
-      // Activity exist validation
-      const activityExist = await Activity.findOne({
-        where: {
-          id,
-          userId: payload.id,
-          status: true
-        }
-      });
-      if(!activityExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('activity', messages.activity.errors.not_found),
-        }
-      }
-      
-      // Name exist validation
-      if(body.name) {
-        const nameExist = await Activity.findOne({
-          where: {
-            name: body.name,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(nameExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('name', messages.activity.errors.in_use.name),
-          }
-        }
-      }
-      
-      // Description exist validation
-      if(body.description) {
-        const descriptionExist = await Activity.findOne({
-          where: {
-            description: body.description,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(descriptionExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('description', messages.activity.errors.in_use.description),
-          } 
-        }
-      }
-      
-      // Pictograms exist validation
-      /* eslint-disable no-param-reassign */
-      if(body.pictogramSentence) {
-
-
-        // validate if pictogramSentence has a valid pictograms
-        const { error, message, statusCode, validationErrors } = await validatePictogram(body.pictogramSentence);
-        if(error) {
-          await transaction.rollback();
-          return {
-            error,
-            statusCode,
-            message,
-            validationErrors,
-          }
-        }
-
-        const pictogramSentenceParsed = body.pictogramSentence.join('-');	// Make it string.
-        const pictogramsExist = await Activity.findOne({
-          where: {
-            pictogramSentence: pictogramSentenceParsed,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(pictogramsExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('pictogramSentence', messages.activity.errors.in_use.pictogramSentence),
-          }
-        }
-
-        /// assign the joined pictograms
-        body.pictogramSentence = pictogramSentenceParsed;
-      };
-
-      // Validate if phase exist
-      if(body.phaseId) {
-        const phaseExist = await Phase.findByPk(body.phaseId);
-        if(!phaseExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 404,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('phaseId', messages.phase.errors.not_found),
-          }
-        }
-      }
-      
-      // Update Activity
-      const activityResponse = await Activity.update(
-        {
-          ...body,
-        },
-        {
-          where: {
-            id,
-            status: true,
-          }
-        },
-        {transaction}
-      );
-      if(!activityResponse) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('update', messages.activity.errors.service.update),
-        }
-      }
-      
-      // Commit transaction
-      await transaction.commit();
-
+      // getting the whole data
       const newData = await Activity.findOne({
         where: {
-          id,
+          id: data.id,
           status: true,
         },
         attributes: {
@@ -413,14 +310,14 @@ module.exports = {
           }
         ]
       });
-      
+
       return {
         error: false,
-        statusCode: 200,
-        message: messages.activity.success.update,
-        data: dataStructure.findActivityDataStructure(newData),
-      }
-      
+        statusCode: 201,
+        message: messages.activity.success.create,
+        data: dataStructure.activityDataStructure(newData, true)
+      };
+
     } catch (error) {
       await transaction.rollback();
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
@@ -432,17 +329,50 @@ module.exports = {
     }
   },
 
-
-  async assingActivityPatient({ activityId, patientId }) {
+  async assingActivityPatient({ activityId, patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
+
+      // Variables
+      let whereCondition = {
+        id: patientId,
+        status: true,
+      }
+
+      // Validate if therapist has the patient in charged.
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+        const therapistExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          }
+        });
+
+        if(!therapistExist) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        // add therapist id to the whereCondition object
+        whereCondition = {
+          ...whereCondition,
+          therapistId: therapistExist.id
+        }
+      }
 
       // Activity exist validation
       const activityExist = await Activity.findOne({
         where: {
           id: activityId,
           status: true
-        }
+        },
+        include: [
+          {
+            model: Phase
+          }
+        ]
       });
       if(!activityExist) {
         await transaction.rollback();
@@ -452,13 +382,26 @@ module.exports = {
           message: messages.activity.errors.not_found,
         }
       }
-      
+
       // Patient exist validation
       const patientExist = await Patient.findOne({
-        where: {
-          id: patientId,
-          status: true
-        }
+        where: whereCondition,
+        include: [
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              }
+            ],
+          }
+        ]
       });
       if(!patientExist) {
         await transaction.rollback();
@@ -466,6 +409,24 @@ module.exports = {
           error: true,
           statusCode: 404,
           message: messages.patient.errors.not_found,
+        }
+      }
+
+      // Validate if patient has an therapist assigned
+      if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
+        if(!patientExist.therapistId) return {
+          error: true,
+          statusCode: 409,
+          message: messages.patient.errors.service.unassigned_therapist
+        }
+      }
+
+      // Validate if the activity has the same phase that the patient
+      if(activityExist.Phase.id !== patientExist.HealthRecord.Phase.id) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.activity.errors.service.activity_phase
         }
       }
 
@@ -520,7 +481,7 @@ module.exports = {
         return {
           error: false,
           statusCode: 200,
-          message: messages.activity.success.create,
+          message: messages.activity.success.assigned,
         }
       }
 
@@ -602,14 +563,24 @@ module.exports = {
   async deleteActivity(id, payload) {
     const transaction = await sequelize.transaction();
     try {
-      
+
+      // Variable
+      let whereCondition = {
+        id,
+        userId: payload.id,
+        status: true
+      }
+
+      if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
+        whereCondition = {
+          id,
+          status:true
+        }
+      }
+
       // Activity exist validation
       const activityExist = await Activity.findOne({
-        where: {
-          id,
-          userId: payload.id,
-          status: true
-        }
+        where: whereCondition
       });
       if(!activityExist) {
         await transaction.rollback();
@@ -620,6 +591,23 @@ module.exports = {
         }
       }
 
+      // Validate if activity is assigned to any patient in the system
+      const activityIsAssigned = await PatientActivity.findOne({
+        where: {
+          activityId: id,
+          status: true,
+          isCompleted: false
+        }
+      });
+
+      if(activityIsAssigned) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.activity.errors.service.delete_assigned_activity
+        }
+      }
 
       // Delete Activity
       const activityResponse = await Activity.update({
@@ -679,10 +667,37 @@ module.exports = {
     }
   },
 
-  async unAssignActivityPatient({ activityId, patientId }) {
+  async unAssignActivityPatient({ activityId, patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
-      
+
+      // Variables
+      let whereCondition = {
+        id: patientId,
+        status: true,
+      }
+
+      // validate if therapist has the patient in charged
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+        const therapistExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id,
+          }
+        });
+        if(!therapistExist) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+        // add therapist id
+        whereCondition = {
+          ...whereCondition,
+          therapistId: therapistExist.id
+        }
+      }
+
       // Activity exist validation
       const activityExist = await Activity.findOne({
         where: {
@@ -701,10 +716,7 @@ module.exports = {
 
       // Patient exist validation
       const patientExist = await Patient.findOne({
-        where: {
-          id: patientId,
-          status: true
-        }
+        where: whereCondition
       });
       if(!patientExist) {
         await transaction.rollback();
@@ -765,7 +777,7 @@ module.exports = {
       }
 
     } catch (error) {
-      await transaction.rollback();	
+      await transaction.rollback();
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,
@@ -776,10 +788,10 @@ module.exports = {
   },
 
 
-  async checkActivityAnswer({ attempt, activityId, patientId }) {
+  async checkActivityAnswer({ attempt, activityId }, payload) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Activity exist validation
       const activityExist = await Activity.findOne({
         where: {
@@ -799,9 +811,17 @@ module.exports = {
       // Patient exist validation
       const patientExist = await Patient.findOne({
         where: {
-          id: patientId,
+          userId: payload.id,
           status: true,
-        }
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          }
+        ]
       });
       if(!patientExist) {
         await transaction.rollback();
@@ -828,7 +848,7 @@ module.exports = {
       const patientActivityExist = await PatientActivity.findOne({
         where: {
           activityId,
-          patientId,
+          patientId: patientExist.id,
           status: true
         }
       });
@@ -845,20 +865,11 @@ module.exports = {
       const activityCompleted = await PatientActivity.findOne({
         where: {
           activityId,
-          patientId,
+          patientId: patientExist.id,
           isCompleted: true,
           status: true,
         }
       });
-
-      if(activityCompleted) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.already_completed,
-        }
-      }
 
       // get the pictogramSentence and check if this one match with the attempt
       const pictogramSentenceArray = activityExist.pictogramSentence.split('-').map(Number);
@@ -875,51 +886,54 @@ module.exports = {
       }
 
       // Save the attempt as correct
-      const newSatisfactoryAttemptAmount = patientActivityExist.satisfactoryAttempts + 1;
+      let newSatisfactoryAttemptAmount = patientActivityExist.satisfactoryAttempts;
+      if(!activityCompleted) {
+        newSatisfactoryAttemptAmount = patientActivityExist.satisfactoryAttempts + 1;
+      }
 
-        // validate if satisfactoryAttempts is equal to satisfactoryPoints
-        if(activityExist.satisfactoryPoints === newSatisfactoryAttemptAmount) {
+      // validate if satisfactoryAttempts is equal to satisfactoryPoints
+      if(activityExist.satisfactoryPoints === newSatisfactoryAttemptAmount && !activityCompleted) {
+        const saveAttemptAsCorrect = await PatientActivity.update({
+          satisfactoryAttempts: newSatisfactoryAttemptAmount,
+          isCompleted: true,
+        },{
+          where: {
+            activityId,
+            patientId: patientExist.id,
+            status: true,
+          },
+          transaction
+        });
 
-          const saveAttemptAsCorrect = await PatientActivity.update({
-            satisfactoryAttempts: newSatisfactoryAttemptAmount,
-            isCompleted: true,
+        if(!saveAttemptAsCorrect) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.activity.errors.service.check_attempt,
+          }
+        }
+      }
+
+      if(!activityCompleted) {
+        const saveAttemptAsCorrect = await PatientActivity.update({
+          satisfactoryAttempts: newSatisfactoryAttemptAmount,
           },{
             where: {
               activityId,
-              patientId,
+              patientId: patientExist.id,
               status: true,
             },
             transaction
-          });
-        
-          if(!saveAttemptAsCorrect) {
-            await transaction.rollback();
-            return {
-              error: true,
-              statusCode: 409,
-              message: messages.activity.errors.service.check_attempt,
-            }
-          }
-        
-        }
+        });
 
-      const saveAttemptAsCorrect = await PatientActivity.update({
-        satisfactoryAttempts: newSatisfactoryAttemptAmount,
-      },{
-        where: {
-          activityId,
-          patientId,
-          status: true,
-        },
-        transaction
-      });
-    
-      if(!saveAttemptAsCorrect) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.check_attempt,
+        if(!saveAttemptAsCorrect) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.activity.errors.service.check_attempt,
+          }
         }
       }
 
