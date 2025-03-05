@@ -59,7 +59,9 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
               id: categoryExist.id,
               status: true,
             },
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -85,7 +87,9 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -365,7 +369,9 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
               id: categoryExist.id,
               status: true,
             },
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -388,7 +394,9 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -580,7 +588,9 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -624,7 +634,9 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
               id: categoryId,
               status: true,
             },
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });
@@ -648,7 +660,9 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status']
+            }
           }
         ]
       });

@@ -315,7 +315,9 @@ module.exports = {
             },
             include: {
               model: Category,
-              attributes: ['id','name']
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
             }
           }
         ]
@@ -340,19 +342,54 @@ module.exports = {
     }
   },
 
-  async updatePatientPictogram(id,body) {
+  async updatePatientPictogram(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
 
       // Destructuring data in order to get oly the fields to modify
       const { patientId, ...resBody } = body;
 
+      // variables
+      let whereCondition = { // this is the where condition when the admin is trying to update a custom pictogram.
+        id: patientId,
+        status: true,
+      };
+
+      if(payload.roles.includes(constants.TUTOR_ROLE)) {
+        const tutorExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id,
+            status: true,
+          },
+          include: [
+            {
+              model: User,
+              where:
+               {
+                 status: true,
+               }
+            }
+          ]
+        });
+
+        if(!tutorExist) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.tutor.errors.not_found
+          }
+        }
+
+        // add tutoId condition, in order to get only the patients that have a relation with the current tutor logged.
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorExist.id
+        }
+      }
+
       // get Patient
       const patientResponse = await Patient.findOne({
-        where: {
-          status: true,
-          id: patientId
-        },
+        where: whereCondition,
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         }
@@ -453,7 +490,9 @@ module.exports = {
             },
             include: {
               model: Category,
-              attributes: ['id','name']
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
             }
           }
         ]

@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { Pictogram, Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, pagination, formatErrorMessages } = require('@utils/index');
+const { messages, pagination, formatErrorMessages, dataStructure } = require('@utils/index');
 
 
 /* eslint-disable radix */
@@ -9,7 +9,7 @@ module.exports = {
 
   async allPictograms(query) {
     try {
-      
+
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Pictogram.findAll({
           where: {
@@ -21,7 +21,7 @@ module.exports = {
           include: [
             {
               model: Category,
-              attributes: ['id','name']
+              attributes: ['id','name', 'icon']
             }
           ]
         });
@@ -30,7 +30,7 @@ module.exports = {
           error: false,
           statusCode: 200,
           message: messages.pictogram.success.all,
-          data,
+          data: dataStructure.customPictogramDataStructure(data),
         }
       }
 
@@ -49,13 +49,16 @@ module.exports = {
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: ['id','name', 'icon']
           }
         ]
       });
 
+      // getting data structured
+      data.rows = dataStructure.customPictogramDataStructure(data.rows);
+
       const dataResponse = pagination.getPageData(data, query.page, limit);
-  
+
       return {
         error: false,
         statusCode: 200,
@@ -88,7 +91,9 @@ module.exports = {
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: {
+              exclude: ['createdAt','updatedAt', 'status']
+            }
           }
         ]
       });
@@ -105,7 +110,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.pictogram.success.found,
-        data,
+        data: dataStructure.findPictogramDataStructure(data),
       }
 
     } catch (error) {
@@ -122,7 +127,7 @@ module.exports = {
   async createPictogram(body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Category exist validation
       const categoryExist = await Category.findOne({
         where: {
@@ -159,7 +164,7 @@ module.exports = {
 
       // TODO: Image exist logic has to be here.
 
-    
+
       const data = await Pictogram.create(
         {
           name: body.name,
@@ -168,7 +173,7 @@ module.exports = {
         },
         { transaction }
       );
-      
+
       if(!data) {
         await transaction.rollback();
         return {
@@ -193,7 +198,7 @@ module.exports = {
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: ['id','name', 'icon']
           }
         ]
       });
@@ -202,7 +207,7 @@ module.exports = {
         error: false,
         statusCode: 201,
         message: messages.pictogram.success.create,
-        data: newData,
+        data: dataStructure.findPictogramDataStructure(newData),
       }
 
     } catch (error) {
@@ -211,7 +216,7 @@ module.exports = {
       return {
         error: true,
         statusCode: 500,
-        message: messages.generalMessages.server, 
+        message: messages.generalMessages.server,
       }
     }
   },
@@ -237,7 +242,7 @@ module.exports = {
           validationErrors: formatErrorMessages('pictogram', messages.pictogram.errors.not_found),
         }
       }
-      
+
       // Category exist validation
       if(body.categoryId) {
         const categoryExist = await Category.findOne({
@@ -320,7 +325,7 @@ module.exports = {
         include: [
           {
             model: Category,
-            attributes: ['id','name']
+            attributes: ['id','name', 'icon']
           }
         ]
       });
@@ -329,7 +334,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.pictogram.success.update,
-        data: newData,
+        data: dataStructure.findPictogramDataStructure(newData),
       }
 
     } catch (error) {
@@ -346,7 +351,7 @@ module.exports = {
   async removePictogram(id) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Pictogram exist validation
       const pictogramExist = await Pictogram.findOne({
         where: {
