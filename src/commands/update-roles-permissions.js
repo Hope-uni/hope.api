@@ -1,4 +1,4 @@
-require('./command-line'); 
+require('./command-line');
 const { Permission, RolesPermission } = require('@models/index');
 const logger = require('@config/logger.config');
 
@@ -28,8 +28,8 @@ async function assignPermissionsRoles() {
       'crear actividades',
       'actualizar actividades',
       'borrar actividades',
-      'desasignar actividades',
-      'asignar actividades',
+      'desasignar-actividad',
+      'asignar-actividad',
     ]
 
     const tutorPermissions = [
@@ -46,6 +46,7 @@ async function assignPermissionsRoles() {
 
     const patientPermissions = [
       'listar pictogramas-personalizados',
+      'verify-activity-answer'
     ]
 
     for(let i=0; i<permissionsData.length; i++) {

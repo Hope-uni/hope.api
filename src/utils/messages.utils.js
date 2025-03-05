@@ -145,7 +145,7 @@ const messages = {
         not_role: `El rol que está asignando a Terapeuta es inadmisible`,
         therapist_assigned: `El paciente ya tiene asignado un terapeuta`,
         therapist_not_assigned: `Terapeuta no fue asignado al Paciente`,
-        patient_to_assign: `Uno de los pacientes que esta intentando asignar no existe, porfavor verifique que todos los pacientes esten en el sistema`,	
+        patient_to_assign: `Uno de los pacientes que esta intentando asignar no existe, porfavor verifique que todos los pacientes esten en el sistema`,
       },
       not_found: `Terapeuta no encontrado`,
       in_use: {
@@ -233,6 +233,7 @@ const messages = {
         user_person_incorrect: `Identificador de usuario o identificador de persona no son correctos`,
         forbidden: `No tienes permíso de listar pacientes que no están relacionados contigo`,
         no_registered: `Pacientes no registrados`,
+        unassigned_therapist: `El paciente no tiene un terapeuta asignado`,
       },
       not_found: `Paciente no encontrado`,
       in_use: {
@@ -657,7 +658,6 @@ const messages = {
     }
   },
 
-
   activity: {
     fields: {
       id: {
@@ -720,6 +720,8 @@ const messages = {
         check_attempt: `La respuesta que has enviado no pudo ser verificada`,
         delete_patient_activity: `La actividad no pudo ser eliminada del paciente`,
         already_completed: `La actividad ya fue completada`,
+        activity_phase: `La actividad que esta tratando de asignarle al paciente no pertenece a la fase que el paciente esta actualmente`,
+        delete_assigned_activity: `La actividad que desea eliminar, esta asignada a un paciente`,
       },
       not_found: `Actividad no encontrada`,
       in_use: {

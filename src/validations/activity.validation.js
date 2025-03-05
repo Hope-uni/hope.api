@@ -21,7 +21,7 @@ module.exports = {
         'any.required': messages.activity.fields.satisfactoryPoints.required,
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
-        'number.max': messages.activity.fields.satisfactoryPoints.max,	
+        'number.max': messages.activity.fields.satisfactoryPoints.max,
       }),
       pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
@@ -128,11 +128,6 @@ module.exports = {
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive,
       }),
-      patientId: joi.number().positive().required().messages({
-        'any.required': messages.patient.fields.id.required,
-        'number.base': messages.patient.fields.id.base,
-        'number.positive': messages.patient.fields.id.positive,
-      }),
       attempt: joi.array().max(30).items(joi.number().positive()).unique().min(1).required().messages({
         'any.required': messages.activity.fields.pictogramSentence.required,
         'number.base': messages.activity.fields.pictogramSentence.base,
@@ -148,4 +143,4 @@ module.exports = {
     return schema.validate(data);
   }
 
-} 
+}

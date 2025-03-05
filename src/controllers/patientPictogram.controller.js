@@ -19,11 +19,14 @@ module.exports = {
 
   async all(req,res) {
     try {
-      
+
       // validate each field from the request except the paginations fields and the tutor enum
       const { page, size, ...resQuery } = req.query;
 
-      const { error } = patientPictogramsEntry.patientPictogramsFilterValidation(resQuery);
+      const { error } = patientPictogramsEntry.patientPictogramsFilterValidation({
+        patientId: req.params.id,
+        ...resQuery
+      });
       if( error ) return res.status(400).json({
         error: true,
         statusCode: 422,
@@ -31,7 +34,10 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, message, statusCode, ...resData } = await all(req.query, req.payload);
+      const { error: dataError, message, statusCode, ...resData } = await all({
+        patientId: req.params.id,
+        ...req.query
+      }, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -60,18 +66,24 @@ module.exports = {
 
   async allCustomPictograms(req,res) {
     try {
-      
+
       // validate each field from the request except the paginations fields and the tutor enum
       const { page, size, ...resQuery } = req.query;
 
-      const { error } = patientPictogramsEntry.patientPictogramsFilterValidation(resQuery);
+      const { error } = patientPictogramsEntry.patientPictogramsFilterValidation({
+        patientId: req.params.id,
+        ...resQuery
+      });
       if( error ) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message,
       });
 
-      const { error:dataError, message, statusCode, ...resData } = await allCustomPictograms(req.query, req.payload);
+      const { error: dataError, message, statusCode, ...resData } = await allCustomPictograms({
+        patientId: req.params.id,
+        ...req.query
+      }, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -100,7 +112,7 @@ module.exports = {
 
   async create(req,res) {
     try {
-      
+
       const { error } = patientPictogramsEntry.createPatientPictogram(req.body);
       if(error) return res.status(400).json({
         error: true,
@@ -139,7 +151,7 @@ module.exports = {
 
   async update(req,res) {
     try {
-      
+
       const { error } = patientPictogramsEntry.updatePatientPictogram({id:req.params.id, ...req.body});
       if(error) return res.status(400).json({
         error: true,
@@ -179,7 +191,7 @@ module.exports = {
 
   async removePatientPictogram(req,res) {
     try {
-      
+
       const { error } = idEntry.findOneValidation({id: req.params.id});
       if(error) return res.status(400).json({
         error: true,

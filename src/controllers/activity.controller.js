@@ -1,14 +1,13 @@
 const logger = require('@config/logger.config');
 const { messages, formatJoiMessages } = require('@utils/index');
-const { 
+const {
   activityEntry,
-  idEntry, 
+  idEntry,
 } = require('@validations/index');
-const { 
+const {
   all,
-  findOne, 
+  findOne,
   create,
-  updateActivity,
   unAssignActivityPatient,
   checkActivityAnswer,
   deleteActivity,
@@ -18,11 +17,11 @@ const {
 
 
 module.exports = {
-  
+
   async allActivities(req,res) {
     try {
-      
-      const { error, message, statusCode, data } = await all();
+
+      const { error, message, statusCode, ...data } = await all(req.query);
 
       if(error) {
         return res.status(statusCode).json({
@@ -36,7 +35,7 @@ module.exports = {
         error,
         statusCode,
         message,
-        data
+        ...data
       });
 
     } catch (error) {
@@ -52,9 +51,9 @@ module.exports = {
 
   async findActivity(req,res) {
     try {
-      
+
       const { error } = idEntry.findOneValidation({ id:req.params.id });
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message
@@ -88,9 +87,9 @@ module.exports = {
 
   async createActivity(req,res) {
     try {
-      
+
       const { error } = activityEntry.createActivityValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -125,53 +124,11 @@ module.exports = {
     }
   },
 
-  async updateActivity(req,res) {
-    try {
-      
-      const { error } = activityEntry.updateActivityValidation({
-        id: req.params.id,
-        ...req.body
-      });
-      if(error) return res.status(400).json({ 
-        error: true,
-        statusCode: 422,
-        message: messages.generalMessages.bad_request,
-        validationErrors: formatJoiMessages(error)
-      });
-
-      const { error:dataError, statusCode, message, validationErrors, data } = await updateActivity(req.params.id, req.body, req.payload);
-
-      if(dataError) {
-        return res.status(statusCode).json({
-          error: dataError,
-          statusCode,
-          message,
-          validationErrors,
-        })
-      };
-
-      return res.status(statusCode).json({
-        error: dataError,
-        statusCode,
-        message,
-        data
-      });
-
-    } catch (error) {
-      logger.error(`${messages.activity.errors.controller}: ${error}`);
-      return res.status(500).json({
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server
-      });
-    }
-  },
-
   async deleteActivity(req,res) {
     try {
-      
+
       const { error } = idEntry.findOneValidation({ id:req.params.id });
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message
@@ -205,15 +162,15 @@ module.exports = {
 
   async assignActivity(req,res) {
     try {
-      
+
       const { error } = activityEntry.assignActivityPatientValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message,
       });
 
-      const { error:dataError, statusCode, message } = await assingActivityPatient(req.body);
+      const { error:dataError, statusCode, message } = await assingActivityPatient(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -241,15 +198,15 @@ module.exports = {
 
   async unAssignActivity(req,res) {
     try {
-      
+
       const { error } = activityEntry.assignActivityPatientValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message,
       });
 
-      const { error:dataError, statusCode, message } = await unAssignActivityPatient(req.body);
+      const { error:dataError, statusCode, message } = await unAssignActivityPatient(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -278,15 +235,15 @@ module.exports = {
 
   async checkActivityPatient(req,res) {
     try {
-      
+
       const { error } = activityEntry.checkActivityPatientValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message
-      }); 
+      });
 
-      const { error:dataError, statusCode, message } = await checkActivityAnswer(req.body);
+      const { error:dataError, statusCode, message } = await checkActivityAnswer(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
