@@ -1,5 +1,5 @@
 const joi = require('joi');
-const {messages} = require('@utils/index');
+const {messages} = require('@utils');
 
 
 module.exports = {
@@ -23,6 +23,24 @@ module.exports = {
         'number.base': messages.phase.fields.scoreActivities.base,
         'number.positive': messages.phase.fields.scoreActivities.positive,
         'number.max': messages.phase.fields.scoreActivities.max,
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
+
+  phaseShiftingValidation(data) {
+    const schema = joi.object().keys({
+      patientId: joi.number().positive().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+      newPhase:joi.number().positive().required().messages({
+        'any.required': messages.phase.fields.id.required,
+        'number.base': messages.phase.fields.id.base,
+        'number.positive': messages.phase.fields.id.positive,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

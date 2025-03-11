@@ -14,6 +14,7 @@ const modules = {
   phase: "fases",
   teaDegree: "grados-de-tea",
   activity: "actividades",
+  observation: "observaciones"
 }
 
 const permission = {

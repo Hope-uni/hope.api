@@ -1,5 +1,5 @@
 const joi = require('joi');
-const { messages } = require('@utils/index');
+const { messages } = require('@utils');
 
 
 module.exports = {
@@ -42,10 +42,6 @@ module.exports = {
         'number.positive': messages.patient.fields.id.positive,
       }),
       tutorId: joi.number().positive().empty(' ').messages({
-        'number.base': messages.tutor.fields.id.base,
-        'number.positive': messages.tutor.fields.id.positive,
-      }),
-      therapistId: joi.number().positive().empty(' ').messages({
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),
