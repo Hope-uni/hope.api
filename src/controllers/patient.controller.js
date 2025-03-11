@@ -172,10 +172,10 @@ module.exports = {
   async updatePatient(req,res) {
     try {
       // Destructuring Object
-      const { therapistId, tutorId,...resBody } = req.body;
+      const { tutorId,...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, therapistId, tutorId});
+      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, tutorId});
 
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
@@ -199,7 +199,7 @@ module.exports = {
         });
       }
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body, req.payload);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,

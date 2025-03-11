@@ -1,9 +1,9 @@
-const { 
-  User, 
-  Role, 
+const {
+  User,
+  Role,
   UserRoles,
-  Person, 
-  sequelize 
+  Person,
+  sequelize
 } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
@@ -75,7 +75,7 @@ module.exports = {
 
       // Pagination
       const { limit, offset } = pagination.paginationValidation(query.page,query.size);
-      
+
       const data = await User.findAndCountAll({
         limit,
         offset,
@@ -141,7 +141,7 @@ module.exports = {
    */
   async findUser(id) {
     try {
-      
+
       if(parseInt(id) === 1) {
         return {
           error: true,
@@ -225,7 +225,7 @@ module.exports = {
         // Variables
         const passwordTemp = generatePassword();
         transaction = await sequelize.transaction();
-        
+
         // username Validation
         const usernameExist = await User.findOne({
           where: {
@@ -263,15 +263,15 @@ module.exports = {
         // Hash Password Validation
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(passwordTemp, salt);
-        
+
         // Create User
         const data = await User.create(
           {
             ...resBody,
             password: hashedPassword
-          }, 
+          },
           {
-            transaction 
+            transaction
           }
         );
 
@@ -424,15 +424,15 @@ module.exports = {
       // Hash Password Validation
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(resBody.password, salt);
-      
+
       // Create User
       const data = await User.create(
         {
           ...resBody,
           password: hashedPassword
-        }, 
+        },
         {
-          transaction 
+          transaction
         }
       );
 
@@ -501,7 +501,7 @@ module.exports = {
     }
   },
 
-  
+
   async updateUser(id, body, transaction) {
     try {
       // Destructuring data
@@ -515,10 +515,10 @@ module.exports = {
         address,
         birthday,
         gender,
-        personId, 
+        personId,
         ...resBody
       } = body;
-      
+
       // this is when you try to create a user directly
       if(!transaction) {
 
@@ -647,8 +647,8 @@ module.exports = {
             validationErrors: formatErrorMessages('update', messages.user.errors.service.update),
           }
         };
-        
-        
+
+
         await transaction.commit();
 
         // Getting User Updated
@@ -868,7 +868,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 400,
-            message: messages.user.errors.service.delete, 
+            message: messages.user.errors.service.delete,
           };
         };
 
@@ -876,7 +876,7 @@ module.exports = {
         const userRolesData = await UserRoles.findAll({
           where: { userId: id }
         });
-        
+
         for (const iterator of userRolesData) {
 
           await UserRoles.destroy({
@@ -895,7 +895,7 @@ module.exports = {
           message: messages.user.success.delete,
         }
       }
-      
+
       // User Exist
       const userExist = await User.findOne({
         where: {
@@ -934,7 +934,7 @@ module.exports = {
       const userRolesData = await UserRoles.findAll({
         where: { userId: id }
       });
-      
+
       for (const iterator of userRolesData) {
         await UserRoles.destroy({
           where: {
@@ -965,6 +965,9 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables
+      const rolesArray = [1, 2, 3, 4];
+
       // superuser does not need other role
       if(parseInt(userId) === 1) {
         return {
@@ -974,7 +977,7 @@ module.exports = {
         }
       }
 
-      if(parseInt(roleId) === 1 || parseInt(roleId) === 2 || parseInt(roleId) === 4 || parseInt(roleId) === 5) {
+      if(rolesArray.some(id => id === parseInt(roleId))) {
         return {
           error: true,
           statusCode: 400,
@@ -1068,7 +1071,7 @@ module.exports = {
       }
 
       await transaction.commit();
-      
+
       return {
         error: false,
         statusCode: 200,
@@ -1104,7 +1107,7 @@ module.exports = {
   async removeRoleUser(userId,roleId) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // superuser does not need other role
       if(parseInt(userId) === 1) {
         return {
@@ -1188,7 +1191,7 @@ module.exports = {
           message: messages.role.errors.unsign_rol,
         }
       }
-      
+
       // Validate if user has Therapist Role.
       const findUserWithRoleGaveIt = await UserRoles.findOne({
         where: {
@@ -1232,5 +1235,3 @@ module.exports = {
   }
 
 }
-
-
