@@ -675,6 +675,10 @@ module.exports = {
           name: data.Phase.name,
           description: data.Phase.description,
         },
+        activitySolution: {
+          pictogramsSolution: data.dataValues.pictograms,
+          textSolution: data.pictogramSentence
+        }
       }
     }
 

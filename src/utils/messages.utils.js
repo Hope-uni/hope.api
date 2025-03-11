@@ -95,7 +95,8 @@ const messages = {
         token: `Token no encontrado`,
         email_username: `El nombre de usuario o correo ingresado no está registrado en nuestro sistema. Por favor, verifica la información proporcionada`,
         tutorTherapist: `Tutor o terapeuta no encontrado`,
-      }
+      },
+      unauthorized: `No estas autorizado para realizar esta acción`
     },
     success: {
       login: `Inicio de sesión existoso!`,
@@ -537,6 +538,10 @@ const messages = {
         update: `Fase no actualizada`,
         delete: `Fase no fue eliminada`,
         all: `Fases no encontradas`,
+        has_activity: `El paciente tiene una actividad en curso`,
+        phase_sequency: `La fase que desea asignarle al paciente no esta permitida`,
+        phase_changed: `Cambio de fase no pudo ser completado`,
+        same_phase: 'El paciente ya tiene asignada la fase',
       },
       helper: `Hubo un error en el helper del Expediente en donde se buscaba las fases`,
       not_found: `Fase no encontrada`,
@@ -550,6 +555,7 @@ const messages = {
       create: `Fase creada`,
       update: `Fase actualizada`,
       delete: `Fase eliminada`,
+      phase_changed: `Cambio de fase exitoso`,
     }
   },
 
@@ -636,7 +642,8 @@ const messages = {
         required: `Descripción es requerida`,
         base: `Descripción debe ser un texto válido`,
         empty: `Descripción no debe estar vacía`,
-        min: `Descripción debe tener como minimo 3 caracteres`
+        min: `Descripción debe tener como minimo 6 caracteres`,
+        max: `Ha sobrepasado el limite de caracteres necesarios para su observación`
       },
     },
     errors: {
@@ -647,6 +654,7 @@ const messages = {
         update: `Observación no actualizada`,
         delete: `Observación no fue eliminada`,
         all: `Observaciones no encontradas`,
+        description: `La observación que intenta crear ya ha sido registrada.`,
       },
       not_found: `Observación no encontrada`,
     },
@@ -722,6 +730,7 @@ const messages = {
         already_completed: `La actividad ya fue completada`,
         activity_phase: `La actividad que esta tratando de asignarle al paciente no pertenece a la fase que el paciente esta actualmente`,
         delete_assigned_activity: `La actividad que desea eliminar, esta asignada a un paciente`,
+        incomplete_phase_score: 'El paciente no ha completado los requerimientos necesarios para el cambio de fase',
       },
       not_found: `Actividad no encontrada`,
       in_use: {

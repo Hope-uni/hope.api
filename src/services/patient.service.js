@@ -487,12 +487,25 @@ module.exports = {
       }
 
       // Validate if the user logged is Therapist, if this true, we validate searching just patients assigned to him.
-      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+      if(payload.roles.includes(constants.THERAPIST_ROLE) && !payload.roles.includes(constants.TUTOR_ROLE)) {
         // Find the therapist
         const therapistResponse = await TutorTherapist.findOne({
           where: {
             userId: payload.id
-          }
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 3
+                  }
+                }
+              ]
+            }
+          ]
         });
 
         if(!therapistResponse) {
@@ -506,6 +519,91 @@ module.exports = {
         whereCondition = {
           ...whereCondition,
           therapistId: therapistResponse.id
+        }
+      }
+
+      // Validate if the user logged is Tutor, if this true, we validate searching just patients assigned to him.
+      if(payload.roles.includes(constants.TUTOR_ROLE) && !payload.roles.includes(constants.THERAPIST_ROLE)) {
+        // Find the tutor
+        const tutorResponse = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 5
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!tutorResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.tutor.errors.not_found
+          }
+        }
+
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorResponse.id
+        }
+      }
+
+      if(payload.roles.includes(constants.THERAPIST_ROLE) && payload.roles.includes(constants.TUTOR_ROLE)) {
+        // Find the tutor
+        const tutorTherapistResponse = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    [Op.or]: [
+                      {
+                        roleId: 3
+                      },
+                      {
+                        roleId: 5,
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!tutorTherapistResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [
+            {
+              tutorId: tutorTherapistResponse.id
+            },
+            {
+              therapistId: tutorTherapistResponse.id
+            }
+          ]
         }
       }
 
@@ -963,16 +1061,65 @@ module.exports = {
     }
   },
 
-  async update(id,body) {
+  async update(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables
+      let whereCondition = {
+        id,
+        status: true,
+      }
+
+      if(payload.roles.includes(constants.TUTOR_ROLE)) {
+        const tutorExist = await TutorTherapist.findOne({
+          where:{
+            userId: payload.id
+          },
+          include: [
+            {
+              model: User,
+              where: {
+                status: true,
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 5
+                  },
+                },
+              ]
+            },
+          ]
+        });
+
+        if(!tutorExist) {
+          return {
+            error: true,
+            statusCode: 401,
+            message: messages.generalMessages.bad_request,
+            validationErrors: formatErrorMessages('tutor', messages.auth.errors.unauthorized),
+          }
+        }
+        // add tutorId to patient request
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorExist.id
+        }
+      }
+
       // validate if patient exist
       const patientExist = await Patient.findOne({
-        where: {
-          id,
-          status: true
-        }
+        where: whereCondition,
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          }
+        ]
       });
       if(!patientExist) {
         await transaction.rollback();
@@ -985,61 +1132,7 @@ module.exports = {
       };
 
       // Destructuring Object
-      const { tutorId, therapistId,...resData } = body;
-
-      // Tutor Exist validation
-      if(tutorId) {
-        const tutorExist = await TutorTherapist.findOne({
-          where: {
-            id: tutorId,
-            status: true
-          }
-        });
-        if(!tutorExist) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 404,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
-          };
-        };
-      };
-
-      if(therapistId) {
-        // Therapist Exist validation
-      const therapistExist = await TutorTherapist.findOne({
-        where: {
-          id: therapistId,
-          status: true
-        },
-        include: [
-          {
-            model: User,
-            include: [
-              {
-                model: UserRoles,
-                include: {
-                  model: Role,
-                  where: {
-                    name: 'Terapeuta',
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      });
-      if(!therapistExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('therapist', messages.therapist.errors.not_found),
-        };
-      };
-      }
+      const { tutorId, ...resData } = body;
 
       const { error:userPersonError, statusCode, message, validationErrors } = await updateUser(patientExist.userId,
         {
@@ -1058,23 +1151,58 @@ module.exports = {
         };
       };
 
-      if(tutorId || therapistId) {
-        const patientResponse = await Patient.update({
-          tutorId,
-          therapistId
-        },{
-          where: {
-            id
-          },
-          transaction
-        });
-        if(!patientResponse) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 409,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('update', messages.patient.errors.service.update),
+      if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
+        // Tutor Exist validation
+        if(tutorId) {
+          const tutorExist = await TutorTherapist.findOne({
+            where: {
+              id: tutorId,
+              status: true
+            },
+            include: [
+              {
+                model: User,
+                where: {
+                  status: true,
+                },
+                include: [
+                  {
+                    model: UserRoles,
+                    where: {
+                      roleId: 5
+                    }
+                  },
+                ]
+              },
+            ]
+          });
+          if(!tutorExist) {
+            await transaction.rollback();
+            return {
+              error: true,
+              statusCode: 404,
+              message: messages.generalMessages.base,
+              validationErrors: formatErrorMessages('tutor', messages.tutor.errors.not_found),
+            };
+          };
+
+          // Update patient adding the new tutor.
+          const patientResponse = await Patient.update({
+            tutorId
+          },{
+            where: {
+              id
+            },
+            transaction
+          });
+          if(!patientResponse) {
+            await transaction.rollback();
+            return {
+              error: true,
+              statusCode: 409,
+              message: messages.generalMessages.base,
+              validationErrors: formatErrorMessages('update', messages.patient.errors.service.update),
+            };
           };
         };
       }

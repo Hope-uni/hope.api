@@ -26,6 +26,7 @@ async function assignPermissionsRoles() {
       'listar actividades',
       'buscar actividades',
       'crear actividades',
+      'crear observaciones',
       'actualizar actividades',
       'borrar actividades',
       'desasignar-actividad',
@@ -34,6 +35,7 @@ async function assignPermissionsRoles() {
 
     const tutorPermissions = [
       'listar pacientes',
+      'buscar pacientes',
       'actualizar perfil',
       // 'actualizar pacientes',
       'buscarme',
