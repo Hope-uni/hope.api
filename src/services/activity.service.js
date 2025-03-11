@@ -311,6 +311,19 @@ module.exports = {
         ]
       });
 
+      const { error:pictogramError, message:pictogramMessage, pictograms } = await getPictograms(newData.pictogramSentence);
+
+      if(pictogramError) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('pictograms', pictogramMessage),
+        }
+      }
+
+      newData.setDataValue('pictograms', pictograms);
+
       return {
         error: false,
         statusCode: 201,

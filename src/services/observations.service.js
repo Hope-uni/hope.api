@@ -1,10 +1,9 @@
 const { Observation, User, HealthRecord, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, formatErrorMessages } = require('@utils/index');
+const { messages, formatErrorMessages } = require('@utils');
+const { patientBelongsToTherapist } = require('@helpers');
 
-module.exports = {
-
-  async createObservation (body, transactionRetrieved) {
+  const createObservation = async (body, transactionRetrieved) => {
     const transaction = transactionRetrieved ?? await sequelize.transaction();
     try {
 
@@ -80,6 +79,86 @@ module.exports = {
         message: messages.generalMessages.server,
       }
     }
-  }
+};
 
+
+const addObservation = async ({ description, patientId }, payload) => {
+  const transaction = await sequelize.transaction();
+  try {
+
+    const { error:verifyPatientError, message:verifyPatientMessage, statusCode: verifyPatientStatus, patientExist } = await patientBelongsToTherapist(payload, patientId,transaction);
+
+    if(verifyPatientError) {
+      await transaction.rollback();
+      return {
+        error: verifyPatientError,
+        statusCode: verifyPatientStatus,
+        message: verifyPatientMessage
+      }
+    }
+
+    // Validate if the obsevation has been added.
+    const descriptionExist = await Observation.findOne({
+      where: {
+        description,
+        status: true,
+      },
+      include: [
+        {
+          model: HealthRecord,
+          where: {
+            patientId: patientExist.id
+          },
+        }
+      ]
+    });
+
+    if(descriptionExist) {
+      await transaction.rollback();
+      return {
+        error: true,
+        statusCode: 409,
+        message: messages.observations.errors.service.description
+      }
+    }
+
+    // Create Observation
+    const { error, statusCode, message, data } = await createObservation({
+      description,
+      userId: payload.id,
+      healthRecordId: patientExist.HealthRecord.id
+    }, transaction);
+
+    if(error) {
+      return {
+        error,
+        statusCode,
+        message: messages.observations.errors.service.create
+      }
+    }
+
+    // Commit transaction
+    await transaction.commit();
+
+    return {
+      error,
+      statusCode,
+      message,
+      data
+    }
+  } catch(error) {
+    await transaction.rollback();
+    logger.error(`${messages.observations.errors.service.base}: ${error}`);
+    return {
+      error: true,
+      statusCode: 500,
+      message: messages.observations.errors.service.base
+    }
+  }
+}
+
+
+module.exports = {
+  createObservation,
+  addObservation
 }
