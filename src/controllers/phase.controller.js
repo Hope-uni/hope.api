@@ -1,9 +1,10 @@
 const logger = require('@config/logger.config');
-const { messages, formatJoiMessages } = require('@utils/index');
-const { phaseEntry } = require('@validations/index');
+const { messages, formatJoiMessages } = require('@utils');
+const { phaseEntry } = require('@validations');
 const {
   all,
   update,
+  phaseShifting
 } = require('@services/phase.service');
 
 
@@ -12,7 +13,7 @@ module.exports = {
 
   async allPhases(req,res) {
     try {
-      
+
       const { error, statusCode, message, data } = await all();
 
       if(error) {
@@ -42,7 +43,7 @@ module.exports = {
 
   async udpatePhase(req,res) {
     try {
-      
+
       const { error } = phaseEntry.updatePhaseValidation({
         id: req.params.id,
         ...req.body
@@ -66,12 +67,11 @@ module.exports = {
       };
 
       return res.status(statusCode).json({
-        error:dataError,
+        error: dataError,
         statusCode,
         message,
         data
-      })
-
+      });
     } catch (error) {
       logger.error(`${messages.phase.errors.controller}:${error}`);
       return res.status(500).json({
@@ -79,6 +79,49 @@ module.exports = {
         statusCode: 500,
         message: messages.generalMessages.server,
       });
+    }
+  },
+
+  async patientPhaseShifting(req,res) {
+    try {
+
+      const { error } = phaseEntry.phaseShiftingValidation({
+        patientId: req.params.patientId,
+        ...req.body
+      });
+      if (error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: error.details[0].message
+      });
+
+      const { error: dataError, statusCode, message, data } = await phaseShifting({
+        patientId: req.params.patientId,
+        ...req.body
+      }, req.payload);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message,
+        data
+      });
+
+    } catch(error) {
+      logger.error(`${messages.phase.errors.controller}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server
+      }
     }
   }
 
