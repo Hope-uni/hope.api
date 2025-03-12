@@ -31,6 +31,8 @@ async function assignPermissionsRoles() {
       'borrar actividades',
       'desasignar-actividad',
       'asignar-actividad',
+      'listar categorias',
+      'listar fases',
     ]
 
     const tutorPermissions = [
@@ -44,6 +46,7 @@ async function assignPermissionsRoles() {
       'crear pictogramas-personalizados',
       'actualizar pictogramas-personalizados',
       'borrar pictogramas-personalizados',
+      'listar categorias',
     ]
 
     const patientPermissions = [

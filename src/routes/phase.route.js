@@ -7,7 +7,7 @@ const  {
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
-router.get('', verifyToken, rolePermissions(['Admin','Superadmin'],['listar fases']), allPhases);
+router.get('', verifyToken, rolePermissions(['Admin','Superadmin', 'Terapeuta'],['listar fases']), allPhases);
 
 router.put('/:patientId', verifyToken, rolePermissions(['Admin','Superadmin', 'Terapeuta'],['modificar paciente-terapeuta']), patientPhaseShifting );
 
