@@ -677,7 +677,6 @@ module.exports = {
         },
         activitySolution: {
           pictogramsSolution: data.dataValues.pictograms,
-          textSolution: data.pictogramSentence
         }
       }
     }
@@ -727,7 +726,6 @@ module.exports = {
       }): null,
       activitySolution: {
         pictogramsSolution: data.dataValues.pictograms,
-        textSolution: data.pictogramSentence
       }
     };
 
