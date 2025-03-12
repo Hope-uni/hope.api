@@ -727,6 +727,7 @@ module.exports = {
       }): null,
       activitySolution: {
         pictogramsSolution: data.dataValues.pictograms,
+
       }
     };
 
