@@ -9,7 +9,7 @@ const {
 const { verifyToken, rolePermissions } = require('../middlewares/index');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin'],['listar categorias']), all);
+router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta', 'Tutor'],['listar categorias']), all);
 router.get('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['buscar categorias']), findOne);
 
 router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin'],['crear categorias']), create);
