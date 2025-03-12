@@ -23,7 +23,7 @@ module.exports = {
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
         'number.max': messages.activity.fields.satisfactoryPoints.max,
       }),
-      pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).messages({
+      pictogramSentence: joi.array().max(15).items(joi.number().positive()).unique().min(1).messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,

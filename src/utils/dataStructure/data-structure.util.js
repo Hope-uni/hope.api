@@ -675,6 +675,7 @@ module.exports = {
           name: data.Phase.name,
           description: data.Phase.description,
         },
+        assignments: null,
         activitySolution: {
           pictogramsSolution: data.dataValues.pictograms,
         }
