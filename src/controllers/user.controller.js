@@ -11,8 +11,8 @@ const {
 const {
   idEntry,
   userEntry
-} = require('@validations/index');
-const { messages, formatJoiMessages } = require('@utils/index');
+} = require('@validations');
+const { messages, formatJoiMessages } = require('@utils');
 
 
 module.exports = {
@@ -57,7 +57,7 @@ module.exports = {
       // Joi Validation
       const { error } = idEntry.findOneValidation({ id: req.params.id });
       if(error) return res.status(400).json({ error: error.details[0].message });
-      
+
       const { error:dataError, message, statusCode, data} = await findUser(req.params.id);
       if(dataError) {
         return res.status(statusCode).json({
@@ -90,7 +90,12 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = userEntry.createUserValidation(req.body);
-      if(error) return res.status(400).json({ error: error.details[0].message });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationsErrors: formatJoiMessages(error)
+      });
       const { error:dataError, statusCode, message, validationErrors, data } = await createUser(req.body);
 
       if(dataError) {
@@ -126,13 +131,13 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = userEntry.updateUserValidation({ ...req.body });
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
         validationErrors: formatJoiMessages(error),
       });
-      
+
       const { error:dataError, statusCode, message, validationErrors, data} = await updateUser(req.params.id,req.body);
 
       if(dataError) {
@@ -167,7 +172,7 @@ module.exports = {
     try {
       // Joi Validation
       const { error } = idEntry.findOneValidation({id: req.params.id});
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: error.details[0].message,
@@ -203,7 +208,7 @@ module.exports = {
     try {
 
       const { error } = userEntry.roleUserValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -235,12 +240,12 @@ module.exports = {
       });
     }
   },
-  
+
   async removeRolesUser(req,res) {
     try {
-      
+
       const { error } = userEntry.roleUserValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,

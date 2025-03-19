@@ -61,7 +61,7 @@ module.exports = {
 
   changePasswordValidation(data) {
     const schema = joi.object().keys({
-      password: joi.string().required().min(8).messages({
+      password: joi.string().required().min(8, 'utf8').messages({
         'any.required': messages.auth.fields.password.required,
         'string.base': messages.auth.fields.password.base,
         'string.empty': messages.auth.fields.password.empty,

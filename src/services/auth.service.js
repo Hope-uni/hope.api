@@ -1,12 +1,12 @@
-const { User, Role, Permission, AuthToken, UserRoles, Patient, sequelize } = require('@models/index.js');
+const { User, Role, Permission, AuthToken, UserRoles, Patient, sequelize } = require('@models/index');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { jwtAccessExpiration, secretKey, domain, userEmail } = require('@config/variables.config');
-const { transporter, handlebarsOption } = require('@helpers/index');
-const { messages, formatErrorMessages, dataStructure } = require('@utils/index');
+const { transporter, handlebarsOption } = require('@helpers');
+const { messages, formatErrorMessages, dataStructure } = require('@utils');
 
 module.exports = {
 
@@ -26,8 +26,6 @@ module.exports = {
   async login(body) {
     const transaction = await sequelize.transaction();
     try {
-
-      
       const getUserFromDb = await User.findOne({
         where: {
           [Op.and]: [
@@ -73,7 +71,7 @@ module.exports = {
           statusCode: 404
         }
       };
-      
+
       // Password Match Validation
       const passwordValid = await bcrypt.compare(body.password, getUserFromDb.password);
       if(!passwordValid) {
@@ -106,7 +104,7 @@ module.exports = {
       /* eslint-disable prefer-const */
       /* eslint-disable no-unused-vars */
       let accessToken;
-    
+
       const getSuperAdmin = getUserFromDb.UserRoles.map((element ) => {
         if(element.Role.name === 'Superadmin') {
           return element.Role.name;
@@ -245,7 +243,7 @@ module.exports = {
 
       // Create Url
       const url = `${domain}/reset-password?token=${encodeURIComponent(emailToken)}`;
-      
+
       // Template file with Nodemailer
       transporter.use('compile', hbs(handlebarsOption));
 
@@ -257,7 +255,7 @@ module.exports = {
         template:'email',
         context: {
           name: userData.name,
-          email: userData.email, 
+          email: userData.email,
           url,
         }
       };
@@ -342,7 +340,7 @@ module.exports = {
       }
     }
   },
-  
+
   /**
    * The function `changePassword` updates a user's password after validating the current password and
    * handling potential errors using transactions in a Node.js application.
@@ -357,7 +355,7 @@ module.exports = {
   async changePassword(body, payload) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       const getUser = await User.findOne({
         where: {
           id: payload.id,
@@ -404,7 +402,7 @@ module.exports = {
       }
 
       // Commit transaction
-      await transaction.commit();   
+      await transaction.commit();
 
       return {
         error: false,
@@ -423,7 +421,7 @@ module.exports = {
       }
     }
   },
-  
+
   /**
    * The function `changePasswordPatient` updates a patient's password after validating the current
    * password and committing the changes in a transaction.
@@ -439,7 +437,7 @@ module.exports = {
   async changePasswordPatient(body, id) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       const getPatient = await Patient.findOne({
         where: {
           id,
@@ -501,7 +499,7 @@ module.exports = {
       }
 
       // Commit transaction
-      await transaction.commit();   
+      await transaction.commit();
 
       return {
         error: false,
@@ -618,7 +616,7 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: messages.auth.errors.service.refresh_auth.token_invalid.empty, 
+        message: messages.auth.errors.service.refresh_auth.token_invalid.empty,
         statusCode: 400
       }
     };
@@ -626,7 +624,7 @@ module.exports = {
       await transaction.rollback();
       return {
         error: true,
-        message: messages.auth.errors.service.refresh_auth.token_invalid.base, 
+        message: messages.auth.errors.service.refresh_auth.token_invalid.base,
         statusCode: 400
       }
     };
@@ -772,7 +770,7 @@ module.exports = {
         await transaction.rollback();
         return {
           error: true,
-          message: messages.auth.errors.service.refresh_auth.token_invalid.base, 
+          message: messages.auth.errors.service.refresh_auth.token_invalid.base,
           statusCode: 400
         }
       };

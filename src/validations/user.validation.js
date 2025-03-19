@@ -1,22 +1,24 @@
 const joi = require('joi');
-const messages = require('@utils/messages.utils');
+const messages= require('@utils/messages.utils');
 
 module.exports = {
 
   createUserValidation(data) {
     const schema = joi.object().keys({
-      username: joi.string().required().min(6).max(16).messages({
+      username: joi.string().strict().trim().required().min(3, 'utf8').max(15, 'utf8').messages({
         'any.required': messages.user.fields.username.required,
         'string.base': messages.user.fields.username.base,
+        'string.trim': messages.user.fields.username.trim,
         'string.empty': messages.user.fields.username.empty,
-        'string.min': messages.user.fields.username.min,
-        'string.max': messages.user.fields.username.max,
+        'string.min': messages.user.fields.username.characters,
+        'string.max': messages.user.fields.username.characters,
       }),
-      email: joi.string().email().required().messages({
+      email: joi.string().strict().trim().email().required().messages({
         'any.required': messages.user.fields.email.required,
         'string.base': messages.user.fields.email.base,
         'string.email': messages.user.fields.email.format,
-        'string.empty': messages.user.fields.email.empty
+        'string.empty': messages.user.fields.email.empty,
+        'string.trim': messages.user.fields.email.trim,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
@@ -26,11 +28,15 @@ module.exports = {
 
   updateUserValidation(data) {
     const schema = joi.object().keys({
-      username: joi.string().empty(' ').messages({
+      username: joi.string().strict().trim().min(3, 'utf8').max(15, 'utf8').empty(' ').messages({
         'string.base': messages.user.fields.username.base,
         'string.empty': messages.user.fields.username.empty,
+        'string.trim': messages.user.fields.username.trim,
+        'string.min': messages.user.fields.username.characters,
+        'string.max': messages.user.fields.username.characters,
       }),
-      email: joi.string().email().empty(' ').messages({
+      email: joi.string().strict().trim().email().empty(' ').messages({
+        'string.trim': messages.user.fields.email.trim,
         'string.email': messages.user.fields.email.format,
         'string.empty': messages.user.fields.email.empty,
       }),
@@ -42,12 +48,12 @@ module.exports = {
 
   roleUserValidation(data) {
     const schema = joi.object().keys({
-      userId: joi.number().positive().required().messages({
+      userId: joi.number().positive().strict().required().messages({
         'any.required': messages.user.fields.id.required,
         'number.base': messages.user.fields.id.base,
         'number.positive': messages.user.fields.id.positive,
       }),
-      roleId: joi.number().positive().required().messages({
+      roleId: joi.number().positive().strict().required().messages({
         'any.required': messages.role.fields.id.required,
         'number.base': messages.role.fields.id.base,
         'number.positive': messages.role.fields.id.positive,

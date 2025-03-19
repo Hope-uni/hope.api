@@ -5,25 +5,27 @@ module.exports = {
 
   createActivityValidation(data) {
     const schema = joi.object().keys({
-      name: joi.string().required().min(3).max(30).messages({
+      name: joi.string().strict().trim().min(3, 'utf8').max(100,'utf8').required().messages({
         'any.required': messages.activity.fields.name.required,
         'string.base': messages.activity.fields.name.base,
-        'string.min': messages.activity.fields.name.min,
-        'string.max': messages.activity.fields.name.max,
+        'string.min': messages.activity.fields.name.characters,
+        'string.max': messages.activity.fields.name.characters,
+        'string.trim': messages.activity.fields.name.trim
       }),
-      description: joi.string().min(6).max(255).required().messages({
+      description: joi.string().strict().trim().min(6, 'utf8').max(255, 'utf8').required().messages({
         'any.required': messages.activity.fields.description.required,
         'string.base': messages.activity.fields.description.base,
-        'string.min': messages.activity.fields.description.min,
-        'string.max': messages.activity.fields.description.max,
+        'string.min': messages.activity.fields.description.characters,
+        'string.max': messages.activity.fields.description.characters,
+        'string.trim': messages.activity.fields.description.trim
       }),
-      satisfactoryPoints: joi.number().max(20).required().positive().messages({
+      satisfactoryPoints: joi.number().strict().max(20).required().positive().messages({
         'any.required': messages.activity.fields.satisfactoryPoints.required,
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
         'number.max': messages.activity.fields.satisfactoryPoints.max,
       }),
-      pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).messages({
+      pictogramSentence: joi.array().max(30).items(joi.number().positive().strict()).unique().min(1).messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
@@ -31,7 +33,7 @@ module.exports = {
         'array.unique': messages.activity.fields.pictogramSentence.unique,
         'array.max': messages.activity.fields.pictogramSentence.max,
       }),
-      phaseId: joi.number().required().positive().messages({
+      phaseId: joi.number().required().positive().strict().messages({
         'any.required': messages.phase.fields.id.required,
         'number.base': messages.phase.fields.id.base,
         'number.positive': messages.phase.fields.id.positive,
@@ -49,19 +51,26 @@ module.exports = {
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive,
       }),
-      name: joi.string().empty(' ').messages({
+      name: joi.string().strict().trim().min(3, 'utf8').max(100,'utf8').empty(' ').messages({
         'string.base': messages.activity.fields.name.base,
         'string.empty': messages.activity.fields.name.empty,
+        'string.min': messages.activity.fields.name.characters,
+        'string.max': messages.activity.fields.name.characters,
+        'string.trim': messages.activity.fields.name.trim
       }),
-      description: joi.string().empty(' ').messages({
+      description: joi.string().strict().trim().min(6, 'utf8').max(255, 'utf8').empty(' ').messages({
         'string.base': messages.activity.fields.description.base,
         'string.empty': messages.activity.fields.description.empty,
+        'string.min': messages.activity.fields.description.characters,
+        'string.max': messages.activity.fields.description.characters,
+        'string.trim': messages.activity.fields.description.trim
       }),
-      satisfactoryPoints: joi.number().positive().messages({
+      satisfactoryPoints: joi.number().strict().max(20).positive().empty(' ').messages({
         'number.base': messages.activity.fields.satisfactoryPoints.base,
         'number.positive': messages.activity.fields.satisfactoryPoints.positive,
+        'number.max': messages.activity.fields.satisfactoryPoints.max,
       }),
-      pictogramSentence: joi.array().max(30).items(joi.number().positive()).unique().min(1).empty(' ').messages({
+      pictogramSentence: joi.array().max(30).items(joi.number().positive().strict()).unique().min(1).empty(' ').messages({
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
         'array.base': messages.activity.fields.pictogramSentence.base,
@@ -69,7 +78,7 @@ module.exports = {
         'array.unique': messages.activity.fields.pictogramSentence.unique,
         'array.max': messages.activity.fields.pictogramSentence.max,
       }),
-      phaseId: joi.number().positive().empty('  ').messages({
+      phaseId: joi.number().positive().strict().empty('  ').messages({
         'number.base': messages.phase.fields.id.base,
         'number.positive': messages.phase.fields.id.positive,
       }),
@@ -82,12 +91,12 @@ module.exports = {
 
   assignActivityPatientValidation(data) {
     const schema = joi.object().keys({
-      activityId: joi.number().positive().required().messages({
+      activityId: joi.number().positive().strict().required().messages({
         'any.required': messages.activity.fields.id.required,
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive,
       }),
-      patientId: joi.number().positive().required().messages({
+      patientId: joi.number().positive().strict().required().messages({
         'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
@@ -123,12 +132,12 @@ module.exports = {
 
   checkActivityPatientValidation(data) {
     const schema = joi.object().keys({
-      activityId: joi.number().positive().required().messages({
+      activityId: joi.number().positive().strict().required().messages({
         'any.required': messages.activity.fields.id.required,
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive,
       }),
-      attempt: joi.array().max(30).items(joi.number().positive()).unique().min(1).required().messages({
+      attempt: joi.array().max(30).items(joi.number().positive().strict()).unique().min(1).required().messages({
         'any.required': messages.activity.fields.pictogramSentence.required,
         'number.base': messages.activity.fields.pictogramSentence.base,
         'number.positive': messages.activity.fields.pictogramSentence.positive,
