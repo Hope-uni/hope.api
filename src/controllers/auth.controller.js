@@ -199,7 +199,7 @@ module.exports = {
 
       }
 
-      const { error:dataError, message, statusCode, validationErrors } = await changePasswordPatient(req.body, req.params.id);
+      const { error:dataError, message, statusCode, validationErrors } = await changePasswordPatient(req.body, req.params.id, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
