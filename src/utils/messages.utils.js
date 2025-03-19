@@ -274,6 +274,7 @@ const messages = {
         base: `Correo debe ser válido`,
         empty: `Correo no debe estar vacío`,
         trim: `Correo contiene espacios adicionales`,
+        characters: `Correo debe tener como minimo 3 y como máximo 50 caracteres`
       },
       password: {
         required: `Contraseña es requerida`,
