@@ -2,7 +2,7 @@ const { User, Role, Permission, UserRoles } = require('@models/index');
 
 module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
 
-  
+
   /* eslint-disable no-unused-vars */
   /* eslint-disable array-callback-return */
   /* eslint-disable no-restricted-syntax */
@@ -78,7 +78,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
         });
       }
     }
-    
+
 
     if(user && haveRole && havePermission) {
       next();
@@ -86,7 +86,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
       response.status(403).json({
         error: true,
         statusCode: 403,
-        message: 'Acceso Denegado' 
+        message: 'Acceso Denegado'
       }); // user is forbidden
     }
 

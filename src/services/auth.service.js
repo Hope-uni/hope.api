@@ -1,4 +1,13 @@
-const { User, Role, Permission, AuthToken, UserRoles, Patient, sequelize } = require('@models/index');
+const {
+  User,
+  Role,
+  Permission,
+  AuthToken,
+  UserRoles,
+  Patient,
+  TutorTherapist,
+  sequelize
+} = require('@models/index');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const hbs = require('nodemailer-express-handlebars');
@@ -7,6 +16,7 @@ const logger = require('@config/logger.config');
 const { jwtAccessExpiration, secretKey, domain, userEmail } = require('@config/variables.config');
 const { transporter, handlebarsOption } = require('@helpers');
 const { messages, formatErrorMessages, dataStructure } = require('@utils');
+const { roleConstants } = require('@constants');
 
 module.exports = {
 
@@ -434,15 +444,39 @@ module.exports = {
    * @returns The function `changePasswordPatient` returns an object with properties based on the
    * outcome of the password change operation.
    */
-  async changePasswordPatient(body, id) {
+  async changePasswordPatient(body, id, payload) {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables
+      let whereCondition = {
+        id,
+        status: true,
+      }
+
+      if(payload.roles.includes(roleConstants.TUTOR_ROLE)) {
+        const tutorExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          },
+        });
+        if(!tutorExist) {
+          return {
+            error: true,
+            message: messages.tutor.errors.not_found,
+            statusCode: 404
+          }
+        }
+
+        // udpate whereCondition
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorExist.id
+        }
+      }
+
       const getPatient = await Patient.findOne({
-        where: {
-          id,
-          status: true
-        },
+        where: whereCondition,
         include: [
           {
             model: User,
