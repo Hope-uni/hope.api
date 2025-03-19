@@ -1,5 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages, formatJoiMessages } = require('@utils/index');
+const { messages, formatJoiMessages } = require('@utils');
 const {
   login,
   forgotPassword,
@@ -26,7 +26,7 @@ module.exports = {
         statusCode: 422,
         message: messages.generalMessages.bad_request,
         validationErrors: formatJoiMessages(error),
-      });	
+      });
 
       const { error:dataError, statusCode, message, data } = await login(req.body);
 
@@ -54,7 +54,7 @@ module.exports = {
       });
     }
   },
-  
+
   /* The `async forgotPassword(req,res)` function is a controller function that handles the process of
   resetting a user's forgotten password. Here is a breakdown of what it does: */
   async forgotPassword(req,res) {
@@ -97,7 +97,7 @@ module.exports = {
   /* The `async resetPassword(req,res)` function is a controller function that handles the process of
   resetting a user's password. Here is a breakdown of what it does: */
   async resetPassword(req,res) {
-    try { 
+    try {
       // Joi Validation
       const { error } = authEntry.resetPasswordValidation(req.body);
       if(error) return res.status(400).json({
@@ -135,9 +135,9 @@ module.exports = {
 
   async changePassword(req,res) {
     try {
-      
+
       const { error } = authEntry.changePasswordValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -199,7 +199,7 @@ module.exports = {
 
       }
 
-      const { error:dataError, message, statusCode, validationErrors } = await changePasswordPatient(req.body, req.params.id);
+      const { error:dataError, message, statusCode, validationErrors } = await changePasswordPatient(req.body, req.params.id, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -260,7 +260,7 @@ module.exports = {
   refreshing the authentication token. Here is a breakdown of what it does: */
   async getRefreshToken(req,res) {
     try {
-      
+
       const { error, message, statusCode, data } = await refreshAuth(req.body.refreshToken);
       if(error) {
         return res.status(statusCode).json({
@@ -289,7 +289,7 @@ module.exports = {
 
   async removeToken(req,res) {
     try {
-      
+
       const { error, message, statusCode } = await removeRefreshToken(req.body.refreshToken);
       if(error) {
         return res.status(statusCode).json({

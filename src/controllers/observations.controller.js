@@ -1,5 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages } = require('@utils');
+const { messages, formatJoiMessages } = require('@utils');
 const {
   addObservation
 } = require('@services/observations.service');
@@ -17,16 +17,17 @@ module.exports = {
       if (error) return res.status(400).json({
         error: true,
         statusCode: 422,
-        message: error.details[0].message
+        message: formatJoiMessages(error)
       });
 
-      const { error: dataError, statusCode, message, data } = await addObservation(req.body, req.payload);
+      const { error: dataError, statusCode, message, validationErrors, data } = await addObservation(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          validationErrors
         });
       }
 
@@ -42,7 +43,7 @@ module.exports = {
       return res.status(500).json({
         error: true,
         statusCode: 500,
-        message: messages.observations.errors.controller,
+        message: messages.generalMessages.server,
       });
     }
   }

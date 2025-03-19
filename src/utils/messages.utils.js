@@ -220,7 +220,9 @@ const messages = {
         positive: `Edad debe ser un número positivo mayor a cero`
       },
       observations: {
-        base: `Observaciones deben ser enviadas en formato válido`,
+        base: `La observación debe ser enviada en formato válido`,
+        trim: `La observación contiene espacios adicionales`,
+        characters: `La observación debe tener como mínimo 6 y como máximo 255 caracteres`,
       }
     },
     errors: {
@@ -263,14 +265,16 @@ const messages = {
         required: `Nombre de usuario es requerido`,
         base: `Nombre de usuario debe ser un texto válido`,
         empty: `Nombre de usuario no debe estar vacío`,
-        min: `El nombre de usuario debe tener como mínimo 6 y como máximo 16 caracteres`,
-        max: `El nombre de usuario debe tener como mínimo 6 y como máximo 16 caracteres`
+        characters: `El nombre de usuario debe tener como mínimo 3 y como máximo 15 caracteres`,
+        trim: `El nombre de usuario contiene espacios adicionales`,
       },
       email: {
         required: `Correo es requerido`,
         format: `Correo debe ser válido`,
         base: `Correo debe ser válido`,
         empty: `Correo no debe estar vacío`,
+        trim: `Correo contiene espacios adicionales`,
+        characters: `Correo debe tener como minimo 3 y como máximo 50 caracteres`
       },
       password: {
         required: `Contraseña es requerida`,
@@ -326,7 +330,9 @@ const messages = {
       name: {
         required: `Nombre de rol es requerido`,
         base: `Nombre de rol debe ser un texto válido`,
-        empty: `Nombre de rol no debe estar vacío`
+        empty: `Nombre de rol no debe estar vacío`,
+        characters: `Nombre debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Nombre contiene espacios adicionales`,
       },
       permissions: {
         required: `Permisos es requerido`,
@@ -371,21 +377,25 @@ const messages = {
         required: `Primer Nombre es requerido`,
         base: `Primer Nombre debe ser un texto válido`,
         empty: `Primer Nombre no debe estar vacío`,
-        min: `Primer Nombre debe tener como minimo 3 caracteres`
+        characters: `Primer Nombre debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Primer Nombre contiente espacios adicionales`,
       },
       secondName:{
         base: `Segundo Nombre debe ser un texto válido`,
-        min: `Segundo Nombre debe tener como minimo 3 caracteres`
+        characters: `Segundo Nombre debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Segundo Nombre contiente espacios adicionales`,
       },
       surname: {
         required: `Primer Apellido es requerido`,
         base: `Primer Apellido debe ser un texto válido`,
         empty: `Primer Apellido no debe estar vacío`,
-        min: `Primer Apellido debe tener como minimo 3 caracteres`
+        characters: `Primer Apellido debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Primer Apellido contiente espacios adicionales`,
       },
       secondSurname: {
         base: `Segundo Apellido debe ser un texto válido`,
-        min: `Segundo Apellido debe tener como minimo 3 caracteres`
+        characters: `Segundo Apellido debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Segundo Apellido contiente espacios adicionales`,
       },
       imageProfile: {
         base: `Imagen de perfil debe ser un texto válido`,
@@ -395,7 +405,8 @@ const messages = {
         required: `Dirección es requerida`,
         base: `Dirección debe ser un texto válido`,
         empty: `Dirección no debe estar vacía`,
-        min: `La dirección proporcionada es muy corta. Por favor, proporciona una dirección más detallada.`
+        characters: `La dirección proporcionada debe tener como minimo 6 y como máximo 255 caracteres`,
+        trim: `Dirección contiente espacios adicionales`,
       },
       birthday: {
         required: 'Fecha de Nacimiento es requerida',
@@ -406,7 +417,8 @@ const messages = {
         required: 'Sexo debe ser especificado',
         only: 'Sexo debe ser (Femenino | femenino) ó (Masculino | masculino)',
         base: 'Sexo debe ser un texto valido',
-        empty: 'Sexo no puede estar vacío'
+        empty: 'Sexo no puede estar vacío',
+        trim: `Sexo contiente espacios adicionales`,
       }
     },
     errors: {
@@ -431,7 +443,8 @@ const messages = {
         required: `Nombre de categoría es requerido`,
         base: `Nombre de categoría debe ser un texto válido`,
         empty: `Nombre de categoría no debe estar vacío`,
-        min: `Nombre de categoría debe tener como minimo 3 caracteres`
+        characters: `Nombre de categoría debe tener como minimo 3 y como máximo 15 caracteres`,
+        trim: `Nombre contiene espacios adicionales`,
       },
       icon: {
         required: `Icono de categoría es requerido`,
@@ -473,7 +486,8 @@ const messages = {
         required: `Nombre de pictograma es requerido`,
         base: `Nombre de pictograma debe ser un texto válido`,
         empty: `Nombre de pictograma no debe estar vacío`,
-        min: `Nombre de pictograma debe tener como minimo 3 caracteres`
+        characters: `Nombre del pictograma debe tener como minimo 3 y como máximo 60 caracteres`,
+        trim: `Nombre del pictograma contiene espacios adicionales`,
       },
       image: {
         base: `Imagen del pictograma debe ser un texto válido`,
@@ -518,16 +532,19 @@ const messages = {
       },
       name: {
         base: `Nombre de la fase debe ser un texto válido`,
-        min: `Nombre de la fase debe tener como minimo 3 caracteres`
+        characters: `Nombre de la fase debe tener como minimo 3 y como máximo 60 caracteres`,
+        trim: `Nombre de la fase contiene espacios adicionales`,
       },
       description: {
         base: `Descripción de la fase debe ser un texto válido`,
-        min: `Descripción de la fase debe tener como minimo 10 caracteres`
+        characters: `Descripción de la fase debe tener como minimo 6 y como máximo 255 caracteres`,
+        trim: `Descripción de la fase contiene espacios adicionales`,
       },
       scoreActivities: {
         base: `Puntuación de actividades debe ser un número válido`,
         positive: `Puntuación de actividades debe ser un número positivo`,
-        max: `La puntuación de actividades debe ser menor o igual a 20`
+        max: `La puntuación de actividades debe ser menor o igual a 20`,
+        min: `La puntuación de actividades debe ser al menos 10`
       }
     },
     errors: {
@@ -642,8 +659,8 @@ const messages = {
         required: `Descripción es requerida`,
         base: `Descripción debe ser un texto válido`,
         empty: `Descripción no debe estar vacía`,
-        min: `Descripción debe tener como minimo 6 caracteres`,
-        max: `Ha sobrepasado el limite de caracteres necesarios para su observación`
+        characters: `Descripción debe tener como minimo 6 y como máximo 255 caracteres`,
+        trim: `Descripción contiene espacios adicionales`,
       },
     },
     errors: {
@@ -677,15 +694,15 @@ const messages = {
         required: `Nombre de la actividad es requerido`,
         base: `Nombre de la actividad debe ser un texto válido`,
         empty: `Nombre de la actividad no debe estar vacío`,
-        min: `Nombre de la actividad debe tener como mínimo 3 y como máximo 30 caracteres`,
-        max: `Nombre de la actividad debe tener como máximo 30 caracteres`
+        characters: `Nombre de la actividad debe tener como mínimo 3 y como máximo 100 caracteres`,
+        trim: `Nombre de la actividad contiene espacios adicionales`,
       },
       description: {
         required: `Descripción de la actividad es requerido`,
         base: `Descripción de la actividad debe ser un texto válido`,
         empty: `Descripción de la actividad no debe estar vacío`,
-        min: `Descripción de la actividad debe tener como mínimo 6 y como máximo 255 caracteres`,
-        max: `Descripción de la actividad debe tener como mínimo 6 y como máximo 255 caracteres`
+        trim: `Descripción de la actividad contiene espacios adicionales`,
+        characters: `Descripción de la actividad debe tener como mínimo 6 y como máximo 255 caracteres`
       },
       satisfactoryPoints: {
         required: `Puntuación de satisfacción es requerida`,

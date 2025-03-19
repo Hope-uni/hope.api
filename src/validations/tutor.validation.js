@@ -36,7 +36,7 @@ module.exports = {
     });
     return schema.validate(data);
   },
-  
+
   updateTutorValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({

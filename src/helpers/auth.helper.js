@@ -1,4 +1,4 @@
-const { Patient, TutorTherapist, Person } = require('@models/index');
+const { Patient, TutorTherapist, HealthRecord, Person } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages } = require('@utils/index');
 const { getFullName } = require('@utils/dataStructure/index');
@@ -8,7 +8,7 @@ module.exports = {
 
   async getPatient(id) {
     try {
-      
+
       const patientResponse = await Patient.findOne({
         where: {
           status: true,
@@ -23,6 +23,12 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status']
             }
+          },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
           }
         ]
       });
@@ -47,6 +53,7 @@ module.exports = {
         address: patientResponse.Person.address,
         birthday: patientResponse.Person.birthday,
         gender: patientResponse.Person.gender,
+        isMonochrome: patientResponse.HealthRecord.isMonochrome
       }
 
       return {
@@ -67,7 +74,7 @@ module.exports = {
 
   async getTutorTherapist(id) {
     try {
-      
+
       const tutorTherapistResponse = await TutorTherapist.findOne({
         where: {
           status: true,

@@ -30,7 +30,7 @@ module.exports = {
     });
     return schema.validate(data);
   },
-  
+
   updateTherapistValidation(data) {
     const schema = joi.object().keys({
       id: joi.number().positive().required().messages({
@@ -63,12 +63,12 @@ module.exports = {
 
   assignPatientValidation(data) {
     const schema = joi.object().keys({
-      therapistId: joi.number().positive().required().messages({
+      therapistId: joi.number().positive().strict().required().messages({
         'any.required': messages.therapist.fields.id.required,
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,
       }),
-      patients: joi.array().items(joi.number().positive()).unique().min(1).messages({
+      patients: joi.array().items(joi.number().positive().strict()).unique().min(1).messages({
         'number.base': messages.therapist.fields.patients.base,
         'number.positive': messages.therapist.fields.patients.positive,
         'any.required': messages.therapist.fields.patients.required,

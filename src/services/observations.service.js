@@ -93,7 +93,8 @@ const addObservation = async ({ description, patientId }, payload) => {
       return {
         error: verifyPatientError,
         statusCode: verifyPatientStatus,
-        message: verifyPatientMessage
+        message: messages.generalMessages.base,
+        validationErrors: formatErrorMessages('patient', verifyPatientMessage)
       }
     }
 
@@ -118,7 +119,8 @@ const addObservation = async ({ description, patientId }, payload) => {
       return {
         error: true,
         statusCode: 409,
-        message: messages.observations.errors.service.description
+        message: messages.generalMessages.base,
+        validationErrors: formatErrorMessages('description', messages.observations.errors.service.description)
       }
     }
 
@@ -133,7 +135,8 @@ const addObservation = async ({ description, patientId }, payload) => {
       return {
         error,
         statusCode,
-        message: messages.observations.errors.service.create
+        message: messages.generalMessages.base,
+        validationErrors: formatErrorMessages('create', messages.observations.errors.service.create)
       }
     }
 
@@ -152,7 +155,7 @@ const addObservation = async ({ description, patientId }, payload) => {
     return {
       error: true,
       statusCode: 500,
-      message: messages.observations.errors.service.base
+      message: messages.generalMessages.server
     }
   }
 }

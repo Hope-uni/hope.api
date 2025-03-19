@@ -12,6 +12,11 @@ const {
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
 
+router.put('/:id', verifyToken, rolePermissions([
+  'Superadmin',
+  'Admin',
+  'Tutor'
+],['modificar paciente-tutor']) ,changePasswordPatient);
 
 router.post('/login', login);
 
@@ -21,11 +26,6 @@ router.post('/reset-password', verifyToken ,resetPassword);
 
 router.post('/change-password', verifyToken ,changePassword);
 
-router.put('/:id', verifyToken, rolePermissions([
-  'Superadmin',
-  'Admin',
-  'Tutor'
-],[]) ,changePasswordPatient);
 
 router.get('/me', verifyToken,me);
 
