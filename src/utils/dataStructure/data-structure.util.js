@@ -675,10 +675,8 @@ module.exports = {
           name: data.Phase.name,
           description: data.Phase.description,
         },
-        activitySolution: {
-          pictogramsSolution: data.dataValues.pictograms,
-          textSolution: data.pictogramSentence
-        }
+        assignments: null,
+        activitySolution: data.dataValues.pictograms,
       }
     }
 
@@ -725,10 +723,7 @@ module.exports = {
           id: p.Patient.id,
         }
       }): null,
-      activitySolution: {
-        pictogramsSolution: data.dataValues.pictograms,
-        textSolution: data.pictogramSentence
-      }
+      activitySolution: data.dataValues.pictograms,
     };
 
     return newData;
