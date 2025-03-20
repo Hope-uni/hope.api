@@ -45,6 +45,9 @@ module.exports = {
               attributes: ['id', 'name', 'description'],
             },
             {
+              model: User
+            },
+            {
               model: PatientActivity,
               attributes: ['id'],
               include: [
@@ -86,6 +89,9 @@ module.exports = {
           {
             model: Phase,
             attributes: ['id', 'name', 'description'],
+          },
+          {
+            model: User
           },
           {
             model: PatientActivity,
@@ -147,6 +153,9 @@ module.exports = {
           {
             model: Phase,
             attributes: ['id', 'name', 'description'],
+          },
+          {
+            model: User
           },
           {
             model: PatientActivity,
@@ -299,6 +308,9 @@ module.exports = {
           {
             model: Phase,
             attributes: ['id', 'name', 'description'],
+          },
+          {
+            model: User
           },
           {
             model: PatientActivity,
