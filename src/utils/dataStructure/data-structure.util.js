@@ -456,7 +456,7 @@ module.exports = {
       */
       currentActivity: data.PatientActivities.length > 0 ? {
         ...data.PatientActivities.filter(item => item.isCompleted === false).map(item => ({
-          id: item.id,
+          id: item.Activity.id,
           name: item.Activity.name ?? null,
           satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
           satisfactoryAttempts: item.satisfactoryAttempts ?? null,
@@ -675,6 +675,10 @@ module.exports = {
           name: data.Phase.name,
           description: data.Phase.description,
         },
+        user: {
+          id: data.User.id,
+          username: data.User.username
+        },
         assignments: null,
         activitySolution: data.dataValues.pictograms,
       }
@@ -691,6 +695,10 @@ module.exports = {
               id: item.Phase.id,
               name: item.Phase.name,
               description: item.Phase.description,
+            },
+            user: {
+              id: item.User.id,
+              username: item.User.username
             },
             assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
               return {
@@ -717,6 +725,10 @@ module.exports = {
         id: data.Phase.id,
         name: data.Phase.name,
         description: data.Phase.description,
+      },
+      user: {
+        id: data.User.id,
+        username: data.User.username
       },
       assignments: data.PatientActivities !== null ?  data.PatientActivities.map((p) => {
         return {

@@ -65,7 +65,7 @@ module.exports = {
 
   patientPictogramsFilterValidation(data) {
     const schema = joi.object().keys({
-      patientId: joi.number().positive().strict().empty(' ').messages({
+      patientId: joi.number().positive().empty(' ').messages({
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),

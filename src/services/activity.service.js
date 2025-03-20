@@ -8,6 +8,7 @@ const {
   TutorTherapist,
   HealthRecord,
   User,
+  Person,
   sequelize
 } = require('@models/index');
 const {
@@ -20,7 +21,8 @@ const {
   validatePictogram,
   getPictograms
 } = require('@helpers');
-const constants = require('@constants/role.constant');
+const { roleConstants: constants } = require('@constants');
+const { getFullName } = require('@utils/dataStructure');
 
 
 module.exports = {
@@ -41,6 +43,9 @@ module.exports = {
             {
               model: Phase,
               attributes: ['id', 'name', 'description'],
+            },
+            {
+              model: User
             },
             {
               model: PatientActivity,
@@ -84,6 +89,9 @@ module.exports = {
           {
             model: Phase,
             attributes: ['id', 'name', 'description'],
+          },
+          {
+            model: User
           },
           {
             model: PatientActivity,
@@ -145,6 +153,9 @@ module.exports = {
           {
             model: Phase,
             attributes: ['id', 'name', 'description'],
+          },
+          {
+            model: User
           },
           {
             model: PatientActivity,
@@ -299,6 +310,9 @@ module.exports = {
             attributes: ['id', 'name', 'description'],
           },
           {
+            model: User
+          },
+          {
             model: PatientActivity,
             attributes: ['id'],
             include: [
@@ -342,15 +356,11 @@ module.exports = {
     }
   },
 
-  async assingActivityPatient({ activityId, patientId }, payload) {
+  async assingActivityPatient({ activityId, patients }, payload) {
     const transaction = await sequelize.transaction();
     try {
-
       // Variables
-      let whereCondition = {
-        id: patientId,
-        status: true,
-      }
+      let therapistExistId;
 
       // Validate if therapist has the patient in charged.
       if(payload.roles.includes(constants.THERAPIST_ROLE)) {
@@ -368,11 +378,7 @@ module.exports = {
           }
         }
 
-        // add therapist id to the whereCondition object
-        whereCondition = {
-          ...whereCondition,
-          therapistId: therapistExist.id
-        }
+        therapistExistId = therapistExist.id
       }
 
       // Activity exist validation
@@ -396,160 +402,180 @@ module.exports = {
         }
       }
 
-      // Patient exist validation
-      const patientExist = await Patient.findOne({
-        where: whereCondition,
-        include: [
-          {
-            model: HealthRecord,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','patientId']
-            },
-            include: [
-              {
-                model: Phase,
-                attributes: {
-                  exclude: ['createdAt','updatedAt'],
-                }
-              }
-            ],
-          }
-        ]
-      });
-      if(!patientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.patient.errors.not_found,
-        }
-      }
+      /* eslint-disable */
+      for (const element of patients) {
 
-      // Validate if patient has an therapist assigned
-      if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
-        if(!patientExist.therapistId) return {
-          error: true,
-          statusCode: 409,
-          message: messages.patient.errors.service.unassigned_therapist
-        }
-      }
-
-      // Validate if the activity has the same phase that the patient
-      if(activityExist.Phase.id !== patientExist.HealthRecord.Phase.id) {
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.activity_phase
-        }
-      }
-
-      // PatientActivity Exist
-      const activityPatientExist = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          status: true,
-        }
-      });
-      if(activityPatientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.in_use.activityPatient,
-        }
-      }
-
-      // Validate if activited is unassigned to this patient
-      const verifyPatientActivityisUnassigned = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          status: false,
-        }
-      });
-
-      if(verifyPatientActivityisUnassigned) {
-
-        const reassignActivity = await PatientActivity.update({
-          status: true,
-          satisfactoryAttempts: 0,
-        },{
+        // Validate if patient exist
+        const patientItem = await Patient.findOne({
           where: {
-            activityId,
-            patientId,
-            status: false,
+            id: element,
+            status: true,
           },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status']
+              },
+            },
+            {
+              model: HealthRecord,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
+              },
+              include: [
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt', 'updatedAt'],
+                  }
+                }
+              ],
+            }
+          ]
         });
 
-        if(!reassignActivity) {
+        if(!patientItem) {
+          await transaction.rollback();
+          return {
+            error:true,
+            statusCode:409,
+            message: `${messages.patient.errors.not_found} con el id: ${element}`
+          }
+        }
+
+        if(payload.roles.includes(constants.THERAPIST_ROLE) && patientItem.therapistId !== therapistExistId) {
+          return {
+            error:true,
+            statusCode:409,
+            message: `${messages.patient.errors.not_found}: ${getFullName(patientItem.Person)}`
+          }
+        }
+
+        // Validate if patient has an therapist assigned
+        if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
+          if(!patientItem.therapistId) {
+            await transaction.rollback();
+            return {
+              error: true,
+              statusCode: 409,
+              message: messages.activity.errors.service.patient_without_therapist(getFullName(patientItem.Person)), // this message is a function that return the message with patient name
+              // and the getFullName has only one purpose like the function name says build the patient's fullname
+            }
+          }
+        }
+
+        // Validate if the activity has the same phase that the patient
+        if(activityExist.Phase.id !== patientItem.HealthRecord.Phase.id) {
           await transaction.rollback();
           return {
             error: true,
             statusCode: 409,
-            message: messages.activity.errors.service.create,
+            message: messages.activity.errors.service.activity_phase(getFullName(patientItem.Person)) // as ai mentioned before is the same purpose specify the patient name.
           }
         }
 
-        return {
-          error: false,
-          statusCode: 200,
-          message: messages.activity.success.assigned,
+        // PatientActivity Exist
+        const activityPatientExist = await PatientActivity.findOne({
+          where: {
+            activityId,
+            patientId: patientItem.id,
+            status: true,
+          }
+        });
+        if(activityPatientExist) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: `${messages.activity.errors.in_use.activityPatient}: ${getFullName(patientItem.Person)}`,
+          }
         }
-      }
 
-      // Validate if activity is completed
-      const activityCompleted = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          isCompleted: true,
-          status: true,
+        // Validate if activity is completed
+        const activityCompleted = await PatientActivity.findOne({
+          where: {
+            activityId,
+            patientId: patientItem.id,
+            isCompleted: true,
+            status: true,
+          }
+        });
+        if(activityCompleted) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: `${messages.activity.errors.service.already_completed} para el paciente: ${getFullName(patientItem.Person)}`,
+          }
         }
-      });
 
-      if(activityCompleted) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.already_completed,
+        // Validate if patient has another activity assigned.
+        const patientActivityAssigned = await PatientActivity.findOne({
+          where: {
+            patientId: patientItem.id,
+            isCompleted: false,
+            status: true,
+          }
+        });
+
+        if(patientActivityAssigned) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.activity.errors.in_use.patient_activity_assigned(getFullName(patientItem.Person)),
+          }
         }
-      }
 
-      // Validate if patient has another activity assigned.
-      const patientActivityAssigned = await PatientActivity.findOne({
-        where: {
-          patientId,
-          isCompleted: false,
-          status: true,
-        }
-      });
+        // Validate if activited is unassigned to this patient
+        const verifyPatientActivityisUnassigned = await PatientActivity.findOne({
+          where: {
+            activityId,
+            patientId: patientItem.id,
+            status: false,
+          }
+        });
+        if(verifyPatientActivityisUnassigned) {
+          const reassignActivity = await PatientActivity.update({
+            status: true,
+            satisfactoryAttempts: 0,
+            isCompleted: false,
+          },{
+            where: {
+              activityId,
+              patientId: patientItem.id,
+              status: false,
+            },
+            transaction
+          });
 
-      if(patientActivityAssigned) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.in_use.patient_activity_assigned,
-        }
-      }
+          if(!reassignActivity) {
+            await transaction.rollback();
+            return {
+              error: true,
+              statusCode: 409,
+              message: `${messages.activity.errors.service.create} para el paciente: ${getFullName(patientItem.Person)}`,
+            }
+          }
+        } else {
+          const data = await PatientActivity.create(
+            {
+              activityId,
+              patientId: patientItem.id,
+              satisfactoryAttempts: 0,
+            },
+            { transaction }
+          );
 
-      const data = await PatientActivity.create(
-        {
-          activityId,
-          patientId,
-          satisfactoryAttempts: 0,
-        },
-        { transaction }
-      );
-
-      if(!data) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.activity.errors.service.create
+          if(!data) {
+            await transaction.rollback();
+            return {
+              error: true,
+              statusCode: 409,
+              message: messages.activity.errors.service.create
+            }
+          }
         }
       }
 

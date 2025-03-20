@@ -1,5 +1,5 @@
 const joi = require('joi');
-const {messages} = require('@utils/index');
+const {messages} = require('@utils');
 
 module.exports = {
 
@@ -96,10 +96,13 @@ module.exports = {
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive,
       }),
-      patientId: joi.number().positive().strict().required().messages({
-        'any.required': messages.patient.fields.id.required,
-        'number.base': messages.patient.fields.id.base,
-        'number.positive': messages.patient.fields.id.positive,
+      patients: joi.array().items(joi.number().positive().strict()).unique().min(1).required().messages({
+        'any.required': messages.activity.fields.patients.required,
+        'number.base': messages.activity.fields.patients.base,
+        'number.positive': messages.activity.fields.patients.positive,
+        'array.unique': messages.activity.fields.patients.unique,
+        'array.base': messages.activity.fields.patients.array,
+        'array.min': messages.activity.fields.patients.array_min
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

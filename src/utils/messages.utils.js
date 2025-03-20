@@ -727,6 +727,14 @@ const messages = {
       restore: {
         required: `Se debe indicar si se desea restaurar la actividad`,
         base: `La condición de restauración debe ser un booleano válido`,
+      },
+      patients: {
+        required: `Paciente es requerido`,
+        base: `Identificador de paciente debe ser un número válido`,
+        positive: `Identificador de paciente debe ser un número positivo`,
+        unique: `Debe seleccionar pacientes diferentes para poder asignarles la actividad`,
+        array: `Debe enviar los pacientes seleccionados en un formato válido`,
+        array_min: `Debe seleccionar al menos un paciente para poder asignarle una actividad`,
       }
     },
     errors: {
@@ -745,9 +753,14 @@ const messages = {
         check_attempt: `La respuesta que has enviado no pudo ser verificada`,
         delete_patient_activity: `La actividad no pudo ser eliminada del paciente`,
         already_completed: `La actividad ya fue completada`,
-        activity_phase: `La actividad que esta tratando de asignarle al paciente no pertenece a la fase que el paciente esta actualmente`,
         delete_assigned_activity: `La actividad que desea eliminar, esta asignada a un paciente`,
         incomplete_phase_score: 'El paciente no ha completado los requerimientos necesarios para el cambio de fase',
+        activity_phase: (patient) => {
+          return `La actividad que desea asignarle al paciente ${patient} no pertenece a la fase que el paciente esta actualmente`
+        },
+        patient_without_therapist: (patient) => {
+          return `El paciente ${patient} no tiene un terapeuta asignado`;
+        }
       },
       not_found: `Actividad no encontrada`,
       in_use: {
@@ -755,7 +768,9 @@ const messages = {
         description: `La descripción de la actividad hace referencia a una actividad ya existente`,
         pictogramSentence: `La colección de pictogramas seleccionados hace referencia a una actividad ya existente`,
         activityPatient: `La actividad seleccionada ya fue asignada al paciente`,
-        patient_activity_assigned: `El paciente ya tiene una actividad asignada`,
+        patient_activity_assigned: (patient) => {
+          return `El paciente ${patient} ya tiene una actividad asignada`
+        },
         patient_activity_unassigned: `La actividad seleccionada ya ha sido inhabilidata al paciente, ¿Desea volver a asignarla?`,
       },
     },
