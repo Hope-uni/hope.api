@@ -456,7 +456,7 @@ module.exports = {
       */
       currentActivity: data.PatientActivities.length > 0 ? {
         ...data.PatientActivities.filter(item => item.isCompleted === false).map(item => ({
-          id: item.id,
+          id: item.Activity.id,
           name: item.Activity.name ?? null,
           satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
           satisfactoryAttempts: item.satisfactoryAttempts ?? null,
