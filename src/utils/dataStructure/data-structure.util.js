@@ -380,7 +380,7 @@ module.exports = {
         username: item.User ? item.User.username : null,
         createdAt: item.createdAt ? item.createdAt : null,
       }
-    }) : null;
+    }) : [];
 
     // phase
     const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
@@ -417,7 +417,7 @@ module.exports = {
         generalProgress: data.generalProgress,
         phaseProgress: 0,
       },
-      observations: observationsGotit,
+      observations: observationsGotit.length > 0 ?  observationsGotit : null,
       achievements: null,
 
       /*
@@ -454,21 +454,7 @@ module.exports = {
           progreso
         }
       */
-      currentActivity: data.PatientActivities.length > 0 ? {
-        ...data.PatientActivities.filter(item => item.isCompleted === false).map(item => ({
-          id: item.Activity.id,
-          name: item.Activity.name ?? null,
-          satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
-          satisfactoryAttempts: item.satisfactoryAttempts ?? null,
-          progress: (item.satisfactoryAttempts / item.Activity.satisfactoryPoints) * 100,
-          description: item.Activity.description ?? null,
-          phase: {
-            id: item.Activity.Phase.id,
-            name: item.Activity.Phase.name,
-            description: item.Activity.Phase.description,
-          },
-        }))[0]
-      } : null,
+      currentActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data) : null,
       /*
         Lista de actividades completadas relacionadas al paciente: {
           id
@@ -730,7 +716,7 @@ module.exports = {
         id: data.User.id,
         username: data.User.username
       },
-      assignments: data.PatientActivities !== null ?  data.PatientActivities.map((p) => {
+      assignments: data.PatientActivities !== null && data.PatientActivities.length > 0 ?  data.PatientActivities.map((p) => {
         return {
           id: p.Patient.id,
         }

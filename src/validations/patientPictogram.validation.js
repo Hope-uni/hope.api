@@ -42,7 +42,8 @@ module.exports = {
         'number.base': messages.pictogram.fields.id.base,
         'number.positive': messages.pictogram.fields.id.positive,
       }),
-      patientId: joi.number().positive().strict().empty(' ').messages({
+      patientId: joi.number().positive().strict().required().messages({
+        'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),

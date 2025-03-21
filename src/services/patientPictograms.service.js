@@ -404,12 +404,24 @@ module.exports = {
         }
       }
 
+      // Verify if pictogram exist
+      const pictogramExist = await Pictogram.findByPk(id);
+
+      if(!pictogramExist) {
+        await transaction.rollback();
+        return  {
+          error: true,
+          statusCode: 409,
+          message: messages.pictogram.errors.not_found
+        }
+      }
+
       // Verify if Patient has this Custom Pictogram
       const patientPictogramExist = await PatientPictogram.findOne({
         where: {
-          status: true,
           patientId,
-          id
+          pictogramId: id,
+          status: true,
         }
       });
       if(!patientPictogramExist) {
@@ -429,7 +441,7 @@ module.exports = {
             status: true,
             name: resBody.name,
             patientId,
-            id: {
+            pictogramId: {
               [Op.ne]: id
             }
           }
@@ -455,8 +467,9 @@ module.exports = {
         },
         {
           where: {
-            id,
-            patientId
+            patientId,
+            pictogramId: id,
+            status: true,
           },
           transaction
         }
@@ -476,7 +489,8 @@ module.exports = {
 
       const newData = await PatientPictogram.findOne({
         where: {
-          id,
+          patientId,
+          pictogramId:id,
           status: true
         },
         attributes: {
@@ -575,6 +589,7 @@ module.exports = {
         }
       }
 
+      // Verify if pictogram exist
       const pictogramExist = await Pictogram.findByPk(id);
 
       if(!pictogramExist) {
