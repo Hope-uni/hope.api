@@ -1,9 +1,5 @@
 const logger = require('@config/logger.config');
 const {
-  messages,
-  formatJoiMessages
-} = require('@utils/index');
-const {
   all,
   allCustomPictograms,
   createPatientPictogram,
@@ -13,7 +9,11 @@ const {
 const {
   patientPictogramsEntry,
   idEntry,
-} = require('@validations/index');
+} = require('@validations');
+const {
+  messages,
+  formatJoiMessages
+} = require('@utils');
 
 module.exports = {
 
@@ -193,14 +193,29 @@ module.exports = {
     try {
 
       const { error } = idEntry.findOneValidation({id: req.params.id});
-      if(error) return res.status(400).json({
-        error: true,
-        statusCode: 422,
-        message: messages.generalMessages.bad_request,
-        validationErrors: formatJoiMessages(error),
-      });
 
-      const { error:dataError, statusCode, message } = await removePatientPictogram(req.params.id);
+      const { error: customError } = patientPictogramsEntry.deletePatientPictograms(req.body);
+
+      if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: error.details[0].message
+        });
+      }
+
+      if(customError) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: customError.details[0].message
+        });
+      }
+
+      const { error:dataError, statusCode, message } = await removePatientPictogram({
+        id: req.params.id,
+        ...req.body
+      },req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
