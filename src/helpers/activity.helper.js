@@ -10,30 +10,22 @@ module.exports = {
 
     try {
 
-      // Validate if pictogramSentence has a valid pictograms
-      const pictograms = await Pictogram.findAll({
-        where: {
-          id: {
-            [Op.in]: pictogramSentence
-          },
-        },
-        attributes: ['id'],
-        raw: true,
-      });
+      /* eslint-disable */
+      for (const item of pictogramSentence) {
+        const getPictogram = await Pictogram.findOne({
+          where: {
+            id: item,
+            status: true
+          }
+        });
 
-      // Verify is all pictogram sentences were found
-      const getPictogramsIds = new Set(pictograms.map(item => item.id));
-
-
-      // Check if all requested IDs exist
-      const verifyAllPictograms = pictogramSentence.every(id => getPictogramsIds.has(id));
-
-      if(pictograms.length <= 0 || !pictograms || verifyAllPictograms === false) {
-        return {
-          error: true,
-          message: messages.pictogram.errors.service.all,
-          statusCode: 404,
-          validationErrors: formatErrorMessages('pictograms', messages.activity.errors.service.pictograms),
+        if(!getPictogram) {
+          return {
+            error: true,
+            message:  messages.activity.errors.service.pictograms,
+            statusCode: 404,
+            validationErrors: formatErrorMessages('pictograms', messages.activity.errors.service.pictograms),
+          }
         }
       }
 
@@ -45,7 +37,7 @@ module.exports = {
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: messages.generalMessages.server, 
+        message: messages.generalMessages.server,
         statusCode: 500
       }
     }
@@ -53,8 +45,8 @@ module.exports = {
 
   async getPictograms(pictogramSentence) {
     try {
-      
-      // get array from the string 
+
+      // get array from the string
       const pictogramArray = pictogramSentence.split('-');
 
       // GetPictograms
@@ -86,7 +78,7 @@ module.exports = {
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,
-        message: messages.generalMessages.server, 
+        message: messages.generalMessages.server,
         statusCode: 500
       }
     }

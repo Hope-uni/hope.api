@@ -11,7 +11,7 @@ router.put('/:id', verifyToken, rolePermissions(['Admin', 'Superadmin'],['actual
 
 router.get('', verifyToken, rolePermissions(['Admin','Superadmin', 'Terapeuta'],['listar fases']), allPhases);
 
-router.put('/:patientId', verifyToken, rolePermissions(['Admin','Superadmin', 'Terapeuta'],['modificar paciente-terapeuta']), patientPhaseShifting );
+router.put('/phase-shift/:id', verifyToken, rolePermissions(['Admin','Superadmin', 'Terapeuta'],['modificar paciente-terapeuta']), patientPhaseShifting );
 
 
 

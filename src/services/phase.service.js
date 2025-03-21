@@ -138,7 +138,7 @@ module.exports = {
     }
   },
 
-  async phaseShifting({ patientId, newPhase }, payload) {
+  async phaseShifting({ patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -179,37 +179,8 @@ module.exports = {
         order:[['id', 'ASC']],
       });
 
-      if(phaseExist.some(item => item.id === newPhase) === false) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.phase.errors.not_found
-        }
-      }
-
       // Validate next phase order
       const getCurrentPhaseIndex = phaseExist.findIndex(item => item.id === patientExist.HealthRecord.phaseId);
-
-      // If the newPhase is the current phase of the patient
-      if(phaseExist[getCurrentPhaseIndex].id === newPhase) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.phase.errors.service.same_phase
-        }
-      }
-
-      // if the phase is not the next one
-      if(phaseExist[getCurrentPhaseIndex + 1].id !== newPhase) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.phase.errors.service.phase_sequency
-        }
-      }
 
       // Verify if the patient has complied with the phases scoreActivities.
       const countActivitiesCompleted = await PatientActivity.findAndCountAll({
@@ -232,7 +203,7 @@ module.exports = {
 
       // Update Patient in order to change his phase
       const data = await HealthRecord.update({
-        phaseId: newPhase
+        phaseId: phaseExist[getCurrentPhaseIndex + 1].id
       }, {
         where: {
           patientId: patientExist.id,
@@ -248,6 +219,9 @@ module.exports = {
           message: messages.phase.errors.service.phase_changed
         }
       }
+
+      // Commit transaction
+      await transaction.commit();
 
       return {
         error: false,

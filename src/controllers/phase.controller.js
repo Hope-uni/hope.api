@@ -86,8 +86,7 @@ module.exports = {
     try {
 
       const { error } = phaseEntry.phaseShiftingValidation({
-        patientId: req.params.patientId,
-        ...req.body
+        patientId: req.params.id
       });
       if (error) return res.status(400).json({
         error: true,
@@ -96,8 +95,7 @@ module.exports = {
       });
 
       const { error: dataError, statusCode, message, data } = await phaseShifting({
-        patientId: req.params.patientId,
-        ...req.body
+        patientId: req.params.id,
       }, req.payload);
 
       if(dataError) {
