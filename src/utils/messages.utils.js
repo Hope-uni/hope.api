@@ -504,7 +504,7 @@ const messages = {
         create: `Pictograma no creado`,
         update: `Pictograma no actualizado`,
         delete: `Pictograma no fue eliminado`,
-        pictogram_not_match: `El pictograma personalizado que intenta modificar no pertence al Paciente solicitante`,
+        pictogram_not_match: `El pictograma personalizado que intenta modificar no pertenece al Paciente solicitante`,
         pictogram_used: `El pictograma que desea reemplazar ya tiene una personalización asociada`,
         all: `Pictogramas no encontrados`,
       },
