@@ -81,6 +81,17 @@ module.exports = {
       'object.unknown': messages.generalMessages.unknown_object,
     });
     return schema.validate(data);
+  },
+
+  deletePatientPictograms(data) {
+    const schema = joi.object().keys({
+      patientId: joi.number().positive().strict().required().messages({
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+        'any.required': messages.patient.fields.id.required,
+      }),
+    });
+    return schema.validate(data);
   }
 
 

@@ -1,9 +1,9 @@
 const { Op } = require('sequelize');
-const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, sequelize } = require('@models');
+const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, UserRoles, sequelize } = require('@models');
 const logger = require('@config/logger.config');
-const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils');
 const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers');
-const constants = require('@constants/role.constant');
+const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils');
+const { roleConstants: constants } = require('@constants');
 
 
 module.exports = {
@@ -517,13 +517,79 @@ module.exports = {
   },
 
 
-  async removePatientPictogram(id) {
+  async removePatientPictogram({ id, patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
 
+      // variables
+      let whereCondition = {
+        id: patientId,
+        status: true,
+      }
+
+      // Check if the user logged is a tutor
+      if(payload.roles.includes(constants.TUTOR_ROLE)) {
+        const tutorResponse = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 5
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!tutorResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.tutor.errors.not_found
+          }
+        }
+
+        whereCondition = {
+          ...whereCondition,
+          tutorId: tutorResponse.id
+        }
+      }
+
+      // validate if patient exist
+      const patientExist = await Patient.findOne({
+        where: whereCondition,
+      });
+
+      if(!patientExist) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.patient.errors.not_found
+        }
+      }
+
+      const pictogramExist = await Pictogram.findByPk(id);
+
+      if(!pictogramExist) {
+        await transaction.rollback();
+        return  {
+          error: true,
+          statusCode: 409,
+          message: messages.pictogram.errors.not_found
+        }
+      }
+
       const patientPictogramExist = await PatientPictogram.findOne({
         where: {
-          id,
+          patientId,
+          pictogramId: id,
           status: true
         }
       });
@@ -543,7 +609,9 @@ module.exports = {
         },
         {
           where: {
-            id
+            id: patientPictogramExist.id,
+            patientId,
+            pictogramId: id,
           },
           transaction
         }
