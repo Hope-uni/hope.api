@@ -838,7 +838,7 @@ module.exports = {
           status: true
         }
       });
-      if(!activityExist) {
+      if (!activityExist) {
         await transaction.rollback();
         return {
           error: true,
@@ -862,7 +862,7 @@ module.exports = {
           }
         ]
       });
-      if(!patientExist) {
+      if (!patientExist) {
         await transaction.rollback();
         return {
           error: true,
@@ -873,7 +873,7 @@ module.exports = {
 
       // validate if pictogramSentence has a valid pictograms
       const { error, message, statusCode, validationErrors } = await validatePictogram(attempt);
-      if(error) {
+      if (error) {
         await transaction.rollback();
         return {
           error,
@@ -891,7 +891,7 @@ module.exports = {
           status: true
         }
       });
-      if(!patientActivityExist) {
+      if (!patientActivityExist) {
         await transaction.rollback();
         return {
           error: true,
@@ -914,9 +914,15 @@ module.exports = {
       const pictogramSentenceArray = activityExist.pictogramSentence.split('-').map(Number);
 
       // Check if the attempt is valid
-      const isValidAttempt = pictogramSentenceArray.every((item, index) => attempt[index] === item );
+      let isValidAttempt = true;
+      for (let item = 0; item < pictogramSentenceArray.length; item++) {
+        if(pictogramSentenceArray[item] !== attempt[item]) {
+          isValidAttempt = false;
+        }
+      }
 
-      if(isValidAttempt === false) {
+      if(isValidAttempt === false || pictogramSentenceArray.length !== attempt.length) {
+        await transaction.rollback();
         return {
           error: true,
           statusCode: 409,

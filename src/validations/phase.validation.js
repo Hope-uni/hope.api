@@ -42,11 +42,6 @@ module.exports = {
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      newPhase:joi.number().positive().strict().required().messages({
-        'any.required': messages.phase.fields.id.required,
-        'number.base': messages.phase.fields.id.base,
-        'number.positive': messages.phase.fields.id.positive,
-      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });

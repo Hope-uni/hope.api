@@ -1,4 +1,4 @@
-const { Observation, User, HealthRecord, Patient, UserRoles, TutorTherapist, sequelize } = require('@models/index');
+const { User, HealthRecord, Patient, UserRoles, TutorTherapist } = require('@models/index');
 const logger = require('@config/logger.config');
 const constants = require('@constants/role.constant');
 const { messages } = require('@utils');

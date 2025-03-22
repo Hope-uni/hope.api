@@ -39,7 +39,7 @@ module.exports = {
 
   updatePatientValidation(data) {
     const schema = joi.object().keys({
-      id: joi.number().positive().strict().required().messages({
+      id: joi.number().positive().required().messages({
         'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
