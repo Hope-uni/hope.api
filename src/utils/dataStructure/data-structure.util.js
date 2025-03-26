@@ -560,7 +560,8 @@ module.exports = {
 
     for (const item of data) {
 
-      if(item.Pictogram) {
+
+      if(item.Pictogram || item.Pictogram !== undefined) {
         const element = {
           id: item.Pictogram.id,
           name: item.name,
@@ -575,7 +576,7 @@ module.exports = {
         newData.push(element);
       }
 
-      if(!item.Pictogram) {
+      if(!item.Pictogram || item.Pictogram === undefined) {
         const element = {
           id: item.id,
           name: item.name,
