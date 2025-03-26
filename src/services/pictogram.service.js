@@ -40,6 +40,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['createdAt','ASC']],
         where: {
           status: true,
         },
