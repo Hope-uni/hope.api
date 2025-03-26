@@ -44,6 +44,7 @@ module.exports = {
             },
             status: true
           },
+          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status', 'password'],
           },
@@ -80,6 +81,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['createdAt', 'ASC']],
         where: {
           id: {
             [Op.ne]: 1
@@ -87,7 +89,7 @@ module.exports = {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status', 'password'],
+          exclude: ['updatedAt','status', 'password'],
         },
         include: [
           {

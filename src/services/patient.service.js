@@ -67,6 +67,7 @@ module.exports = {
           where: {
             status: true,
           },
+          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -162,11 +163,12 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['createdAt', 'ASC']],
         where: {
           status: true,
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['updatedAt','status']
         },
         include: [
           {
@@ -276,6 +278,7 @@ module.exports = {
             status: true,
             therapistId: null
           },
+          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -371,12 +374,13 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['createdAt', 'ASC']],
         where: {
           status: true,
           therapistId: null
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['updatedAt','status']
         },
         include: [
           {

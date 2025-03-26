@@ -1,22 +1,22 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const constants = require('@constants/role.constant');
-const { 
-  TutorTherapist, 
-  User, 
-  Person, 
-  Role, 
-  UserRoles, 
+const {
+  TutorTherapist,
+  User,
+  Person,
+  Role,
+  UserRoles,
   Patient,
   HealthRecord,
   TeaDegree,
   Phase,
   Observation,
-  sequelize 
+  sequelize
 } = require('@models/index.js');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
-const { 
+const {
   deleteUser,
   createUser,
   updateUser,
@@ -35,6 +35,7 @@ module.exports = {
           where: {
             status: true
           },
+          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -95,7 +96,7 @@ module.exports = {
           data: dataStructure.tutorDataStructure(data),
         }
       }
-    
+
       // Pagination
       const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
@@ -103,11 +104,12 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order:[['createdAt','ASC']],
         where: {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status', 'personId']
+          exclude: ['updatedAt','status', 'personId']
         },
         include: [
           {
@@ -184,7 +186,7 @@ module.exports = {
 
   async allPatientsTutor(query, payload) {
     try {
-      
+
         // Get Tutor
         const tutorExist = await TutorTherapist.findOne({
           where: {
@@ -215,7 +217,7 @@ module.exports = {
             }
           ]
         });
-  
+
         if(!tutorExist || tutorExist.User.UserRoles[0].name === constants.TUTOR_ROLE) {
           return {
             error: true,
@@ -223,14 +225,15 @@ module.exports = {
             message: messages.tutor.errors.not_found,
           }
         }
-  
-        
+
+
         if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
           const data = await Patient.findAll({
             where: {
               status: true,
               tutorId: tutorExist.id,
             },
+            order:[['createdAt', 'ASC']],
             attributes: {
               exclude: ['createdAt','updatedAt','status','personId']
             },
@@ -313,7 +316,7 @@ module.exports = {
               }
             ]
           });
-  
+
           // Return Patient
           return {
             error: false,
@@ -322,19 +325,20 @@ module.exports = {
             data: dataStructure.patientDataStructure(data),
           };
         }
-  
+
         const { limit, offset } = pagination.paginationValidation(query.page, query.size);
-  
+
         const data = await Patient.findAndCountAll({
           limit,
           offset,
           distinct: true,
+          order:[['createdAt', 'ASC']],
           where: {
             status: true,
             tutorId: tutorExist.id,
           },
           attributes: {
-            exclude: ['createdAt','updatedAt','status']
+            exclude: ['updatedAt','status']
           },
           include: [
             {
@@ -415,19 +419,19 @@ module.exports = {
             }
           ]
         });
-  
+
         // get Patient structured
         data.rows = dataStructure.patientDataStructure(data.rows);
-  
+
         const dataResponse = pagination.getPageData(data, query.page, limit);
-  
+
         return {
           error: false,
           statusCode: 200,
           message: messages.patient.success.all,
           ...dataResponse
         };
-  
+
       } catch (error) {
         logger.error(`${messages.tutor.errors.service.base}: ${error}`);
         return {
@@ -440,7 +444,7 @@ module.exports = {
 
   async findOne(id) {
     try {
-      
+
       const data = await TutorTherapist.findOne({
         where: {
           id,
@@ -895,7 +899,7 @@ module.exports = {
         };
       }
 
-      // Commit Transaction 
+      // Commit Transaction
       await transaction.commit();
 
       // find Tutor

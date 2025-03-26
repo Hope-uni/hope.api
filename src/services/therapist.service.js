@@ -1,11 +1,11 @@
 const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
-const { 
-  TutorTherapist, 
-  Person, 
-  User, 
-  Role, 
-  UserRoles, 
+const {
+  TutorTherapist,
+  Person,
+  User,
+  Role,
+  UserRoles,
   Patient,
   HealthRecord,
   TeaDegree,
@@ -32,6 +32,7 @@ module.exports = {
           where: {
             status: true,
           },
+          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -108,11 +109,12 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order:[['createdAt', 'ASC']],
         where: {
           status: true
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','personId']
+          exclude: ['updatedAt','status','personId']
         },
         include: [
           {
@@ -229,13 +231,14 @@ module.exports = {
         }
       }
 
-      
+
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Patient.findAll({
           where: {
             status: true,
             therapistId: therapistExist.id,
           },
+          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
@@ -317,18 +320,20 @@ module.exports = {
         };
       }
 
+      // TODO: I need to check this part of the endpoint due to unknow issues
       const { limit, offset } = pagination.paginationValidation(query.page, query.size);
 
       const data = await Patient.findAndCountAll({
         limit,
         offset,
         distinct: true,
+        order:[['createdAt', 'ASC']],
         where: {
           status: true,
           tutorId: therapistExist.id,
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status']
+          exclude: ['updatedAt','status']
         },
         include: [
           {
@@ -569,7 +574,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.therapist.success.found,
-        data: dataStructure.findTherapistDataStructure(data) 
+        data: dataStructure.findTherapistDataStructure(data)
       };
 
     } catch (error) {
@@ -602,7 +607,7 @@ module.exports = {
           phoneNumber,
           ...resBody
         } = body;
-      
+
 
       // IdentificationNumber validation
       const identificationNumberExist = await TutorTherapist.findOne({
@@ -637,7 +642,7 @@ module.exports = {
           validationErrors: formatErrorMessages('phoneNumber', messages.therapist.errors.in_use.phoneNumber)
         };
       };
-      
+
       // Assigning Roles and generate the temporary password.
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
       resBody.password = passwordTemp;
@@ -977,7 +982,7 @@ module.exports = {
           }
         ],
       });
-    
+
       return {
         error: false,
         statusCode: 200,
@@ -1007,7 +1012,7 @@ module.exports = {
   async removeTherapist(id) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // validate if therapist exist
       const therapistExist = await TutorTherapist.findOne({
         where: {
@@ -1079,7 +1084,7 @@ module.exports = {
   async assignPatient(body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Verify if therapist exists
       const therapistExist = await TutorTherapist.findOne({
         where: {
@@ -1171,7 +1176,7 @@ module.exports = {
             transaction
           }
         );
-  
+
         if(!updatePatientResponse) {
           await transaction.rollback();
           return {
@@ -1203,4 +1208,3 @@ module.exports = {
   }
 
 }
-

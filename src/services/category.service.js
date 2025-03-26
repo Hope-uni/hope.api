@@ -7,12 +7,13 @@ module.exports = {
   /* eslint-disable radix */
   async allCategories(query) {
     try {
-      
+
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Category.findAll({
           where: {
             status: true,
           },
+          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status']
           }
@@ -35,6 +36,7 @@ module.exports = {
         where: {
           status: true,
         },
+        order:[['createdAt', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         }
@@ -61,7 +63,7 @@ module.exports = {
 
   async findCategory(id) {
     try {
-      
+
       const data = await Category.findOne({
         where: {
           id,
@@ -100,7 +102,7 @@ module.exports = {
   async createCategory(body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Name exist validation
       const nameExist = await Category.findOne({
         where: {
@@ -207,7 +209,7 @@ module.exports = {
           validationErrors: formatErrorMessages('category', messages.category.errors.not_found),
         }
       }
-      
+
       // Name exist validation
       if(body.name) {
         const nameExist = await Category.findOne({

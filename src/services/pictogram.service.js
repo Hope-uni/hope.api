@@ -15,6 +15,7 @@ module.exports = {
           where: {
             status: true,
           },
+          order:[['name', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','categoryId']
           },
@@ -40,7 +41,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt','ASC']],
+        order:[['name', 'ASC']],
         where: {
           status: true,
         },
