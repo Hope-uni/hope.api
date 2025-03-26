@@ -559,6 +559,7 @@ const messages = {
         phase_sequency: `La fase que desea asignarle al paciente no esta permitida`,
         phase_changed: `Cambio de fase no pudo ser completado`,
         same_phase: 'El paciente ya tiene asignada la fase',
+        invalid_phase_shifting: `No puede avanzar de fase, el paciente esta en la fase final del programa.`,
       },
       helper: `Hubo un error en el helper del Expediente en donde se buscaba las fases`,
       not_found: `Fase no encontrada`,
