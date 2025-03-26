@@ -2,7 +2,7 @@ module.exports = {
 
   allPatientActivities(data) {
     const activities = data.PatientActivities.filter(item => item.isCompleted === true).map(item => ({
-      id: item.id,
+      id: item.Activity.id,
       name: item.Activity.name ?? null,
       description: item.Activity.description ?? null,
       phase: {
