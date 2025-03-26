@@ -1,4 +1,4 @@
-const { Phase, PatientActivity, HealthRecord, sequelize } = require('@models/index');
+const { Phase, PatientActivity, HealthRecord, Activity, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { messages, formatErrorMessages } = require('@utils');
@@ -182,13 +182,37 @@ module.exports = {
       // Validate next phase order
       const getCurrentPhaseIndex = phaseExist.findIndex(item => item.id === patientExist.HealthRecord.phaseId);
 
+      // get the maximum level.
+      const lastLevel = phaseExist.reduce((acc, current) => {
+        return current.level > acc.level ? current : acc;
+      }, { level: -Infinity });
+
+      // Validate if patient has the last phase
+      /* eslint-disable radix */
+      if (parseInt(phaseExist[getCurrentPhaseIndex].level) === lastLevel.level) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.phase.errors.service.invalid_phase_shifting,
+        }
+      }
+
       // Verify if the patient has complied with the phases scoreActivities.
       const countActivitiesCompleted = await PatientActivity.findAndCountAll({
         where: {
           patientId: patientExist.id,
           isCompleted: true,
           status: true,
-        }
+        },
+        include: [
+          {
+            model: Activity,
+            where: {
+              phaseId: patientExist.HealthRecord.Phase.id
+            }
+          }
+        ]
       });
 
       /* eslint-disable radix */
