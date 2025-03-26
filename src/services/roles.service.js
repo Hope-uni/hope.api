@@ -14,7 +14,7 @@ module.exports = {
   /* eslint-disable radix */
   /* eslint-disable consistent-return */
   async allRoles(query) {
-    try { 
+    try {
 
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0){
         const data = await Role.findAll({
@@ -30,6 +30,7 @@ module.exports = {
               }
             ]
           },
+          order:[['createdAt', 'ASC']],
           include: {
             model: Permission,
             as: 'permissions',
@@ -49,7 +50,7 @@ module.exports = {
             }
           }
         });
-  
+
         return {
           error: false,
           statusCode: 200,
@@ -64,6 +65,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order:[['createdAt', 'ASC']],
         where: {
           [Op.and]: [
             {
@@ -103,7 +105,7 @@ module.exports = {
         message: messages.role.success.all,
         ...dataResponse
       };
-      
+
     } catch (error) {
       logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
@@ -126,9 +128,9 @@ module.exports = {
    */
   async findRole(id) {
     try {
-      
-      const data = await Role.findOne({ 
-        where: { 
+
+      const data = await Role.findOne({
+        where: {
           [Op.and]: [
             {
               id
@@ -204,7 +206,7 @@ module.exports = {
   async createRole(body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Vaslidate if name exist
       const nameExist = await Role.findOne({where: { name: body.name }});
       if(nameExist) {
@@ -333,7 +335,7 @@ module.exports = {
   async updateRole(id,body) {
     const transaction = await sequelize.transaction();
     try {
-      
+
       // Validate if Role Exist
       let roleExist = await Role.findOne({
         where: {
@@ -359,7 +361,7 @@ module.exports = {
 
       // Vaslidate if name exist
       const nameExist = await Role.findOne({
-        where: { 
+        where: {
           [Op.and]: [
             {
               name: body.name
@@ -415,7 +417,7 @@ module.exports = {
       // Commit Transaction
       await transaction.commit();
 
-      roleExist = await Role.findOne({ 
+      roleExist = await Role.findOne({
         where: { id },
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'status'],
@@ -449,7 +451,7 @@ module.exports = {
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`${messages.role.errors.service.base}: ${error}`);	
+      logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,
@@ -478,7 +480,7 @@ module.exports = {
           message: messages.role.errors.not_found,
         };
       }
-      
+
       // Validate if Role Exist
       const roleExist = await Role.findOne({
         where: {
@@ -524,7 +526,7 @@ module.exports = {
 
     } catch (error) {
       await transaction.rollback();
-      logger.error(`${messages.role.errors.service.base}: ${error}`);	
+      logger.error(`${messages.role.errors.service.base}: ${error}`);
       return {
         error: true,
         statusCode: 500,

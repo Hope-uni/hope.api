@@ -36,6 +36,7 @@ module.exports = {
           where: {
             status: true,
           },
+          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','phaseId', 'pictogramSentence']
           },
@@ -79,11 +80,12 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['createdAt', 'ASC']],
         where: {
           status: true,
         },
         attributes: {
-          exclude: ['createdAt','updatedAt','status','phaseId', 'pictogramSentence']
+          exclude: ['updatedAt','status','phaseId', 'pictogramSentence']
         },
         include: [
           {

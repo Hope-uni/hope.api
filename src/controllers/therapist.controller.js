@@ -60,7 +60,7 @@ module.exports = {
         error,
         statusCode,
         message,
-      ...resData
+        ...resData
       });
 
     } catch (error) {

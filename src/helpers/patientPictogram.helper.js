@@ -15,6 +15,7 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -49,6 +50,7 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -81,6 +83,7 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
             [Op.like]: `%${pictogramName}%`
           }
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -99,8 +102,9 @@ async function getCustomPictograms({categoryId, pictogramName, patientResponse})
             status: true,
             name: {
               [Op.like]: `%${pictogramName}%`
-            }
+            },
           },
+          order: [['name', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status']
           },
@@ -323,6 +327,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -359,6 +364,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -388,6 +394,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
             [Op.like]: `%${pictogramName}%`
           }
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -411,6 +418,7 @@ async function getPictogramsPatient(payload, { patientId, categoryId, pictogramN
               [Op.like]: `%${pictogramName}%`
             }
           },
+          order: [['name', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status']
           },
@@ -582,6 +590,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -624,6 +633,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
         where: {
           status: true,
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -654,6 +664,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
             [Op.like]: `%${pictogramName}%`
           }
         },
+        order: [['name', 'ASC']],
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },
@@ -677,6 +688,7 @@ async function getPictogramsPatientTutor({ patientId, categoryId, pictogramName,
               [Op.like]: `%${pictogramName}%`
             }
           },
+          order: [['name', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status']
           },

@@ -80,6 +80,7 @@ module.exports = {
             status: true,
             patientId,
           },
+          order: [['name', 'ASC']],
           attributes: ['id', 'name', 'imageUrl'],
           include: [
             {
@@ -119,6 +120,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
+        order: [['name', 'ASC']],
         where: {
           status: true,
           patientId,

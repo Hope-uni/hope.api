@@ -6,11 +6,12 @@ module.exports = {
 
   async all() {
     try {
-      
+
       const data = await TeaDegree.findAll({
         attributes: {
           exclude: ['createdAt','updatedAt']
-        }
+        },
+        order:[['createdAt', 'ASC']],
       });
 
       if(!data) {

@@ -13,6 +13,7 @@ module.exports = {
         where: {
           status: true,
         },
+        order:[['createdAt', 'ASC']],
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'status']
         }
