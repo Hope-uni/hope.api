@@ -1,8 +1,8 @@
 const { Phase, PatientActivity, HealthRecord, Activity, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { messages, formatErrorMessages } = require('@utils');
-const { patientBelongsToTherapist } = require('@helpers');
+const { patientBelongsToTherapist, getProgress } = require('@helpers');
+const { messages, formatErrorMessages, dataStructure } = require('@utils');
 
 module.exports = {
 
@@ -195,7 +195,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.phase.errors.service.invalid_phase_shifting,
+          message: messages.phase.errors.service.invalid_phase_shifting
         }
       }
 
@@ -248,10 +248,25 @@ module.exports = {
       // Commit transaction
       await transaction.commit();
 
+      // get the current patient progress.
+      const { error:progressError, message: progressMessage, generalProgress, phaseProgress, patientPhase  } = await getProgress(patientExist.id);
+      if(progressError) {
+        return {
+          error: progressError,
+          statusCode: 409,
+          message: progressMessage
+        }
+      }
+
       return {
         error: false,
         statusCode: 200,
-        message: messages.phase.success.phase_changed
+        message: messages.phase.success.phase_changed,
+        data: dataStructure.phaseShiftingDataStructure({
+          phase: patientPhase,
+          generalProgress,
+          phaseProgress
+        })
       }
 
     } catch(error) {

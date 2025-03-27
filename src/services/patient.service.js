@@ -741,7 +741,7 @@ module.exports = {
       }
 
       // Get Progress of the Patient about his phase level and activities score
-      const { error:progressError, message: progressMessage, generalProgress } = await getProgress(data.id);
+      const { error:progressError, message: progressMessage, generalProgress, phaseProgress } = await getProgress(data.id);
       if(progressError) {
         return {
           error: progressError,
@@ -749,7 +749,9 @@ module.exports = {
           message: progressMessage,
         }
       }
+      // Adding keys to patient response
       data.generalProgress = generalProgress;
+      data.phaseProgress = phaseProgress;
 
       return {
         error: false,
