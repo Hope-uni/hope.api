@@ -1,9 +1,9 @@
 const { Observation, User, HealthRecord, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, formatErrorMessages } = require('@utils');
 const { patientBelongsToTherapist } = require('@helpers');
+const { messages, formatErrorMessages, dataStructure } = require('@utils');
 
-  const createObservation = async (body, transactionRetrieved) => {
+const createObservation = async (body, transactionRetrieved) => {
     const transaction = transactionRetrieved ?? await sequelize.transaction();
     try {
 
@@ -143,11 +143,32 @@ const addObservation = async ({ description, patientId }, payload) => {
     // Commit transaction
     await transaction.commit();
 
+    // get observation
+    const getNewObservation = await Observation.findOne({
+      where: {
+        id: data.id,
+        status: true,
+      },
+      include: {
+        model: User,
+      }
+    });
+
+
+    if(!getNewObservation) {
+      return {
+        error: true,
+        statusCode: 404,
+        message: messages.generalMessages.base,
+        validationErrors: formatErrorMessages('Observation', messages.observations.errors.not_found)
+      }
+    }
+
     return {
       error,
       statusCode,
       message,
-      data
+      data: dataStructure.findObservationDataStructure(getNewObservation)
     }
   } catch(error) {
     await transaction.rollback();

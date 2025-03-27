@@ -17,7 +17,8 @@ module.exports = {
       if (error) return res.status(400).json({
         error: true,
         statusCode: 422,
-        message: formatJoiMessages(error)
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
       });
 
       const { error: dataError, statusCode, message, validationErrors, data } = await addObservation(req.body, req.payload);

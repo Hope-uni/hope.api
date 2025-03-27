@@ -726,7 +726,16 @@ module.exports = {
     };
 
     return newData;
+  },
 
+  // Observations Structure
+  findObservationDataStructure(data) {
+    return {
+      id: data.id,
+      description: data.description,
+      username: data.User.username,
+      createdAt: data.createdAt
+    }
   }
 
 
