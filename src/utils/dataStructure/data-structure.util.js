@@ -415,7 +415,7 @@ module.exports = {
       currentPhase: getPhase,
       progress: {
         generalProgress: data.generalProgress,
-        phaseProgress: 0,
+        phaseProgress: data.phaseProgress,
       },
       observations: observationsGotit.length > 0 ?  observationsGotit : null,
       achievements: null,
@@ -735,6 +735,22 @@ module.exports = {
       description: data.description,
       username: data.User.username,
       createdAt: data.createdAt
+    }
+  },
+
+
+  // Phase -> PhaseShifting data structure
+  phaseShiftingDataStructure(data) {
+    return {
+      currentPhase: {
+        id: data.phase.id,
+        name: data.phase.name,
+        description: data.phase.description,
+      },
+      progress: {
+        generalProgress: data.generalProgress,
+        phaseProgress: data.phaseProgress
+      }
     }
   }
 

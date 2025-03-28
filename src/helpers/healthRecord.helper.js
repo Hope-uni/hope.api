@@ -1,11 +1,12 @@
-const { Phase, Patient, HealthRecord, TeaDegree, Observation } = require('@models/index');
+const { Phase, Patient, HealthRecord, TeaDegree, PatientActivity,Activity, Observation } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
+const { messages } = require('@utils');
 
 
 
 module.exports = {
 
+  /* eslint-disable radix */
   async getProgress(patientId) {
     try {
 
@@ -52,13 +53,13 @@ module.exports = {
           statusCode: 404
         }
       }
-      
-      const data = await Phase.findAndCountAll({
+
+      const phaseData = await Phase.findAndCountAll({
         distinct: true,
         order: [['id', 'ASC']]
       });
 
-      if(!data) {
+      if(!phaseData) {
         return {
           error: true,
           message: messages.healthRecord.errors.not_found,
@@ -66,20 +67,43 @@ module.exports = {
         }
       }
 
-      // Building the percentage
-      const totalPhases = data.count;
-      let phaseIndex = 0;
+      /* Building the percentage */
       let generalProgress = 0;
+      let phaseProgress = 0;
+      // General Progress
+      const totalPhases = phaseData.count;
+      let phaseIndex = 0;
 
       if(patientData.HealthRecord !== null && patientData.HealthRecord.Phase !== null) {
-        phaseIndex = data.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
+        phaseIndex = phaseData.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
 
-        generalProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2);
+        generalProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2); // general progress value
       }
+
+      // Phase progress: phase progress is base in how many activities the patient has done in his current phase.
+      const countActivitiesCompleted = await PatientActivity.findAndCountAll({
+        where: {
+          patientId: patientData.id,
+          isCompleted: true,
+          status: true,
+        },
+        include: [
+          {
+            model: Activity,
+            where: {
+              phaseId: patientData.HealthRecord.Phase.id
+            }
+          }
+        ]
+      });
+
+      phaseProgress = ((parseInt(countActivitiesCompleted.count) / parseInt(phaseData.rows[phaseIndex].scoreActivities)) * 100).toFixed(2); // Phase progress value
 
       return {
         error: false,
         generalProgress,
+        phaseProgress,
+        patientPhase: patientData.HealthRecord.Phase,
       }
 
     } catch (error) {

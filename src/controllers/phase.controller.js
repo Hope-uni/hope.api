@@ -102,7 +102,8 @@ module.exports = {
         return res.status(statusCode).json({
           error: dataError,
           statusCode,
-          message
+          message,
+          data: null,
         });
       }
 
