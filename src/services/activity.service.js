@@ -867,8 +867,7 @@ module.exports = {
         return {
           error,
           statusCode,
-          message,
-          validationErrors,
+          message:messages.activity.errors.service.incorrect_answer,
         }
       }
 
