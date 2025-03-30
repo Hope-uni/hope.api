@@ -11,6 +11,7 @@ const patientPictogramsEntry = require('./patientPictogram.validation');
 const phaseEntry = require('./phase.validation');
 const activityEntry = require('./activity.validation');
 const observationEntry = require('./observations.validation');
+const { paginationEntry } = require('./pagination.validation');
 
 
 module.exports = {
@@ -27,4 +28,5 @@ module.exports = {
   phaseEntry,
   activityEntry,
   observationEntry,
+  paginationEntry
 }

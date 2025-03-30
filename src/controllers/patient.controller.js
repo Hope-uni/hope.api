@@ -6,26 +6,36 @@ const {
   update,
   removePatient,
   allPatientsWithoutTherapist,
+  allPatientsAvailableForActivities,
 } = require('@services/patient.service');
-const { patientEntry, idEntry } = require('@validations/index');
-const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
+const { messages, userPersonEntries, formatJoiMessages } = require('@utils');
+const { patientEntry, idEntry, paginationEntry } = require('@validations');
 
 module.exports = {
 
   async all(req,res) {
     try {
-      const { error, statusCode, message, validationErrors, ...resData } = await all(req.query,req.payload);
+
+      const { error } = patientEntry.patientFilterValidation(req.query);
       if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: formatJoiMessages(error)
+        })
+      }
+
+      const { error: dataError, statusCode, message, ...resData } = await all(req.query);
+      if(dataError) {
         return res.status(statusCode).json({
-          error,
+          error: dataError,
           statusCode,
           message,
-          validationErrors,
         });
       };
 
       return res.status(statusCode).json({
-        error,
+        error: dataError,
         statusCode,
         message,
         ...resData
@@ -44,19 +54,27 @@ module.exports = {
   async allPatientsWithoutTherapist(req,res) {
     try {
 
-      const { error, statusCode, message, validationErrors, ...resData } = await allPatientsWithoutTherapist(req.query);
-
+      const { error } = paginationEntry(req.query);
       if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: formatJoiMessages(error)
+        });
+      }
+
+      const { error:dataError, statusCode, message, ...resData } = await allPatientsWithoutTherapist(req.query);
+
+      if(dataError) {
         return res.status(statusCode).json({
-          error,
+          error:dataError,
           statusCode,
           message,
-          validationErrors,
         });
       }
 
       return res.status(statusCode).json({
-        error,
+        error:dataError,
         statusCode,
         message,
         ...resData
@@ -68,6 +86,52 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
+      });
+    }
+  },
+
+  async allPatientsAvailableForActivities(req,res) {
+    try {
+
+      const { error } = patientEntry.patientAvailableForActivityValidation({
+        ...req.query,
+        activityId: req.params.id
+      });
+      if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: formatJoiMessages(error)
+        });
+      }
+
+      const { error:dataError, message, statusCode, data } = await allPatientsAvailableForActivities(
+        req.params.id,
+        req.query,
+        req.payload
+      );
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message,
+        data
+      });
+
+    } catch(error) {
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server
       });
     }
   },

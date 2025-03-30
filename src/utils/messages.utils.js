@@ -10,6 +10,26 @@ const messages = {
     unknown_object: 'Esta propiedad no está permitida',
   },
 
+  // Pagination
+  pagination: {
+    page: {
+      base: `Número de página debe ser un número válido`,
+      positive: `Número de página debe ser un número positivo`
+    },
+    size: {
+      base: `Cantidad de registros a paginar debe ser un número válido`,
+      positive: `Cantidad de registros a paginar debe ser un número positivo o mayor a cero`
+    },
+  },
+
+  // Filters
+  globalFilters: {
+    conflictParams: `Los parámetros de filtrado no son compatibles`,
+    hasActiveActivity: {
+      base: `El parámetro deber ser un valor logico "verdadero|Falso"`,
+    },
+  },
+
   // Auth Module
   auth: {
     fields: {

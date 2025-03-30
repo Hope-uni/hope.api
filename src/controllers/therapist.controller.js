@@ -1,6 +1,5 @@
 const logger = require('@config/logger.config');
 const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
-const { therapistEntry, idEntry } = require('@validations/index');
 const {
   all,
   findOne,
@@ -10,6 +9,7 @@ const {
   assignPatient,
   allPatientsTherapist,
 } = require('@services/therapist.service');
+const { therapistEntry, idEntry, patientEntry } = require('@validations');
 
 module.exports = {
 
@@ -46,18 +46,27 @@ module.exports = {
   async allPatientsTherapist(req,res) {
     try {
 
-      const { error, message, statusCode, ...resData } = await allPatientsTherapist(req.query, req.payload);
-
+      const { error } = patientEntry.patientFilterValidation(req.query);
       if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: formatJoiMessages(error)
+        });
+      }
+
+      const { error:dataError, message, statusCode, ...resData } = await allPatientsTherapist(req.query, req.payload);
+
+      if(dataError) {
         return res.status(statusCode).json({
-          error,
+          error: dataError,
           statusCode,
           message,
         });
       };
 
       return res.status(statusCode).json({
-        error,
+        error: dataError,
         statusCode,
         message,
         ...resData
