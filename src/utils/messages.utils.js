@@ -768,7 +768,7 @@ const messages = {
         all: `Actividades no encontradas`,
         pictograms: `Los pictogramas seleccionados no son válidos`,
         unassign_activity_patient: `La actividad no pudo ser desasignada del paciente`,
-        patient_activity_not_assigned: `La actividad seleccionada ya no está asignada al paciente`,
+        patient_activity_not_assigned: `Actualmente el paciente no tiene actividad asignada`,
         patient_activity_not_found: `La actividad seleccionada no está asignada al paciente`,
         incorrect_answer: `Respuesta incorrecta`,
         check_attempt: `La respuesta que has enviado no pudo ser verificada`,

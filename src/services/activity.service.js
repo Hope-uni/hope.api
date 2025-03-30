@@ -708,7 +708,7 @@ module.exports = {
     }
   },
 
-  async unAssignActivityPatient({ activityId, patientId }, payload) {
+  async unAssignActivityPatient({ patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -739,50 +739,30 @@ module.exports = {
         }
       }
 
-      // Activity exist validation
-      const activityExist = await Activity.findOne({
-        where: {
-          id: activityId,
-          status: true
-        }
-      });
-      if(!activityExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.activity.errors.not_found,
-        }
-      }
-
       // Patient exist validation
       const patientExist = await Patient.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          },
+          {
+            model: PatientActivity,
+            where: {
+              status:true,
+              isCompleted: false,
+            }
+          }
+        ]
       });
       if(!patientExist) {
         await transaction.rollback();
         return {
           error: true,
           statusCode: 404,
-          message: messages.patient.errors.not_found,
-        }
-      }
-
-
-      // Verify if the activity is assigned to the patient
-      const activityPatientExist = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          status: true
-        }
-      });
-
-      if(!activityPatientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
           message: messages.activity.errors.service.patient_activity_not_assigned,
         }
       }
@@ -792,9 +772,9 @@ module.exports = {
         status: false
       },{
         where: {
-          activityId,
-          patientId,
-          status: true
+          patientId: patientExist.id,
+          status: true,
+          isCompleted: false
         },
         transaction
       });

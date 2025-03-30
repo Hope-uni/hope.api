@@ -1,9 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages, formatJoiMessages } = require('@utils/index');
-const {
-  activityEntry,
-  idEntry,
-} = require('@validations/index');
+const { messages, formatJoiMessages } = require('@utils');
 const {
   all,
   findOne,
@@ -13,6 +9,11 @@ const {
   deleteActivity,
   assingActivityPatient
 } = require('@services/activity.service');
+const {
+  activityEntry,
+  idEntry,
+  paginationEntry
+} = require('@validations');
 
 
 
@@ -21,18 +22,27 @@ module.exports = {
   async allActivities(req,res) {
     try {
 
-      const { error, message, statusCode, ...data } = await all(req.query);
-
+      const { error } = paginationEntry(req.query);
       if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: error.details[0].message
+        });
+      }
+
+      const { error:dataError, message, statusCode, ...data } = await all(req.query);
+
+      if(dataError) {
         return res.status(statusCode).json({
-          error,
+          error: dataError,
           statusCode,
           message
         });
       };
 
       return res.status(statusCode).json({
-        error,
+        error: dataError,
         statusCode,
         message,
         ...data
@@ -199,14 +209,14 @@ module.exports = {
   async unAssignActivity(req,res) {
     try {
 
-      const { error } = activityEntry.assignActivityPatientValidation(req.body);
+      const { error } = activityEntry.unAssignActivityPatinetValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
-        message: error.details[0].message,
+        message: error.details[0].message
       });
 
-      const { error:dataError, statusCode, message } = await unAssignActivityPatient(req.body, req.payload);
+      const { error:dataError, statusCode, message, data } = await unAssignActivityPatient(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -219,7 +229,8 @@ module.exports = {
       return res.status(statusCode).json({
         error: dataError,
         statusCode,
-        message
+        message,
+        data
       });
 
     } catch (error) {
