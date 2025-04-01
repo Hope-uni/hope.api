@@ -445,32 +445,9 @@ module.exports = {
         username: data.therapist.User.username,
         phoneNumber: data.therapist.phoneNumber ? `${data.therapist.phoneNumber}` : null,
       } : null,
-    /*
-        Informacion de la actividad asignada: {
-          id
-          nombre
-          descripcion
-          fase
-          progreso
-        }
-      */
-      currentActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data) : null,
-      /*
-        Lista de actividades completadas relacionadas al paciente: {
-          id
-          nombre
-          descripcion
-          fase
-        }
-      */
+      latestCompletedActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data.PatientActivities).lastActivity : null,
+      currentActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data.PatientActivities).currentActivity : null,
       activities: data.PatientActivities.length > 0 ? activityDataStructure.allPatientActivities(data) : null,
-      /*
-        Lista de Pictogramas personalizados del Paciente: {
-          id
-          imagen
-          nombre
-        }
-      */
       pictograms: data.pictograms ?? null,
     }
   },
@@ -687,11 +664,7 @@ module.exports = {
               id: item.User.id,
               username: item.User.username
             },
-            assignments: item.PatientActivities.length > 0 ?  item.PatientActivities.map((p) => {
-              return {
-                id: p.Patient.id,
-              }
-            }): null
+            assignments: item.PatientActivities.length > 0 ?  activityDataStructure.allActivityAssigments(item.PatientActivities) : null
           })
       });
     }
@@ -717,11 +690,7 @@ module.exports = {
         id: data.User.id,
         username: data.User.username
       },
-      assignments: data.PatientActivities !== null && data.PatientActivities.length > 0 ?  data.PatientActivities.map((p) => {
-        return {
-          id: p.Patient.id,
-        }
-      }): null,
+      assignments: data.PatientActivities !== null && data.PatientActivities.length > 0 ?  activityDataStructure.allActivityAssigments(data.PatientActivities) : null,
       activitySolution: data.dataValues.pictograms,
     };
 
