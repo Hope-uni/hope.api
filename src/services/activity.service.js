@@ -50,7 +50,7 @@ module.exports = {
             },
             {
               model: PatientActivity,
-              attributes: ['id'],
+              attributes: ['id', 'isCompleted'],
               include: [
                 {
                   model: Patient,
@@ -97,7 +97,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -161,7 +161,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -316,7 +316,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -867,8 +867,7 @@ module.exports = {
         return {
           error,
           statusCode,
-          message,
-          validationErrors,
+          message:messages.activity.errors.service.incorrect_answer,
         }
       }
 
