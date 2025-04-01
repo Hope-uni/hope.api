@@ -18,7 +18,7 @@ module.exports = {
 
   currentPatientActivity(data) {
 
-    const currentActivity = data.PatientActivities.filter(item => item.isCompleted === false).map(item => ({
+    const currentActivity = data.filter(item => item.isCompleted === false).map(item => ({
       id: item.Activity.id,
       name: item.Activity.name ?? null,
       satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
@@ -32,7 +32,41 @@ module.exports = {
       },
     }))[0];
 
-    return currentActivity ?? null;
+    // Get the last activity completed in case the patient does not have activities assigned.
+    let lastActivity = null;
+    if(!currentActivity) {
+      lastActivity = {
+        id: data[0].Activity.id,
+        name: data[0].Activity.name ?? null,
+        satisfactoryPoints: data[0].Activity.satisfactoryPoints ?? null,
+        satisfactoryAttempts: data[0].satisfactoryAttempts ?? null,
+        progress: (data[0].satisfactoryAttempts / data[0].Activity.satisfactoryPoints) * 100,
+        description: data[0].Activity.description ?? null,
+        phase: {
+          id: data[0].Activity.Phase.id,
+          name: data[0].Activity.Phase.name,
+          description: data[0].Activity.Phase.description,
+        },
+      }
+    }
+
+    return {
+      currentActivity: currentActivity ?? null,
+      lastActivity,
+    }
+  },
+
+  allActivityAssigments(data) {
+
+    const assigments = [];
+
+    data.map((item) => {
+      if(item.isCompleted === false) {
+        assigments.push(item.Patient.id);
+      }
+    });
+
+    return assigments.length === 0 ? null : assigments;
   }
 
 }

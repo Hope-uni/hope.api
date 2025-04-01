@@ -872,7 +872,10 @@ module.exports = {
           {
             model: PatientActivity,
             attributes: {
-              exclude: ['createdAt','updatedAt']
+              exclude: ['updatedAt']
+            },
+            where: {
+              status: true,
             },
             include: [
               {
@@ -932,6 +935,9 @@ module.exports = {
               }
             ],
           }
+        ],
+        order:[
+          [{model: PatientActivity}, 'createdAt', 'DESC'],
         ]
       });
 
