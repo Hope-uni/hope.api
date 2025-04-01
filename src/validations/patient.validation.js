@@ -1,5 +1,6 @@
 const joi = require('joi');
 const { messages } = require('@utils');
+const { paginationFields } = require('./pagination.validation'); // Pagination fields is for add this fields to any joi model and not use the entire joi model just for pagination.
 
 
 module.exports = {
@@ -16,10 +17,10 @@ module.exports = {
         'number.positive': messages.tutor.fields.id.positive,
       }),
       phaseId: joi.number().positive().strict().required().messages({
-        'any.required': messages.phase.fields.id.required,
-        'number.base': messages.phase.fields.id.base,
-        'number.positive': messages.phase.fields.id.positive,
-      }),
+      'any.required': messages.phase.fields.id.required,
+      'number.base': messages.phase.fields.id.base,
+      'number.positive': messages.phase.fields.id.positive,
+    }),
       teaDegreeId: joi.number().positive().strict().required().messages({
         'any.required': messages.teaDegree.fields.id.required,
         'number.base': messages.teaDegree.fields.id.base,
@@ -53,5 +54,35 @@ module.exports = {
     });
     return schema.validate(data);
   },
+
+  patientFilterValidation(data) {
+    const schema = joi.object().keys({
+      ...paginationFields,
+      hasActiveActivity: joi.boolean().empty(' ').messages({
+        'boolean.base': messages.globalFilters.hasActiveActivity.base,
+      }),
+      activityId: joi.number().positive().empty(' ').messages({
+        'number.base': messages.activity.fields.id.base,
+        'number.positive': messages.activity.fields.id.positive
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
+
+  patientAvailableForActivityValidation(data) {
+    const schema = joi.object().keys({
+      ...paginationFields,
+      activityId: joi.number().positive().required().messages({
+        'number.base': messages.activity.fields.id.base,
+        'number.positive': messages.activity.fields.id.positive,
+        'any.required': messages.activity.fields.id.required
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  }
 
 }

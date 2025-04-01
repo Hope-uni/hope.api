@@ -10,6 +10,26 @@ const messages = {
     unknown_object: 'Esta propiedad no está permitida',
   },
 
+  // Pagination
+  pagination: {
+    page: {
+      base: `Número de página debe ser un número válido`,
+      positive: `Número de página debe ser un número positivo`
+    },
+    size: {
+      base: `Cantidad de registros a paginar debe ser un número válido`,
+      positive: `Cantidad de registros a paginar debe ser un número positivo o mayor a cero`
+    },
+  },
+
+  // Filters
+  globalFilters: {
+    conflictParams: `Los parámetros de filtrado no son compatibles`,
+    hasActiveActivity: {
+      base: `El parámetro deber ser un valor logico "verdadero|Falso"`,
+    },
+  },
+
   // Auth Module
   auth: {
     fields: {
@@ -748,7 +768,7 @@ const messages = {
         all: `Actividades no encontradas`,
         pictograms: `Los pictogramas seleccionados no son válidos`,
         unassign_activity_patient: `La actividad no pudo ser desasignada del paciente`,
-        patient_activity_not_assigned: `La actividad seleccionada ya no está asignada al paciente`,
+        patient_activity_not_assigned: `Actualmente el paciente no tiene actividad asignada`,
         patient_activity_not_found: `La actividad seleccionada no está asignada al paciente`,
         incorrect_answer: `Respuesta incorrecta`,
         check_attempt: `La respuesta que has enviado no pudo ser verificada`,

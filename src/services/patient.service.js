@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const logger = require('@config/logger.config');
 const {
   Patient,
@@ -15,9 +15,9 @@ const {
   Activity,
   sequelize
 } = require('@models/index.js');
-const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils');
 const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
 const constants = require('@constants/role.constant');
+const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
@@ -29,38 +29,118 @@ module.exports = {
 
   /* eslint-disable radix */
   /* eslint-disable consistent-return */
-  async all(query, payload) {
+  async all(query) {
     try {
 
-      const userType = await User.findOne({
-        where: {
-          id: payload.id,
-          status: true,
+      // Variable
+      let conditinalInclude = [
+        {
+          model: Person,
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status']
+          },
         },
-        include: [
-          {
-            model: UserRoles,
-            include: [
-              {
-                model: Role,
-                where: {
-                  id: {
-                    [Op.notIn]: [3,4,5]
-                  }
+        {
+          model: User,
+          where: {
+            status: true,
+          },
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status', 'password']
+          },
+          include: [
+            {
+              model: UserRoles,
+              include: [
+                {
+                  model: Role,
+                  attributes: {
+                    exclude: ['createdAt', 'updatedAt', 'status']
+                  },
                 }
+              ]
+            },
+          ]
+        },
+        {
+          model: TutorTherapist,
+          as: 'tutor',
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status']
+          },
+          include: {
+            model: Person,
+            attributes: ['id', 'firstName', 'surname']
+          }
+        },
+        {
+          model: TutorTherapist,
+          as: 'therapist',
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status']
+          },
+          include: {
+            model: Person,
+            attributes: ['id', 'firstName', 'surname']
+          }
+        },
+        {
+          model: HealthRecord,
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
+          },
+          include: [
+            {
+              model: TeaDegree,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt'],
               }
-            ]
+            },
+            {
+              model: Phase,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt'],
+              }
+            },
+            {
+              model: Observation,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status', 'userId', 'healthRecordId'],
+              }
+            }
+          ],
+        },
+      ];
+
+      // validate if activityId query was retrieved in the request. This query param will allow us to get all patients that has this activity.
+      if(query.activityId) {
+        conditinalInclude = [
+          ...conditinalInclude,
+          {
+            model: PatientActivity,
+            where: {
+              activityId: parseInt(query.activityId),
+              isCompleted: false,
+              status: true,
+            }
           }
         ]
-      });
-
-      if(!userType.UserRoles[0]) {
-        return {
-          error: true,
-          statusCode: 403,
-          message: messages.patient.errors.service.forbidden,
-        }
       }
+
+      // This query param will allow us to get all patients that has an activity assigned
+      if(!query.activityId && query.hasActiveActivity && query.hasActiveActivity === 'true') {
+        conditinalInclude = [
+          ...conditinalInclude,
+          {
+            model: PatientActivity,
+            where: {
+              isCompleted: false,
+              status: true,
+            }
+          }
+        ]
+      }
+
 
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Patient.findAll({
@@ -71,81 +151,7 @@ module.exports = {
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            },
-            {
-              model: User,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
-            },
-            {
-              model: TutorTherapist,
-              as: 'tutor',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: {
-                model: Person,
-                attributes: ['id', 'firstName', 'surname']
-              }
-            },
-            {
-              model: TutorTherapist,
-              as: 'therapist',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: {
-                model: Person,
-                attributes: ['id', 'firstName', 'surname']
-              }
-            },
-            {
-              model: HealthRecord,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','patientId']
-              },
-              include: [
-                {
-                  model: TeaDegree,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt'],
-                  }
-                },
-                {
-                  model: Phase,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt'],
-                  }
-                },
-                {
-                  model: Observation,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                  }
-                }
-              ],
-            }
-          ]
+          include: conditinalInclude,
         });
 
         // Return Patient
@@ -164,9 +170,209 @@ module.exports = {
         offset,
         distinct: true,
         order: [['createdAt', 'ASC']],
-        where: {
+        where:{
           status: true,
         },
+        attributes: {
+          exclude: ['updatedAt','status']
+        },
+        include: conditinalInclude,
+      });
+
+      // get Patient structured
+      data.rows = dataStructure.patientDataStructure(data.rows);
+
+      const dataResponse = pagination.getPageData(data, query.page, limit);
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.patient.success.all,
+        ...dataResponse
+      };
+
+    } catch (error) {
+      logger.error(`${messages.patient.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        message: messages.generalMessages.server,
+        statusCode: 500,
+      }
+    }
+  },
+
+  async allPatientsAvailableForActivities(activityId,query, payload) {
+    try {
+
+      // adding therapistId if this one is necessary
+      const setTherapist = (therapist = { [Op.ne]: null }) => {
+        return {
+          [Op.and]: [
+            {
+              status: true,
+              therapistId: therapist
+            },
+            {
+              [Op.or]: [
+                {
+                  id: {
+                    [Op.notIn]: Sequelize.literal(`(SELECT pa."patientId" FROM "PatientActivities" pa)`)
+                  }
+                },
+                {
+                  id: {
+                    [Op.notIn]: Sequelize.literal(`(SELECT pa."patientId" FROM "Patients" p left join "PatientActivities" pa on p.id = pa."patientId" WHERE pa.status = true AND pa."isCompleted" = false)`)
+                  }
+                }
+              ]
+            }
+          ],
+        }
+      }
+      // Variables
+      let patientWhereCondition = setTherapist();
+
+      // validate if activity Exist
+      const activityExist = await Activity.findOne({
+        where: {
+          id: activityId,
+          status: true,
+        }
+      });
+      if(!activityExist) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.activity.errors.not_found
+        }
+      }
+
+
+      // Validate if therapist has the patient in charged.
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+        const therapistExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id,
+            status: true,
+          }
+        });
+
+        if(!therapistExist) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        // adding therapist id for get patients that belongs to this therapist.
+        patientWhereCondition = setTherapist(therapistExist.id);
+      }
+
+      // Get patients without pagination.
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+        const data = await Patient.findAll({
+          where: patientWhereCondition,
+          order: [['createdAt', 'ASC']],
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','personId']
+          },
+          include: [
+            {
+              model: Person,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status']
+              },
+            },
+            {
+              model: User,
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status', 'password']
+              },
+              include: [
+                {
+                  model: UserRoles,
+                  include: [
+                    {
+                      model: Role,
+                      attributes: {
+                        exclude: ['createdAt', 'updatedAt', 'status']
+                      },
+                    }
+                  ]
+                },
+              ]
+            },
+            {
+              model: TutorTherapist,
+              as: 'tutor',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: TutorTherapist,
+              as: 'therapist',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status']
+              },
+              include: {
+                model: Person,
+                attributes: ['id', 'firstName', 'surname']
+              }
+            },
+            {
+              model: HealthRecord,
+              where: {
+                phaseId: activityExist.phaseId
+              },
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
+              },
+              include: [
+                {
+                  model: TeaDegree,
+                  attributes: {
+                    exclude: ['createdAt', 'updatedAt'],
+                  }
+                },
+                {
+                  model: Phase,
+                  attributes: {
+                    exclude: ['createdAt', 'updatedAt'],
+                  }
+                },
+                {
+                  model: Observation,
+                  attributes: {
+                    exclude: ['createdAt', 'updatedAt', 'status', 'userId', 'healthRecordId'],
+                  }
+                }
+              ],
+            },
+          ],
+        });
+
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.patient.success.all,
+          data: dataStructure.patientDataStructure(data),
+        };
+      }
+
+      const { limit, offset } = pagination.paginationValidation(query.page, query.size);
+
+      const data = await Patient.findAndCountAll({
+        limit,
+        offset,
+        distinct: true,
+        order: [['createdAt', 'ASC']],
+        where: patientWhereCondition,
         attributes: {
           exclude: ['updatedAt','status']
         },
@@ -174,14 +380,33 @@ module.exports = {
           {
             model: Person,
             attributes: {
-              exclude: ['createdAt','updatedAt','status']
+              exclude: ['createdAt', 'updatedAt', 'status']
             },
+          },
+          {
+            model: User,
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'status', 'password']
+            },
+            include: [
+              {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt', 'updatedAt', 'status']
+                    },
+                  }
+                ]
+              },
+            ]
           },
           {
             model: TutorTherapist,
             as: 'tutor',
             attributes: {
-              exclude: ['createdAt','updatedAt','status']
+              exclude: ['createdAt', 'updatedAt', 'status']
             },
             include: {
               model: Person,
@@ -192,7 +417,7 @@ module.exports = {
             model: TutorTherapist,
             as: 'therapist',
             attributes: {
-              exclude: ['createdAt','updatedAt','status']
+              exclude: ['createdAt', 'updatedAt', 'status']
             },
             include: {
               model: Person,
@@ -200,51 +425,35 @@ module.exports = {
             }
           },
           {
-            model: User,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
             model: HealthRecord,
+            where: {
+              phaseId: activityExist.phaseId
+            },
             attributes: {
-              exclude: ['createdAt','updatedAt','status','patientId']
+              exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
             },
             include: [
               {
                 model: TeaDegree,
                 attributes: {
-                  exclude: ['createdAt','updatedAt'],
+                  exclude: ['createdAt', 'updatedAt'],
                 }
               },
               {
                 model: Phase,
                 attributes: {
-                  exclude: ['createdAt','updatedAt'],
+                  exclude: ['createdAt', 'updatedAt'],
                 }
               },
               {
                 model: Observation,
                 attributes: {
-                  exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
+                  exclude: ['createdAt', 'updatedAt', 'status', 'userId', 'healthRecordId'],
                 }
               }
             ],
-          }
-        ]
+          },
+        ],
       });
 
       // get Patient structured
@@ -663,7 +872,10 @@ module.exports = {
           {
             model: PatientActivity,
             attributes: {
-              exclude: ['createdAt','updatedAt']
+              exclude: ['updatedAt']
+            },
+            where: {
+              status: true,
             },
             include: [
               {
@@ -723,6 +935,9 @@ module.exports = {
               }
             ],
           }
+        ],
+        order:[
+          [{model: PatientActivity}, 'createdAt', 'DESC'],
         ]
       });
 

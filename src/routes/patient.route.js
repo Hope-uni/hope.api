@@ -5,7 +5,8 @@ const {
   findPatient,
   updatePatient,
   removePatient,
-  allPatientsWithoutTherapist
+  allPatientsWithoutTherapist,
+  allPatientsAvailableForActivities
 } = require('@controllers/patient.controller');
 const { verifyToken, rolePermissions } = require('@middlewares/index');
 
@@ -13,6 +14,7 @@ const { verifyToken, rolePermissions } = require('@middlewares/index');
 router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar pacientes']), all);
 router.get('/patients-therapist', verifyToken, rolePermissions(['Superadmin','Admin']), allPatientsWithoutTherapist);
 router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta', 'Tutor'],['buscar pacientes']), findPatient);
+router.get('/availableForActivity/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['listar pacientes']), allPatientsAvailableForActivities);
 
 router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear pacientes']), createPatient);
 
