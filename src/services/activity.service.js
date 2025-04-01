@@ -50,7 +50,7 @@ module.exports = {
             },
             {
               model: PatientActivity,
-              attributes: ['id'],
+              attributes: ['id', 'isCompleted'],
               include: [
                 {
                   model: Patient,
@@ -97,7 +97,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -161,7 +161,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -316,7 +316,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id'],
+            attributes: ['id', 'isCompleted'],
             include: [
               {
                 model: Patient,
@@ -362,7 +362,9 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
       // Variables
-      let therapistExistId;
+      let patientWhereCondition = {
+        status: true,
+      }
 
       // Validate if therapist has the patient in charged.
       if(payload.roles.includes(constants.THERAPIST_ROLE)) {
@@ -373,6 +375,7 @@ module.exports = {
         });
 
         if(!therapistExist) {
+          await transaction.rollback();
           return {
             error: true,
             statusCode: 404,
@@ -380,7 +383,10 @@ module.exports = {
           }
         }
 
-        therapistExistId = therapistExist.id
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          therapistId: therapistExist.id,
+        }
       }
 
       // Activity exist validation
@@ -407,18 +413,27 @@ module.exports = {
       /* eslint-disable */
       for (const element of patients) {
 
+        // assign the id to the patientWhereCondition
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          id: element
+        }
+
         // Validate if patient exist
         const patientItem = await Patient.findOne({
-          where: {
-            id: element,
-            status: true,
-          },
+          where: patientWhereCondition,
           include: [
             {
               model: Person,
               attributes: {
                 exclude: ['createdAt','updatedAt','status']
               },
+            },
+            {
+              model: User,
+              where: {
+                status: true,
+              }
             },
             {
               model: HealthRecord,
@@ -443,14 +458,6 @@ module.exports = {
             error:true,
             statusCode:409,
             message: `${messages.patient.errors.not_found} con el id: ${element}`
-          }
-        }
-
-        if(payload.roles.includes(constants.THERAPIST_ROLE) && patientItem.therapistId !== therapistExistId) {
-          return {
-            error:true,
-            statusCode:409,
-            message: `${messages.patient.errors.not_found}: ${getFullName(patientItem.Person)}`
           }
         }
 
@@ -708,7 +715,7 @@ module.exports = {
     }
   },
 
-  async unAssignActivityPatient({ activityId, patientId }, payload) {
+  async unAssignActivityPatient({ patientId }, payload) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -739,50 +746,30 @@ module.exports = {
         }
       }
 
-      // Activity exist validation
-      const activityExist = await Activity.findOne({
-        where: {
-          id: activityId,
-          status: true
-        }
-      });
-      if(!activityExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.activity.errors.not_found,
-        }
-      }
-
       // Patient exist validation
       const patientExist = await Patient.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          },
+          {
+            model: PatientActivity,
+            where: {
+              status:true,
+              isCompleted: false,
+            }
+          }
+        ]
       });
       if(!patientExist) {
         await transaction.rollback();
         return {
           error: true,
           statusCode: 404,
-          message: messages.patient.errors.not_found,
-        }
-      }
-
-
-      // Verify if the activity is assigned to the patient
-      const activityPatientExist = await PatientActivity.findOne({
-        where: {
-          activityId,
-          patientId,
-          status: true
-        }
-      });
-
-      if(!activityPatientExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
           message: messages.activity.errors.service.patient_activity_not_assigned,
         }
       }
@@ -792,9 +779,9 @@ module.exports = {
         status: false
       },{
         where: {
-          activityId,
-          patientId,
-          status: true
+          patientId: patientExist.id,
+          status: true,
+          isCompleted: false
         },
         transaction
       });
@@ -880,8 +867,7 @@ module.exports = {
         return {
           error,
           statusCode,
-          message,
-          validationErrors,
+          message:messages.activity.errors.service.incorrect_answer,
         }
       }
 

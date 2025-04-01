@@ -51,7 +51,7 @@ module.exports = {
         return res.status(400).json({
           error: true,
           statusCode: 422,
-          message: formatJoiMessages(error)
+          message: error.details[0].message
         });
       }
 

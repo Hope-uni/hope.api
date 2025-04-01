@@ -1,5 +1,4 @@
 const { Pictogram } = require('@models/index');
-const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { messages, formatErrorMessages } = require('@utils/index');
 
@@ -46,33 +45,35 @@ module.exports = {
   async getPictograms(pictogramSentence) {
     try {
 
-      // get array from the string
+      // Variables
+      const pictograms = [];
       const pictogramArray = pictogramSentence.split('-');
 
       // GetPictograms
-      const pictograms = await Pictogram.findAll({
-        where: {
-          id: {
-            [Op.in]: pictogramArray
-          }
-        },
-        attributes: ['id', 'name', 'imageUrl'],
-      });
+      for(const item of pictogramArray) {
+        const patientPictogram = await Pictogram.findOne({
+          where: {
+            id: item,
+            status: true,
+          },
+          attributes: ['id', 'name', 'imageUrl'],
+        });
 
-      if(!pictograms) {
-        return {
-          error: true,
-          message: messages.pictogram.errors.service.all,
-          statusCode: 404
-        }
-      };
+        if(!patientPictogram) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.pictogram.errors.service.all,
+          }
+        };
+        pictograms.push(patientPictogram);
+      }
 
       return {
         error: false,
         message: messages.pictogram.success.all,
         pictograms,
       }
-
 
     } catch (error) {
       logger.error(`${messages.activity.errors.service.base}: ${error}`);

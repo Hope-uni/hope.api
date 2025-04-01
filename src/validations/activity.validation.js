@@ -110,6 +110,18 @@ module.exports = {
     return schema.validate(data);
   },
 
+  unAssignActivityPatinetValidation(data) {
+    const schema = joi.object().keys({
+      patientId: joi.number().positive().strict().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
 
   reassignActivityPatientValidation(data) {
     const schema = joi.object().keys({
