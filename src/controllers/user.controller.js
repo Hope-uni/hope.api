@@ -55,7 +55,7 @@ module.exports = {
     try {
 
       // Joi Validation
-      const { error } = idEntry.findOneValidation({ id: req.params.id });
+      const { error } = idEntry.findOneValidation({ id: req.params.id }, messages.user.fields.id);
       if(error) return res.status(400).json({ error: error.details[0].message });
 
       const { error:dataError, message, statusCode, data} = await findUser(req.params.id);
@@ -171,7 +171,7 @@ module.exports = {
   async removeUser(req,res) {
     try {
       // Joi Validation
-      const { error } = idEntry.findOneValidation({id: req.params.id});
+      const { error } = idEntry.findOneValidation({id: req.params.id}, messages.user.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,

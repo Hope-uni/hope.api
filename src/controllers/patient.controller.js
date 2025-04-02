@@ -140,7 +140,7 @@ module.exports = {
     try {
 
       // joi validation
-      const { error } = await idEntry.findOneValidation({id: req.params.id});
+      const { error } = await idEntry.findOneValidation({id: req.params.id},messages.patient.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
@@ -293,7 +293,7 @@ module.exports = {
   async removePatient(req,res) {
     try {
       // Joi Validation
-      const { error } = idEntry.findOneValidation({id: req.params.id});
+      const { error } = idEntry.findOneValidation({id: req.params.id}, messages.patient.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,

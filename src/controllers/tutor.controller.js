@@ -18,7 +18,7 @@ module.exports = {
   function does: */
   async allTutors(req,res) {
     try {
-      
+
       const { error, message, statusCode, ...resData} = await all(req.query);
       if(error) {
         return res.status(statusCode).json({
@@ -41,13 +41,13 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
   async allPatientsTutor(req,res) {
     try {
-      
+
       const { error, message, statusCode, ...resData} = await allPatientsTutor(req.query, req.payload);
       if(error) {
         return res.status(statusCode).json({
@@ -70,7 +70,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -78,10 +78,10 @@ module.exports = {
   finding a specific tutor by their ID. Here's a breakdown of what the function does: */
   async findTutor(req,res) {
     try {
-      
+
       // Joi validation
-      const { error } = idEntry.findOneValidation({id:req.params.id});
-      if(error) return res.status(400).json({ 
+      const { error } = idEntry.findOneValidation({id:req.params.id}, messages.tutor.fields.id);
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -110,7 +110,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: `${messages.tutor.errors.controller}: ${error}`
-      }); 
+      });
     }
   },
 
@@ -120,10 +120,10 @@ module.exports = {
     try {
       // destructuring object
       const { phoneNumber, telephone, identificationNumber, ...resBody } = req.body;
-      
+
       // User and Person joi validation
       const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
-      
+
       // Tutor joi validation
       const { error } = tutorEntry.createTutorValidation({ phoneNumber, telephone, identificationNumber });
 
@@ -169,7 +169,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -179,14 +179,14 @@ module.exports = {
     try {
       // destructuring obejct
       const { phoneNumber, identificationNumber, telephone,...resBody } = req.body;
-    
-      
+
+
       // User and person joi validation
       const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
-      
+
       // Joi validation
       const { error } = tutorEntry.updateTutorValidation({id:req.params.id, phoneNumber, identificationNumber, telephone});
-      
+
       if(error || customError) {
         const userPersonErrors = customError ? customError.details : [];
         const tutorErrors = error ? error.details : [];
@@ -229,7 +229,7 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 
@@ -240,7 +240,7 @@ module.exports = {
     try {
 
       // joi validation
-      const { error } = idEntry.findOneValidation({id:req.params.id});
+      const { error } = idEntry.findOneValidation({id:req.params.id}, messages.tutor.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 400,
@@ -262,14 +262,14 @@ module.exports = {
         statusCode,
         message,
       });
-      
+
     } catch (error) {
       logger.error(`${messages.tutor.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
-      }); 
+      });
     }
   },
 

@@ -14,5 +14,6 @@ router.use('/phase', require('./phase.route'));
 router.use('/teaDegree', require('./teaDegree.route'));
 router.use('/activity', require('./activity.route'));
 router.use('/observation', require('./observations.route'));
+router.use('/healthRecord', require('./healthRecord.route'));
 
 module.exports = router;

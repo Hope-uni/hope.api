@@ -21,7 +21,7 @@ module.exports = {
 
   async all(req,res) {
     try {
-      
+
       const { error,message, statusCode, ...data } = await allPictograms(req.query);
       if(error) {
         return res.status(statusCode).json({
@@ -51,8 +51,8 @@ module.exports = {
   async findOne(req,res) {
     try {
 
-      const { error } = idEntry.findOneValidation({ id: req.params.id });
-      if(error) return res.status(400).json({ 
+      const { error } = idEntry.findOneValidation({ id: req.params.id },messages.pictogram.fields.id);
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -87,7 +87,7 @@ module.exports = {
 
   async create(req,res) {
     try {
-      
+
       const { error } = pictogramEntry.createPictogramValidation(req.body);
       if(error) return res.status(400).json({
         error: true,
@@ -102,7 +102,7 @@ module.exports = {
           error:dataError,
           statusCode,
           message,
-          validationErrors	
+          validationErrors
         });
       };
 
@@ -125,7 +125,7 @@ module.exports = {
 
   async update(req,res) {
     try {
-      
+
       const { error } = pictogramEntry.updatePictogramValidation({id: req.params.id, ...req.body});
       if(error) return res.status(400).json({
         error: true,
@@ -140,7 +140,7 @@ module.exports = {
           error:dataError,
           statusCode,
           message,
-          validationErrors	
+          validationErrors
         });
       };
 
@@ -163,8 +163,8 @@ module.exports = {
 
   async removePictogram(req,res) {
     try {
-      
-      const { error } = idEntry.findOneValidation({ id: req.params.id });
+
+      const { error } = idEntry.findOneValidation({ id: req.params.id }, messages.pictogram.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
