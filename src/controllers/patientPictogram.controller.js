@@ -192,7 +192,7 @@ module.exports = {
   async removePatientPictogram(req,res) {
     try {
 
-      const { error } = idEntry.findOneValidation({id: req.params.id});
+      const { error } = idEntry.findOneValidation({id: req.params.id}, messages.pictogram.fields.id);
 
       const { error: customError } = patientPictogramsEntry.deletePatientPictograms(req.body);
 

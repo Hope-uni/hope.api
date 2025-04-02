@@ -14,7 +14,7 @@ module.exports = {
 
   async all(req,res) {
     try {
-      
+
       const { error, message, statusCode, ...data } = await allCategories(req.query);
 
       if(error) {
@@ -44,7 +44,7 @@ module.exports = {
 
   async findOne(req,res) {
     try {
-      const { error } = idEntry.findOneValidation({ id:req.params.id });
+      const { error } = idEntry.findOneValidation({ id:req.params.id }, messages.category.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
@@ -80,9 +80,9 @@ module.exports = {
 
   async create(req,res) {
     try {
-      
+
       const { error } = categoryEntry.createCategoryValidation(req.body);
-      if(error) return res.status(400).json({ 
+      if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
         message: messages.generalMessages.bad_request,
@@ -158,8 +158,8 @@ module.exports = {
 
   async remove(req,res) {
     try {
-      
-      const { error } = idEntry.findOneValidation({id:req.params.id});
+
+      const { error } = idEntry.findOneValidation({id:req.params.id}, messages.category.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,

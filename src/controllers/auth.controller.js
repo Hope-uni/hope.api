@@ -175,7 +175,7 @@ module.exports = {
   async changePasswordPatient(req,res) {
     try {
 
-      const { error: idError } = idEntry.findOneValidation({id:req.params.id});
+      const { error: idError } = idEntry.findOneValidation({id:req.params.id}, messages.patient.fields.id);
 
       const { error } = authEntry.changePasswordValidation(req.body);
 

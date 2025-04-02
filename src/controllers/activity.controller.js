@@ -62,7 +62,7 @@ module.exports = {
   async findActivity(req,res) {
     try {
 
-      const { error } = idEntry.findOneValidation({ id:req.params.id });
+      const { error } = idEntry.findOneValidation({ id:req.params.id }, messages.activity.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
@@ -137,7 +137,7 @@ module.exports = {
   async deleteActivity(req,res) {
     try {
 
-      const { error } = idEntry.findOneValidation({ id:req.params.id });
+      const { error } = idEntry.findOneValidation({ id:req.params.id }, messages.activity.fields.id);
       if(error) return res.status(400).json({
         error: true,
         statusCode: 422,
@@ -180,7 +180,7 @@ module.exports = {
         message: error.details[0].message,
       });
 
-      const { error:dataError, statusCode, message, data } = await assingActivityPatient(req.body, req.payload);
+      const { error:dataError, statusCode, message } = await assingActivityPatient(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({

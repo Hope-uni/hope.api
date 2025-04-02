@@ -411,6 +411,7 @@ module.exports = {
       email: data.User.email,
       birthday: data.Person.birthday,
       address: data.Person.address,
+      isMonochrome: data.HealthRecord.isMonochrome,
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
       progress: {

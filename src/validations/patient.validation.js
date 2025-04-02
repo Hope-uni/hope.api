@@ -83,6 +83,5 @@ module.exports = {
       'object.unknown': messages.generalMessages.unknown_object,
     });
     return schema.validate(data);
-  }
-
+  },
 }

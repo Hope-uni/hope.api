@@ -1,19 +1,20 @@
-const { HealthRecord, Patient, TeaDegree, Phase, sequelize } = require('@models/index');
+const { HealthRecord, Patient, TeaDegree, Phase, TutorTherapist, User, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const {
-  messages,
-  formatErrorMessages
-} = require('@utils/index');
 const {
   createHealthRecordPhase
 } = require('@services/healthRecordPhase.service');
+const {
+  messages,
+  formatErrorMessages
+} = require('@utils');
+const { roleConstants:constants } = require('@constants');
 
 module.exports = {
 
   async createHealthRecord(body, transactionRetrieved) {
     const transaction = transactionRetrieved ?? await sequelize.transaction();
     try {
-      
+
       // Destructuring data
       const {
         description = '',
@@ -135,6 +136,113 @@ module.exports = {
         error: true,
         statusCode: 500,
         message: messages.generalMessages.server,
+      }
+    }
+  },
+
+  async changeMonochromePatient(patientId,payload) {
+    const transaction = await sequelize.transaction();
+    try {
+
+      // Variables
+      let patientWhereCondition = {
+        status: true,
+        id:patientId
+      };
+
+      if(payload.roles.includes(constants.TUTOR_ROLE)) {
+        const tutorExist = await TutorTherapist.findOne({
+          where: {
+            userId: payload.id
+          },
+          include:{
+            model: User,
+            where: {
+              status: true,
+            }
+          }
+        });
+        if(!tutorExist) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.tutor.errors.not_found,
+          }
+        }
+
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          tutorId: tutorExist.id
+        }
+      };
+
+      // Validate if patient Exist
+      const patientExist = await Patient.findOne({
+        where: patientWhereCondition,
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+            }
+          },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+          }
+        ]
+      });
+
+      if(!patientExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.patient.errors.patient_assigned
+        }
+      }
+
+      // Update Monochrome endpoint.
+      const data = await HealthRecord.update({
+        isMonochrome: !patientExist.HealthRecord.isMonochrome
+      }, {
+        where: {
+          patientId: patientExist.id
+        },
+        transaction,
+        returning: true,
+      });
+
+      if (!data) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.healthRecord.errors.service.monochrome
+        }
+      }
+
+      // Commit transaction.
+      await transaction.commit();
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.healthRecord.success.monochrome,
+        data: {
+          isMonochrome: data[1][0].isMonochrome
+        }
+      }
+    } catch(error) {
+      await transaction.rollback();
+      logger.error(`${messages.healthRecord.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server
       }
     }
   }

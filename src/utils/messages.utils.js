@@ -259,6 +259,7 @@ const messages = {
         unassigned_therapist: `El paciente no tiene un terapeuta asignado`,
       },
       not_found: `Paciente no encontrado`,
+      patient_assigned: `Paciente no está en su lista de asignación`,
       in_use: {
         identificationNumber: `Cédula ya está en uso`,
         phoneNumber: `El numero de teléfono ya está en uso`
@@ -640,6 +641,7 @@ const messages = {
         update: `Expediente no actualizado`,
         delete: `Expediente no fue eliminado`,
         all: `Expedientes no encontrados`,
+        monochrome: `No se pudo actualizar el formato blanco/negro del paciente`,
       },
       not_found: `Expediente no encontrado`,
     },
@@ -648,6 +650,7 @@ const messages = {
       found: `Expediente encontrado`,
       create: `Expediente creado`,
       update: `Expediente actualizado`,
+      monochrome: `Información actualizada`
     }
   },
 
