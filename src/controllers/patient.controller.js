@@ -105,7 +105,7 @@ module.exports = {
         });
       }
 
-      const { error:dataError, message, statusCode, data } = await allPatientsAvailableForActivities(
+      const { error:dataError, message, statusCode, ...data } = await allPatientsAvailableForActivities(
         req.params.id,
         req.query,
         req.payload
@@ -123,7 +123,7 @@ module.exports = {
         error: dataError,
         statusCode,
         message,
-        data
+        ...data
       });
 
     } catch(error) {
