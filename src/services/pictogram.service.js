@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { Pictogram, Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, pagination, formatErrorMessages, dataStructure } = require('@utils/index');
+const { messages, pagination, formatErrorMessages, dataStructure } = require('@utils');
 
 
 /* eslint-disable radix */
@@ -10,11 +10,73 @@ module.exports = {
   async allPictograms(query) {
     try {
 
-      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
-        const data = await Pictogram.findAll({
+      // Variables
+      let pictogramWhereCondition = {
+        status: true,
+      }
+
+      if(query.categoryId && !query.pictogramName) {
+        // validate if category exist
+        const categoryExist = await Category.findOne({
           where: {
-            status: true,
+            id: query.categoryId,
+            status: true
+          }
+        });
+        if(!categoryExist) {
+          return {
+            error: true,
+            message: messages.category.errors.not_found,
+            statusCode: 404
+          }
+        }
+
+        pictogramWhereCondition = {
+          ...pictogramWhereCondition,
+          categoryId: categoryExist.id
+        }
+
+      }
+
+      if(query.pictogramName && !query.categoryId) {
+        pictogramWhereCondition = {
+          ...pictogramWhereCondition,
+          name: {
+            [Op.iLike]: `%${query.pictogramName}%`
+          }
+        }
+      }
+
+      if(query.categoryId && query.pictogramName) {
+
+        // validate if category exist
+        const categoryExist = await Category.findOne({
+          where: {
+            id: query.categoryId,
+            status: true
+          }
+        });
+        if(!categoryExist) {
+          return {
+            error: true,
+            message: messages.category.errors.not_found,
+            statusCode: 404
+          }
+        }
+
+        pictogramWhereCondition = {
+          ...pictogramWhereCondition,
+          name: {
+            [Op.iLike]: `%${query.pictogramName}%`
           },
+          categoryId: categoryExist.id,
+        }
+      }
+
+      if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
+
+        const data = await Pictogram.findAll({
+          where: pictogramWhereCondition,
           order:[['name', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','categoryId']
@@ -22,6 +84,9 @@ module.exports = {
           include: [
             {
               model: Category,
+              where: {
+                status: true,
+              },
               attributes: ['id','name', 'icon']
             }
           ]
@@ -42,9 +107,7 @@ module.exports = {
         offset,
         distinct: true,
         order:[['name', 'ASC']],
-        where: {
-          status: true,
-        },
+        where: pictogramWhereCondition,
         attributes: {
           exclude: ['createdAt','updatedAt','status','categoryId']
         },

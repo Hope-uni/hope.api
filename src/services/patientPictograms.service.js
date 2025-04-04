@@ -1,30 +1,27 @@
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, UserRoles, sequelize } = require('@models');
 const logger = require('@config/logger.config');
-const { getPictogramsPatient, getPictogramsPatientTutor } = require('@helpers');
+const { getPictogramsPatient } = require('@helpers');
 const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils');
 const { roleConstants: constants } = require('@constants');
 
 
 module.exports = {
 
-  async allCustomPictograms({ patientId, page, size }, payload) {
+  async allCustomPictograms({ patientId, page, size, categoryId, pictogramName }, payload) {
     try {
 
       // Variables
-      let whereCondition = {
+      let patientWhereCondition = {
         id: patientId,
         status: true,
       }
-
-      // Validate if patient id was provided
-      if(!patientId || patientId === null || patientId.trim() === "") {
-        return {
-          error: true,
-          message: messages.patient.fields.id.required,
-          statusCode: 400,
-        }
+      let pictogramWhereCondition = {
+        status: true,
+        patientId,
       }
+
+
       // Get Tutor
       if(payload.roles.includes(constants.TUTOR_ROLE)) {
         const tutorExist = await TutorTherapist.findOne({
@@ -35,21 +32,21 @@ module.exports = {
         if(!tutorExist) {
           return {
             error: true,
-            message: messages.tutor.errors.not_found,
-            statusCode: 404
+            statusCode: 404,
+            message: messages.tutor.errors.not_found
           }
         }
 
-        // udpate whereCondition
-        whereCondition = {
-          ...whereCondition,
+        // udpate patientWhereCondition
+        patientWhereCondition = {
+          ...patientWhereCondition,
           tutorId: tutorExist.id
         }
       }
 
       // get Patient
       const patientResponse = await Patient.findOne({
-        where: whereCondition,
+        where: patientWhereCondition,
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
@@ -71,15 +68,131 @@ module.exports = {
         }
       }
 
+      if(pictogramName && !categoryId) {
+        pictogramWhereCondition = {
+          ...pictogramWhereCondition,
+          name: {
+            [Op.iLike]: `%${pictogramName}%`
+          }
+        }
+      }
+
+
      // Without Pagination
      /* eslint-disable radix */
       if(!page || !size || parseInt(page) === 0 && parseInt(size) === 0) {
 
+        // If categoryId parameter was sent
+        if(categoryId && !pictogramName) {
+          // validate if category exist
+          const categoryExist = await Category.findOne({
+            where: {
+              id: categoryId,
+              status: true
+            }
+          });
+          if(!categoryExist) {
+            return {
+              error: true,
+              message: messages.category.errors.not_found,
+              statusCode: 404
+            }
+          }
+
+          const dataResponseByCategoryId = await PatientPictogram.findAll({
+            where: {
+              status: true,
+              patientId,
+            },
+            order: [['name', 'ASC']],
+            attributes: ['id', 'name', 'imageUrl'],
+            include: [
+              {
+                model: Pictogram,
+                where: {
+                  categoryId: categoryExist.id
+                },
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status','categoryId']
+                },
+                include: {
+                  model: Category,
+                  where: {
+                    status: true,
+                  },
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  }
+                }
+              }
+            ]
+          });
+
+          return {
+            error: false,
+            statusCode: 200,
+            message: messages.pictogram.success.all,
+            data: dataResponseByCategoryId.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponseByCategoryId) : [],
+          }
+        }
+
+        // If categoryId and PictogramName parameters were sent
+        if(categoryId && pictogramName) {
+          // validate if category exist
+          const categoryExist = await Category.findOne({
+            where: {
+              id: categoryId,
+              status: true
+            }
+          });
+          if(!categoryExist) {
+            return {
+              error: true,
+              message: messages.category.errors.not_found,
+              statusCode: 404
+            }
+          }
+
+          const dataResponse = await PatientPictogram.findAll({
+            where: {
+              status: true,
+              id: {
+                [Op.in]: Sequelize.literal(`(SELECT pp.id FROM "PatientPictograms" pp INNER JOIN "Pictograms" p
+                  on pp."pictogramId" = p.id WHERE pp.name ILIKE '%${pictogramName}%' AND p."categoryId" = ${categoryExist.id} AND pp."patientId" = ${patientId} AND p.status = true)`
+                )
+              },
+            },
+            order: [['name', 'ASC']],
+            attributes: ['id', 'name', 'imageUrl'],
+            include: [
+              {
+                model: Pictogram,
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status','categoryId']
+                },
+                include: {
+                  model: Category,
+                  where: {
+                    status: true,
+                  },
+                  attributes: {
+                    exclude: ['createdAt','updatedAt','status']
+                  }
+                }
+              }
+            ]
+          });
+
+          return {
+            error: false,
+            statusCode: 200,
+            message: messages.pictogram.success.all,
+            data: dataResponse.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponse) : [],
+          }
+        }
+
         const data = await PatientPictogram.findAll({
-          where: {
-            status: true,
-            patientId,
-          },
+          where: pictogramWhereCondition,
           order: [['name', 'ASC']],
           attributes: ['id', 'name', 'imageUrl'],
           include: [
@@ -97,34 +210,151 @@ module.exports = {
             }
           ]
         });
-        if(!data) {
-          return {
-            error: false,
-            statusCode: 200,
-            message: messages.pictogram.errors.service.all,
-          }
-        }
 
         return {
           error: false,
           statusCode: 200,
           message: messages.pictogram.success.all,
-          data: dataStructure.customPictogramDataStructure(data),
+          data: data.length > 0 ?  dataStructure.customPictogramDataStructure(data) : [],
         }
       }
 
       // With Pagination
       const { limit, offset } = pagination.paginationValidation(page, size);
 
+      // CategoryId was sent paginatin version
+      if(categoryId && !pictogramName) {
+
+        // validate if category exist
+        const categoryExist = await Category.findOne({
+          where: {
+            id: categoryId,
+            status: true
+          }
+        });
+        if(!categoryExist) {
+          return {
+            error: true,
+            message: messages.category.errors.not_found,
+            statusCode: 404
+          }
+        }
+
+        const dataResponseByCategoryId = await PatientPictogram.findAndCountAll({
+          limit,
+          offset,
+          distinct: true,
+          order: [['name', 'ASC']],
+          where: {
+            status: true,
+            patientId,
+          },
+          attributes: ['id', 'name', 'imageUrl'],
+          include: [
+            {
+              model: Pictogram,
+              where: {
+                categoryId: categoryExist.id,
+                status: true,
+              },
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','categoryId']
+              },
+              include: {
+                model: Category,
+                where: {
+                  status: true,
+                },
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status']
+                }
+              }
+            },
+          ]
+        });
+
+        // Structuring the data form the request
+        dataResponseByCategoryId.rows = dataStructure.customPictogramDataStructure(dataResponseByCategoryId.rows);
+
+        const dataResponse = pagination.getPageData(dataResponseByCategoryId, page, limit);
+
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.pictogram.success.all_patient_pictograms,
+          ...dataResponse
+        }
+      }
+
+      if(categoryId && pictogramName) {
+
+        // validate if category exist
+        const categoryExist = await Category.findOne({
+          where: {
+            id: categoryId,
+            status: true
+          }
+        });
+        if(!categoryExist) {
+          return {
+            error: true,
+            message: messages.category.errors.not_found,
+            statusCode: 404
+          }
+        }
+
+        const dtaResponseByFilters = await PatientPictogram.findAndCountAll({
+          limit,
+          offset,
+          distinct: true,
+          order: [['name', 'ASC']],
+          where: {
+            status: true,
+            id: {
+              [Op.in]: Sequelize.literal(`(SELECT pp.id FROM "PatientPictograms" pp INNER JOIN "Pictograms" p
+                on pp."pictogramId" = p.id WHERE pp.name ILIKE '%${pictogramName}%' AND p."categoryId" = ${categoryExist.id} AND pp."patientId" = ${patientId} AND p.status = true)`
+              )
+            },
+          },
+          attributes: ['id', 'name', 'imageUrl'],
+          include: [
+            {
+              model: Pictogram,
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','categoryId']
+              },
+              include: {
+                model: Category,
+                where: {
+                  status: true,
+                },
+                attributes: {
+                  exclude: ['createdAt','updatedAt','status']
+                }
+              }
+            },
+          ]
+        });
+
+        // Structuring the data form the request
+        dtaResponseByFilters.rows = dataStructure.customPictogramDataStructure(dtaResponseByFilters.rows);
+
+        const dataResponse = pagination.getPageData(dtaResponseByFilters, page, limit);
+
+        return {
+          error: false,
+          statusCode: 200,
+          message: messages.pictogram.success.all_patient_pictograms,
+          ...dataResponse
+        }
+      }
+
       const data = await PatientPictogram.findAndCountAll({
         limit,
         offset,
         distinct: true,
         order: [['name', 'ASC']],
-        where: {
-          status: true,
-          patientId,
-        },
+        where: pictogramWhereCondition,
         attributes: ['id', 'name', 'imageUrl'],
         include: [
           {
@@ -167,6 +397,26 @@ module.exports = {
   async all(query, payload) {
     try {
 
+      // variables
+      const { patientId } = query;
+      let patientWhereCondition = {
+        status: true,
+      };
+
+      if(patientId) {
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          id: patientId
+        }
+      }
+
+      if(payload.roles.includes(constants.PATIENT_ROLE)) {
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          userId: payload.id
+        }
+      }
+
       if(payload.roles.includes(constants.TUTOR_ROLE)) {
 
         // Get Tutor
@@ -183,11 +433,38 @@ module.exports = {
           }
         }
 
-        return await getPictogramsPatientTutor(query, tutorExist);
+        // adding tutor id for seek the correct patient and validate if this one does belong to the tutor logged.
+        patientWhereCondition = {
+          ...patientWhereCondition,
+          tutorId: tutorExist.id
+        }
       }
 
-      return await getPictogramsPatient(payload,query);
+      // get Patient
+      const patientResponse = await Patient.findOne({
+        where: patientWhereCondition,
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+              userVerified: true
+            }
+          }
+        ],
+        attributes: {
+          exclude: ['createdAt','updatedAt','status']
+        }
+      });
+      if(!patientResponse) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.patient.errors.not_found,
+        }
+      }
 
+      return await getPictogramsPatient(patientResponse,query);
     } catch (error) {
       logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
       return {
