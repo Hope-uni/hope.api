@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { User, UserRoles, Role } = require('@models/index');
 const logger = require('@config/logger.config');
 const { secretKey } = require('@config/variables.config');
-const { messages } = require('../utils');
+const { messages } = require('@utils');
 
 
 module.exports = {
