@@ -7,25 +7,22 @@ const {
   removePatientPictogram,
 } = require('@services/patientPictograms.service');
 const {
-  patientPictogramsEntry,
-  idEntry,
-} = require('@validations');
-const {
   messages,
   formatJoiMessages
 } = require('@utils');
+const {
+  patientPictogramsEntry,
+  idEntry,
+} = require('@validations');
 
 module.exports = {
 
   async all(req,res) {
     try {
 
-      // validate each field from the request except the paginations fields and the tutor enum
-      const { page, size, ...resQuery } = req.query;
-
       const { error } = patientPictogramsEntry.patientPictogramsFilterValidation({
         patientId: req.params.id,
-        ...resQuery
+        ...req.query
       });
       if( error ) return res.status(400).json({
         error: true,
@@ -67,12 +64,9 @@ module.exports = {
   async allCustomPictograms(req,res) {
     try {
 
-      // validate each field from the request except the paginations fields and the tutor enum
-      const { page, size, ...resQuery } = req.query;
-
       const { error } = patientPictogramsEntry.patientPictogramsFilterValidation({
         patientId: req.params.id,
-        ...resQuery
+        ...req.query
       });
       if( error ) return res.status(400).json({
         error: true,

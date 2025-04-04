@@ -538,7 +538,6 @@ module.exports = {
 
     for (const item of data) {
 
-
       if(item.Pictogram || item.Pictogram !== undefined) {
         const element = {
           id: item.Pictogram.id,
@@ -566,6 +565,70 @@ module.exports = {
           }
         }
         newData.push(element);
+      }
+    }
+
+    return newData;
+  },
+
+  customPictogramDataStructureFilters(data, patientId){
+
+    // Variables
+    const newData = [];
+
+    for (const item of data) {
+
+      if(!item.PatientPictograms || item.PatientPictograms.length <= 0) {
+        const element = {
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl,
+          category: {
+            id: item.Category.id,
+            name: item.Category.name,
+            icon: item.Category.icon ?? null,
+          }
+        }
+
+        newData.push(element);
+      }
+
+      if(item.PatientPictograms.length > 0) {
+
+        // Variables
+        /* eslint-disable radix */
+        let pictogramFound;
+        const pictogramSelected = item.PatientPictograms.filter((element) => parseInt(element.patientId) === parseInt(patientId) && element.status === true);
+
+        if(pictogramSelected.length > 0) {
+          pictogramFound = {
+            id: item.id,
+            name: pictogramSelected[0].name,
+            imageUrl: pictogramSelected[0].imageUrl,
+            category: {
+              id: item.Category.id,
+              name: item.Category.name,
+              icon: item.Category.icon ?? null,
+            }
+          }
+          newData.push(pictogramFound);
+        }
+
+        if(pictogramSelected.length === 0 || pictogramSelected === null) {
+          const element = {
+            id: item.id,
+            name: item.name,
+            imageUrl: item.imageUrl,
+            category: {
+              id: item.Category.id,
+              name: item.Category.name,
+              icon: item.Category.icon ?? null,
+            }
+          }
+
+          newData.push(element);
+        }
+
       }
     }
 

@@ -848,6 +848,21 @@ module.exports = {
             ]
           },
           {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
+          },
+          {
             model: User,
             where: {
               status: true
@@ -887,21 +902,6 @@ module.exports = {
                 ]
               }
             ],
-          },
-          {
-            model: TutorTherapist,
-            as: 'therapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person,
-              },
-              {
-                model: User,
-              }
-            ]
           },
           {
             model: HealthRecord,

@@ -1,5 +1,6 @@
 const joi = require('joi');
 const messages = require('@utils/messages.utils');
+const { paginationFields } = require('./pagination.validation');
 
 
 module.exports = {
@@ -66,11 +67,12 @@ module.exports = {
 
   patientPictogramsFilterValidation(data) {
     const schema = joi.object().keys({
+      ...paginationFields,
       patientId: joi.number().positive().empty(' ').messages({
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      categoryId: joi.number().positive().strict().empty(' ').messages({
+      categoryId: joi.number().positive().empty(' ').messages({
         'number.base': messages.category.fields.id.base,
         'number.positive': messages.category.fields.id.positive,
       }),
