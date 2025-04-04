@@ -322,6 +322,7 @@ const messages = {
         delete_role: `Rol no fue eliminado`,
         delete_role_user: `Este usuario no se le puede remover roles`,
       },
+      user_verified: `Usuario no verificado`,
       not_found: `Usuario no encontrado`,
       forbidden: `El tipo de usuario que desea registrar solo debe ser admisible con el rol "Admin" `,
       rol_forbidden: `Este usuario no se le pueden asignar roles`,

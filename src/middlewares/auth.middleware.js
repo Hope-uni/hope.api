@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { User, UserRoles, Role } = require('@models/index');
 const logger = require('@config/logger.config');
 const { secretKey } = require('@config/variables.config');
+const { messages } = require('../utils');
 
 
 module.exports = {
@@ -26,10 +27,9 @@ module.exports = {
       };
 
       // Validate if user is verified
-      const userVerified = await User.findOne({
+      const validUser = await User.findOne({
         where: {
           id: payload.id,
-          userVerified: true,
           status: true,
         },
         include: [
@@ -50,17 +50,23 @@ module.exports = {
         ]
       });
 
-      if(!userVerified && req.originalUrl.split('/')[3] !== 'change-password') {
+      if(validUser.userVerified === false && req.originalUrl.split('/')[3] !== 'change-password') {
         return res.status(401).json({
           error: true,
           statusCode: 401,
-          message: `Usuario no verificado`,
+          message: messages.user.errors.user_verified,
+          data: {
+            role: {
+              id: validUser.UserRoles[0].Role.id,
+              name: validUser.UserRoles[0].Role.name,
+            },
+          }
         });
       }
 
       // add role to payload
-      if(userVerified) {
-        const roles = userVerified.UserRoles.map(item => item.Role.name);
+      if(validUser.userVerified === true) {
+        const roles = validUser.UserRoles.map(item => item.Role.name);
         payload.roles = roles;
       }
 
