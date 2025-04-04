@@ -7,7 +7,8 @@ const {
   removeCategory
 } = require('@services/category.service');
 const { categoryEntry, idEntry } = require('@validations/index');
-const { formatJoiMessages, messages } = require('@utils/index');
+const { formatJoiMessages, messages } = require('@utils');
+const { paginationEntry } = require('@validations');
 
 
 module.exports = {
@@ -15,18 +16,27 @@ module.exports = {
   async all(req,res) {
     try {
 
-      const { error, message, statusCode, ...data } = await allCategories(req.query);
-
+      const { error } = paginationEntry(req.query);
       if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: error.details[0].message
+        });
+      }
+
+      const { error: dataError, message, statusCode, ...data } = await allCategories(req.query);
+
+      if(dataError) {
         return res.status(statusCode).json({
-          error,
+          error: dataError,
           statusCode,
           message
         });
       };
 
       return res.status(statusCode).json({
-        error,
+        error: dataError,
         statusCode,
         message,
         ...data
