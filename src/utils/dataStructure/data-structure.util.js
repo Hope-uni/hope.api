@@ -453,6 +453,13 @@ module.exports = {
     }
   },
 
+  findActivitiesPatient(data) {
+    return {
+      latestCompletedActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data.PatientActivities).lastActivity : null,
+      currentActivity: data.PatientActivities.length > 0 ? activityDataStructure.currentPatientActivity(data.PatientActivities).currentActivity : null,
+    }
+  },
+
 
   updatePatientDataStructure(data) {
 

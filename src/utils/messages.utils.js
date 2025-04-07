@@ -3,7 +3,7 @@ const messages = {
     base: `Hubo un problema con los datos ingresados. Verifique los datos e intente nuevamente`,
     server: `Hubo un problema inesperado. Por favor, intente más tarde`,
     bad_request: 'BAD_REQUEST',
-    unauthorized: 'UNAUTHORIZED',
+    unauthorized: 'No està autorizado para consultar este servicio',
     not_found: 'NOT_FOUND',
     conflict: 'CONFLICT',
     forbidden: `No tiene permiso para realizar esta acción`,
@@ -785,7 +785,8 @@ const messages = {
         },
         patient_without_therapist: (patient) => {
           return `El paciente ${patient} no tiene un terapeuta asignado`;
-        }
+        },
+        non_activity_patient: `Paciente sin historial de actividades realizadas o en proceso`,
       },
       not_found: `Actividad no encontrada`,
       in_use: {
@@ -809,6 +810,7 @@ const messages = {
       unassigned: `Actividad desasignada exitosamente`,
       check_attempt: `Respuesta verificada exitosamente`,
       reassign: `Actividad reasignada exitosamente`,
+      current_activity: `Actividad actual`,
     }
   },
 }

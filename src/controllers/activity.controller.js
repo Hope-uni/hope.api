@@ -1,5 +1,4 @@
 const logger = require('@config/logger.config');
-const { messages, formatJoiMessages } = require('@utils');
 const {
   all,
   findOne,
@@ -7,8 +6,10 @@ const {
   unAssignActivityPatient,
   checkActivityAnswer,
   deleteActivity,
-  assingActivityPatient
+  assingActivityPatient,
+  currentPatientActivity
 } = require('@services/activity.service');
+const { messages, formatJoiMessages } = require('@utils');
 const {
   activityEntry,
   idEntry,
@@ -280,5 +281,34 @@ module.exports = {
     }
   },
 
+  async currentPatientActivity(req,res) {
+    try {
+
+      const { error:dataError, statusCode, message, data } = await currentPatientActivity(req.payload);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        })
+      };
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message,
+        data
+      });
+
+    } catch (error) {
+      logger.error(`${messages.activity.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server
+      });
+    }
+  }
 
 }

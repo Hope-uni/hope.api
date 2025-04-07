@@ -889,9 +889,6 @@ module.exports = {
             attributes: {
               exclude: ['updatedAt']
             },
-            where: {
-              status: true,
-            },
             include: [
               {
                 model: Activity,

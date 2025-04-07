@@ -79,7 +79,6 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
       }
     }
 
-
     if(user && haveRole && havePermission) {
       next();
     } else {
