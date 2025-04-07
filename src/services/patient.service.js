@@ -32,7 +32,45 @@ module.exports = {
   async all(query) {
     try {
 
-      // Variable
+      // Variables
+      let therapistWhereCondition = {
+        status: true,
+      }
+
+      if(query.therapistId) {
+        const therapistResponse = await TutorTherapist.findOne({
+          where: {
+            id: parseInt(query.therapistId)
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 3
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!therapistResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          id: therapistResponse.id
+        }
+      }
+
       let conditinalInclude = [
         {
           model: Person,
@@ -76,6 +114,7 @@ module.exports = {
         {
           model: TutorTherapist,
           as: 'therapist',
+          where: therapistWhereCondition,
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'status']
           },

@@ -13,8 +13,8 @@ module.exports = {
         'number.positive': messages.tutor.fields.id.positive,
       }),
       therapistId: joi.number().positive().strict().empty(' ').messages({
-        'number.base': messages.tutor.fields.id.base,
-        'number.positive': messages.tutor.fields.id.positive,
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
       }),
       phaseId: joi.number().positive().strict().required().messages({
       'any.required': messages.phase.fields.id.required,
@@ -64,6 +64,10 @@ module.exports = {
       activityId: joi.number().positive().empty(' ').messages({
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive
+      }),
+      therapistId: joi.number().positive().empty(' ').messages({
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
