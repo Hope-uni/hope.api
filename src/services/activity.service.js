@@ -1,4 +1,3 @@
-const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const {
   Activity,
@@ -8,21 +7,26 @@ const {
   TutorTherapist,
   HealthRecord,
   User,
+  UserRoles,
+  Role,
+  TeaDegree,
+  Observation,
   Person,
   sequelize
 } = require('@models/index');
+const {
+  validatePictogram,
+  getPictograms,
+  getCustomPictograms,
+  getProgress
+} = require('@helpers');
+const { roleConstants: constants } = require('@constants');
 const {
   formatErrorMessages,
   messages,
   dataStructure,
   pagination
 } = require('@utils');
-const {
-  validatePictogram,
-  getPictograms
-} = require('@helpers');
-const { roleConstants: constants } = require('@constants');
-const { getFullName } = require('@utils/dataStructure');
 
 
 module.exports = {
@@ -50,7 +54,7 @@ module.exports = {
             },
             {
               model: PatientActivity,
-              attributes: ['id', 'isCompleted'],
+              attributes: ['id', 'isCompleted', 'status'],
               include: [
                 {
                   model: Patient,
@@ -161,7 +165,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id', 'isCompleted'],
+            attributes: ['id', 'isCompleted', 'status'],
             include: [
               {
                 model: Patient,
@@ -468,7 +472,7 @@ module.exports = {
             return {
               error: true,
               statusCode: 409,
-              message: messages.activity.errors.service.patient_without_therapist(getFullName(patientItem.Person)), // this message is a function that return the message with patient name
+              message: messages.activity.errors.service.patient_without_therapist(dataStructure.getFullName(patientItem.Person)), // this message is a function that return the message with patient name
               // and the getFullName has only one purpose like the function name says build the patient's fullname
             }
           }
@@ -480,7 +484,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: messages.activity.errors.service.activity_phase(getFullName(patientItem.Person)) // as ai mentioned before is the same purpose specify the patient name.
+            message: messages.activity.errors.service.activity_phase(dataStructure.getFullName(patientItem.Person)) // as ai mentioned before is the same purpose specify the patient name.
           }
         }
 
@@ -497,7 +501,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: `${messages.activity.errors.in_use.activityPatient}: ${getFullName(patientItem.Person)}`,
+            message: `${messages.activity.errors.in_use.activityPatient}: ${dataStructure.getFullName(patientItem.Person)}`,
           }
         }
 
@@ -515,7 +519,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: `${messages.activity.errors.service.already_completed} para el paciente: ${getFullName(patientItem.Person)}`,
+            message: `${messages.activity.errors.service.already_completed} para el paciente: ${dataStructure.getFullName(patientItem.Person)}`,
           }
         }
 
@@ -533,7 +537,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: messages.activity.errors.in_use.patient_activity_assigned(getFullName(patientItem.Person)),
+            message: messages.activity.errors.in_use.patient_activity_assigned(dataStructure.getFullName(patientItem.Person)),
           }
         }
 
@@ -564,7 +568,7 @@ module.exports = {
             return {
               error: true,
               statusCode: 409,
-              message: `${messages.activity.errors.service.create} para el paciente: ${getFullName(patientItem.Person)}`,
+              message: `${messages.activity.errors.service.create} para el paciente: ${dataStructure.getFullName(patientItem.Person)}`,
             }
           }
         } else {
@@ -989,5 +993,183 @@ module.exports = {
       }
     }
   },
+
+  async currentPatientActivity(payload) {
+    try {
+
+      if(payload.roles.some((name) => name === constants.ADMIN_ROLE || name === constants.SUPERADMIN_ROLE)) {
+        return {
+          error: true,
+          statusCode: 401,
+          message: messages.generalMessages.unauthorized
+        }
+      }
+
+      const data = await Patient.findOne({
+        where: {
+          userId: payload.id,
+          status: true,
+        },
+        attributes: {
+          exclude: ['createdAt','updatedAt','status','personId']
+        },
+        include: [
+          {
+            model: Person,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+          },
+          {
+            model: TutorTherapist,
+            as: 'tutor',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
+          },
+          {
+            model: TutorTherapist,
+            as: 'therapist',
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            },
+            include: [
+              {
+                model: Person,
+              },
+              {
+                model: User,
+              }
+            ]
+          },
+          {
+            model: User,
+            where: {
+              status: true
+            },
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','password']
+            },
+            include: [
+              {
+                model: UserRoles,
+                include: [
+                  {
+                    model: Role,
+                    attributes: {
+                      exclude: ['createdAt','updatedAt','status']
+                    },
+                  }
+                ]
+              },
+            ]
+          },
+          {
+            model: PatientActivity,
+            attributes: {
+              exclude: ['updatedAt']
+            },
+            where: {
+              status: true,
+            },
+            include: [
+              {
+                model: Activity,
+                include: [
+                  {
+                    model: Phase,
+                  }
+                ]
+              }
+            ],
+          },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: TeaDegree,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Phase,
+                attributes: {
+                  exclude: ['createdAt','updatedAt'],
+                }
+              },
+              {
+                model: Observation,
+                attributes: {
+                  exclude: ['updatedAt', 'status', 'healthRecordId'],
+                },
+                include: [
+                  {
+                    model: User,
+                    attributes: ['username'],
+                  }
+                ]
+              }
+            ],
+          }
+        ],
+        order:[
+          [{model: PatientActivity}, 'createdAt', 'DESC'],
+        ]
+      });
+
+      if(!data) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.activity.errors.service.non_activity_patient,
+        }
+      };
+
+      const { error, data:pictogramData } = await getCustomPictograms({ patientResponse: data });
+      if(!error) {
+        data.pictograms = pictogramData;
+      }
+
+      // Get Progress of the Patient about his phase level and activities score
+      const { error:progressError, message: progressMessage, generalProgress, phaseProgress } = await getProgress(data.id);
+      if(progressError) {
+        return {
+          error: progressError,
+          statusCode: 409,
+          message: progressMessage,
+        }
+      }
+      // Adding keys to patient response
+      data.generalProgress = generalProgress;
+      data.phaseProgress = phaseProgress;
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.activity.success.current_activity,
+        data: dataStructure.findActivitiesPatient(data),
+      };
+
+    } catch(error) {
+      logger.error(`${messages.activity.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }
+    }
+  }
 
 }

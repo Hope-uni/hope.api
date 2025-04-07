@@ -7,11 +7,13 @@ const {
   checkActivityPatient,
   unAssignActivity,
   deleteActivity,
+  currentPatientActivity,
 } = require('@controllers/activity.controller');
 const { verifyToken, rolePermissions } = require('@middlewares');
 
 
 router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['listar actividades']), allActivities);
+router.get('/current-activity', verifyToken, rolePermissions(['Paciente'],['listar actividades']), currentPatientActivity);
 router.get('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['buscar actividades']), findActivity);
 
 router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['crear actividades']), createActivity);

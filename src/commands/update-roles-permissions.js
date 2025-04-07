@@ -52,7 +52,8 @@ async function assignPermissionsRoles() {
     const patientPermissions = [
       'listar pictogramas-personalizados',
       'verify-activity-answer',
-      'listar categorias'
+      'listar categorias',
+      'listar actividades',
     ]
 
     for(let i=0; i<permissionsData.length; i++) {

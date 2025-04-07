@@ -1,7 +1,7 @@
 module.exports = {
 
   allPatientActivities(data) {
-    const activities = data.PatientActivities.filter(item => item.isCompleted === true).map(item => ({
+    const activities = data.PatientActivities.filter(item => item.isCompleted === true && item.status === true).map(item => ({
       id: item.Activity.id,
       name: item.Activity.name ?? null,
       description: item.Activity.description ?? null,
@@ -18,7 +18,7 @@ module.exports = {
 
   currentPatientActivity(data) {
 
-    const currentActivity = data.filter(item => item.isCompleted === false).map(item => ({
+    const currentActivity = data.filter(item => item.isCompleted === false && item.status === true).map(item => ({
       id: item.Activity.id,
       name: item.Activity.name ?? null,
       satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
@@ -61,7 +61,7 @@ module.exports = {
     const assigments = [];
 
     data.map((item) => {
-      if(item.isCompleted === false) {
+      if(item.isCompleted === false && item.status === true) {
         assigments.push(item.Patient.id);
       }
     });
