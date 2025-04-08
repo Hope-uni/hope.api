@@ -4,7 +4,7 @@ module.exports = {
 
   all(data) {
     const childAge = dates.getAge(data);
-    
+
     // phase
     const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.Phase.id,
@@ -33,6 +33,7 @@ module.exports = {
       currentPhase: getPhase,
       achievementCount: 0,
       image: data.Person.imageProfile ?? null,
+      isVerified: data.User.userVerified,
       // Cantidad de logros
     };
   }

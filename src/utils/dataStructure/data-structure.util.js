@@ -53,6 +53,7 @@ module.exports = {
         username: iterator.username,
         email: iterator.email,
         roles: rolesData ?? null,
+        isVerified: iterator.userVerified,
       }
       newData.push(element);
     }
@@ -98,6 +99,7 @@ module.exports = {
         username: data.dataValues.username,
         email: data.dataValues.email,
         roles: rolesData ?? null,
+        isVerified: data.userVerified,
       }
     } else {
       element = {
@@ -106,6 +108,7 @@ module.exports = {
         username: data.dataValues.username,
         email: data.dataValues.email,
         roles: rolesData ?? null,
+        isVerified: data.userVerified,
       }
     }
 
@@ -135,6 +138,7 @@ module.exports = {
         username: data.User.username,
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
         childrenInCharge: data.patientTherapist.length > 0 ? data.patientTherapist.length : null,
+        isVerified: data.User.userVerified
       };
     }
 
@@ -150,6 +154,7 @@ module.exports = {
           username: iterator.User.username,
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
           childrenInCharge: iterator.patientTherapist.length > 0 ? iterator.patientTherapist.length : null,
+          isVerified: iterator.User.userVerified
         };
 
         newData.push(element);
@@ -190,6 +195,7 @@ module.exports = {
       identificationNumber: data.identificationNumber,
       phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
       address: data.Person.address,
+      isVerified: data.User.userVerified,
       children: children.length > 0 ? children : null,
       activities: data.User.Activities.length > 0 ? data.User.Activities.filter((condition) => condition.status === true).map((item) => ({
         id: item.id,
@@ -254,6 +260,7 @@ module.exports = {
         phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
         telephone: data.telephone ? `${data.telephone}` : null,
         childrenInCharge: data.patientTutor.length > 0 ? data.patientTutor.length : null,
+        isVerified: data.User.userVerified,
       }
 
     }
@@ -271,6 +278,7 @@ module.exports = {
           phoneNumber: iterator.phoneNumber ? `${iterator.phoneNumber}` : null,
           telephone: iterator.telephone ? `${iterator.telephone}` : null,
           childrenInCharge: iterator.patientTutor.length > 0 ? iterator.patientTutor.length : null,
+          isVerified: iterator.User.userVerified
         }
         newData.push(element);
       }
@@ -310,6 +318,7 @@ module.exports = {
       phoneNumber: data.phoneNumber ? `${data.phoneNumber}` : null,
       telephone: data.telephone ? `${data.telephone}` : null,
       address: data.Person.address ?? null,
+      isVerified: data.User.userVerified,
       children: children.length > 0 ? children : null,
     }
 
@@ -411,6 +420,7 @@ module.exports = {
       email: data.User.email,
       birthday: data.Person.birthday,
       address: data.Person.address,
+      isVerified: data.User.userVerified,
       isMonochrome: data.HealthRecord.isMonochrome,
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
