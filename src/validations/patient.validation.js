@@ -13,8 +13,8 @@ module.exports = {
         'number.positive': messages.tutor.fields.id.positive,
       }),
       therapistId: joi.number().positive().strict().empty(' ').messages({
-        'number.base': messages.tutor.fields.id.base,
-        'number.positive': messages.tutor.fields.id.positive,
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
       }),
       phaseId: joi.number().positive().strict().required().messages({
       'any.required': messages.phase.fields.id.required,
@@ -65,6 +65,10 @@ module.exports = {
         'number.base': messages.activity.fields.id.base,
         'number.positive': messages.activity.fields.id.positive
       }),
+      therapistId: joi.number().positive().empty(' ').messages({
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
+      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
@@ -84,4 +88,22 @@ module.exports = {
     });
     return schema.validate(data);
   },
+
+  changeTherapistValidation(data) {
+    const schema = joi.object().keys({
+      therapistId: joi.number().positive().strict().required().messages({
+        'any.required': messages.therapist.fields.id.required,
+        'number.base': messages.therapist.fields.id.base,
+        'number.positive': messages.therapist.fields.id.positive,
+      }),
+      patientId: joi.number().positive().required().messages({
+        'any.required': messages.patient.fields.id.required,
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  }
 }

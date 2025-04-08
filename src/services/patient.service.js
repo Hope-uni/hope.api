@@ -32,7 +32,45 @@ module.exports = {
   async all(query) {
     try {
 
-      // Variable
+      // Variables
+      let therapistWhereCondition = {
+        status: true,
+      }
+
+      if(query.therapistId) {
+        const therapistResponse = await TutorTherapist.findOne({
+          where: {
+            id: parseInt(query.therapistId)
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 3
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!therapistResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          id: therapistResponse.id
+        }
+      }
+
       let conditinalInclude = [
         {
           model: Person,
@@ -76,6 +114,7 @@ module.exports = {
         {
           model: TutorTherapist,
           as: 'therapist',
+          where: therapistWhereCondition,
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'status']
           },
@@ -1614,5 +1653,126 @@ module.exports = {
       }
     }
   },
+
+  async changeTherapist({patientId, therapistId}) {
+    const transaction = await sequelize.transaction();
+    try {
+
+      // Find the therapist
+      const therapistResponse = await TutorTherapist.findOne({
+        where: {
+          id: therapistId,
+          status: true,
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              userVerified: true,
+              status: true,
+            },
+            include: [
+              {
+                model: UserRoles,
+                where: {
+                  roleId: 3
+                }
+              }
+            ]
+          }
+        ]
+      });
+
+      if(!therapistResponse) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.therapist.errors.not_found
+        }
+      }
+
+      // Verify if patient Exist
+      const patientExist = await Patient.findOne({
+        where: {
+          id: patientId,
+          status: true,
+        },
+        include: {
+          model: User,
+          where: {
+            status: true,
+          }
+        }
+      });
+      if(!patientExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.patient.errors.not_found
+        }
+      }
+
+      // Validate the new therapist does not be the same therapist currently assigned to patient
+      if(patientExist.therapistId === therapistId) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.patient.errors.service.therapist_assigned
+        }
+      }
+
+      // validate if patient does not have therapist.
+      if(!patientExist.therapistId || patientExist.therapistId === null) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.patient.errors.service.unassigned_therapist
+        }
+      }
+
+
+      // update patient changing the therapistId
+      const data = await Patient.update({
+        therapistId
+      }, {
+        where: {
+          id: patientId,
+          status: true,
+        },
+        transaction
+      });
+
+      if(!data) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.patient.errors.service.change_therapist
+        }
+      }
+
+      // Commit transaction
+      await transaction.commit();
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.patient.success.change_therapist
+      }
+
+    } catch(error) {
+      await transaction.rollback();
+      logger.error(`${messages.patient.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }
+    }
+  }
 
 }
