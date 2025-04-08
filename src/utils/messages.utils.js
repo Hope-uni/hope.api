@@ -257,6 +257,8 @@ const messages = {
         forbidden: `No tienes permíso de listar pacientes que no están relacionados contigo`,
         no_registered: `Pacientes no registrados`,
         unassigned_therapist: `El paciente no tiene un terapeuta asignado`,
+        therapist_assigned: `Debe hacer el cambio con un terapeuta diferente al que ya esta asignado`,
+        change_therapist: `Cambio de terapeuta no completado`,
       },
       not_found: `Paciente no encontrado`,
       patient_assigned: `Paciente no está en su lista de asignación`,
@@ -270,7 +272,8 @@ const messages = {
       found: `Paciente encontrado`,
       create: `Paciente creado`,
       update: `Paciente actualizado`,
-      delete: `Paciente eliminado`
+      delete: `Paciente eliminado`,
+      change_therapist: `Cambio de terapeuta existoso`,
     }
   },
 

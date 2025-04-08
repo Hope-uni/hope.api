@@ -7,6 +7,7 @@ const {
   removePatient,
   allPatientsWithoutTherapist,
   allPatientsAvailableForActivities,
+  changeTherapist
 } = require('@services/patient.service');
 const { messages, userPersonEntries, formatJoiMessages } = require('@utils');
 const { patientEntry, idEntry, paginationEntry } = require('@validations');
@@ -318,6 +319,44 @@ module.exports = {
       });
 
     } catch (error) {
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      });
+    }
+  },
+
+  async changeTherapist(req,res) {
+    try {
+
+      const { error } = patientEntry.changeTherapistValidation({ patientId: req.params.id, ...req.body });
+      if(error) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: error.details[0].message
+        });
+      }
+
+      const { error: dataError, statusCode, message } = await changeTherapist({ patientId: req.params.id, ...req.body });
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error: dataError,
+          statusCode,
+          message
+        });
+      }
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message
+      });
+
+    } catch(error) {
       logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,
