@@ -101,7 +101,7 @@ module.exports = {
           },
           {
             model: PatientActivity,
-            attributes: ['id', 'isCompleted'],
+            attributes: ['id', 'isCompleted', 'status'],
             include: [
               {
                 model: Patient,
@@ -757,6 +757,7 @@ module.exports = {
           {
             model: User,
             where: {
+              userVerified: true,
               status: true,
             }
           },
