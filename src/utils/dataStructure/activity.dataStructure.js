@@ -35,17 +35,20 @@ module.exports = {
     // Get the last activity completed in case the patient does not have activities assigned.
     let lastActivity = null;
     if(!currentActivity) {
+
+      const activityFound = data.find((item) => item.status === true && item.isCompleted === true);
+
       lastActivity = {
-        id: data[0].Activity.id,
-        name: data[0].Activity.name ?? null,
-        satisfactoryPoints: data[0].Activity.satisfactoryPoints ?? null,
-        satisfactoryAttempts: data[0].satisfactoryAttempts ?? null,
-        progress: (data[0].satisfactoryAttempts / data[0].Activity.satisfactoryPoints) * 100,
-        description: data[0].Activity.description ?? null,
+        id: activityFound.Activity.id,
+        name: activityFound.Activity.name ?? null,
+        satisfactoryPoints: activityFound.Activity.satisfactoryPoints ?? null,
+        satisfactoryAttempts: activityFound.satisfactoryAttempts ?? null,
+        progress: (activityFound.satisfactoryAttempts / activityFound.Activity.satisfactoryPoints) * 100,
+        description: activityFound.Activity.description ?? null,
         phase: {
-          id: data[0].Activity.Phase.id,
-          name: data[0].Activity.Phase.name,
-          description: data[0].Activity.Phase.description,
+          id: activityFound.Activity.Phase.id,
+          name: activityFound.Activity.Phase.name,
+          description: activityFound.Activity.Phase.description,
         },
       }
     }
