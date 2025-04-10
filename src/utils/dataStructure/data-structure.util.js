@@ -654,7 +654,7 @@ module.exports = {
 
   findCustomPictogramDataStructure(data) {
     return {
-      id: data.id,
+      id: data.Pictogram.id,
       name: data.name,
       imageUrl: data.imageUrl,
       category: {
