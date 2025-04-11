@@ -12,6 +12,7 @@ const phaseEntry = require('./phase.validation');
 const activityEntry = require('./activity.validation');
 const observationEntry = require('./observations.validation');
 const { paginationEntry } = require('./pagination.validation');
+const achievementsEntry = require('./achievements.validation');
 
 
 module.exports = {
@@ -28,5 +29,6 @@ module.exports = {
   phaseEntry,
   activityEntry,
   observationEntry,
-  paginationEntry
+  paginationEntry,
+  achievementsEntry
 }

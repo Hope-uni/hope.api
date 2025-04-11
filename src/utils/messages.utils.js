@@ -816,6 +816,54 @@ const messages = {
       current_activity: `Actividad actual`,
     }
   },
+
+  achievements: {
+    fields: {
+      id: {
+        required: `Identificador del logro es requerido`,
+        base: `Identificador del logro debe ser un número válido`,
+        positive: `Identificador del logro debe ser un número positivo`
+      },
+      name: {
+        required: `Nombre del logro es requerido`,
+        base: `Nombre del logro debe ser un texto válido`,
+        empty: `Nombre del logro no debe estar vacío`,
+        characters: `Nombre del logro debe tener como minimo 3 y como máximo 20 caracteres`,
+        trim: `Nombre del logro contiene espacios adicionales`,
+      },
+      imageUrl: {
+        required: `Imagen del logro es requerido`,
+        base: `Imagen del logro debe ser un texto válido`,
+        empty: `Imagen del logro no debe estar vacío`,
+      },
+    },
+    errors: {
+      controller: `Hubo un error en el controlador de logros`,
+      service: {
+        base: `Hubo un error en el servicio de logros`,
+        create: `Logro no creado`,
+        update: `Logro no actualizado`,
+        delete: `Logro no fue eliminado`,
+        all: `Logros no encontrados`,
+        not_alowed: `No se puede borrar el logro que pertenece a una fase por defecto`,
+        patient_already_has: `El paciente ya tiene este logro asignado`,
+        assign: `Logro no fue asignado al paciente`,
+      },
+      not_found: `Logro no encontrado`,
+      in_use: {
+        name: `Nombre del logro ya está en uso`,
+        imageUrl: `La imagen del logro ya está en uso`,
+      },
+    },
+    success: {
+      all: `Lista de logros`,
+      found: `Logro encontrado`,
+      create: `Logro creado`,
+      update: `Logro actualizado`,
+      delete: `Logro eliminado`,
+      assign: `Logro asignado exitosamente`,
+    },
+  },
 }
 
 module.exports = messages;

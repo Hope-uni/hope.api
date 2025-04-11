@@ -802,7 +802,33 @@ module.exports = {
         phaseProgress: data.phaseProgress
       }
     }
-  }
+  },
+
+
+  // Achievements Structure
+
+  achievementsDataStructure(data) {
+
+    const newData = [];
+
+    for (const item of data) {
+      newData.push({
+        id: item.id,
+        name: item.name,
+        imageUrl: item.imageUrl,
+      })
+    }
+
+    return newData;
+  },
+
+  findAchievementDataStructure(data) {
+    return {
+      id: data.id,
+      name: data.name,
+      imageUrl: data.imageUrl,
+    }
+  },
 
 
 }
