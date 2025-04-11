@@ -14,7 +14,8 @@ const modules = {
   phase: "fases",
   teaDegree: "grados-de-tea",
   activity: "actividades",
-  observation: "observaciones"
+  observation: "observaciones",
+  achievement: "logros"
 }
 
 const permission = {
@@ -74,7 +75,11 @@ const customPermissions = [
   {
     description: 'verify-activity-answer',
     group: 'activity'
-  }
+  },
+  {
+    description: 'asignar-logros',
+    group: 'achievement'
+  },
 ]
 
 /* eslint-disable no-restricted-syntax */

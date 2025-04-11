@@ -15,5 +15,6 @@ router.use('/teaDegree', require('./teaDegree.route'));
 router.use('/activity', require('./activity.route'));
 router.use('/observation', require('./observations.route'));
 router.use('/healthRecord', require('./healthRecord.route'));
+router.use('/achievements', require('./achievements.route'));
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const logger = require('../config/logger.config');
 const {  SeederMeta } = require('../models/index');
-const { getFixtures } = require('../utils/fixtures.util');
+const { initialPhases } = require('../utils/fixtures.util');
 
 
 /** @type {import('sequelize-cli').Migration} */
@@ -18,7 +18,7 @@ module.exports = {
       });
 
       if(!executedSeeders) {
-        await queryInterface.bulkInsert('Phases', getFixtures, {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases, {transaction});
 
 
         const seederRegistered = await SeederMeta.create({
@@ -44,12 +44,12 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[0].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[1].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[2].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[3].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[4].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:getFixtures[5].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[0].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[1].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[2].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[3].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[4].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[5].name }, { transaction }); 
 
       await transaction.commit();
 
