@@ -7,17 +7,24 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     const date = new Date();
     try {
-      
+
       const seederName = 'TeaDegrees';
 
       const executedSeeders = await SeederMeta.findOne({
         where: {
           name: seederName,
-        }
+        },
+        transaction,
+        logging: false,
       });
 
+      if(executedSeeders) {
+        await transaction.commit();
+        return;
+      }
+
       if(!executedSeeders) {
-        
+
         await queryInterface.bulkInsert('TeaDegrees', [
           {
             name: 'Grado 1',
@@ -117,10 +124,10 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
 
-      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 1' }, { transaction }); 
-      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 2' }, { transaction }); 
-      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 3' }, { transaction }); 
-      
+      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 1' }, { transaction });
+      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 2' }, { transaction });
+      await queryInterface.bulkDelete('TeaDegrees',{ name:'Grado 3' }, { transaction });
+
       await transaction.commit();
 
     } catch (error) {

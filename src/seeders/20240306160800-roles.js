@@ -9,12 +9,19 @@ module.exports = {
     try {
 
       const seederName = 'Roles';
-      
+
       const executedSeeders =await SeederMeta.findOne({
         where: {
           name: seederName
-        }
+        },
+        transaction,
+        logging: false,
       });
+
+      if(executedSeeders) {
+        await transaction.commit();
+        return;
+      }
 
       if(!executedSeeders) {
         await queryInterface.bulkInsert('Roles', [
@@ -119,7 +126,7 @@ module.exports = {
             ),
           },
         ], { transaction });
-        
+
         const seederRegistered = await SeederMeta.create({
           name: seederName
         },{transaction});
@@ -141,7 +148,7 @@ module.exports = {
   async down (queryInterface) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      
+
       await queryInterface.bulkDelete('Roles', { name: 'Superadmin' },{transaction});
       await queryInterface.bulkDelete('Roles', { name: 'Admin' },{transaction});
       await queryInterface.bulkDelete('Roles', { name: 'Terapeuta' },{transaction});

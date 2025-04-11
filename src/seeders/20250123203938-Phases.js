@@ -14,11 +14,23 @@ module.exports = {
       const executedSeeders = await SeederMeta.findOne({
         where: {
           name: seederName,
-        }
+        },
+        transaction,
+        logging: false,
       });
 
+      if(executedSeeders) {
+        await transaction.commit();
+        return;
+      }
+
       if(!executedSeeders) {
-        await queryInterface.bulkInsert('Phases', initialPhases, {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[0], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[1], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[2], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[3], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[4], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases[5], {transaction});
 
 
         const seederRegistered = await SeederMeta.create({
@@ -44,12 +56,12 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[0].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[1].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[2].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[3].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[4].name }, { transaction }); 
-      await queryInterface.bulkDelete('Phases',{ name:initialPhases[5].name }, { transaction }); 
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[0].name }, { transaction });
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[1].name }, { transaction });
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[2].name }, { transaction });
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[3].name }, { transaction });
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[4].name }, { transaction });
+      await queryInterface.bulkDelete('Phases',{ name:initialPhases[5].name }, { transaction });
 
       await transaction.commit();
 
