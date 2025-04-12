@@ -10,28 +10,35 @@ module.exports = {
 
 
       const seederName = 'AdminUserRoles';
-      
+
       const executedSeeders =await SeederMeta.findOne({
         where: {
           name: seederName
-        }
+        },
+        transaction,
+        logging: false,
       });
-      
+
+      if(executedSeeders) {
+        await transaction.commit();
+        return;
+      }
+
       if(!executedSeeders) {
         const roleInfo = await Role.findOne({
           where: {
-            id:1 
+            id:1
           },
         });
-  
+
         const userInfo = await User.findOne({
           where: {
             username: 'hope',
           },
         });
-  
-        
-  
+
+
+
         await queryInterface.bulkInsert('UserRoles',[
           {
             userId: userInfo.id,
@@ -67,7 +74,7 @@ module.exports = {
           await transaction.rollback();
           logger.error(`Seeder History was not created!`);
         }
-  
+
         await transaction.commit();
       }
 
@@ -83,7 +90,7 @@ module.exports = {
   async down (queryInterface) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      
+
       await queryInterface.bulkDelete('UserRoles',{ roleId: 1 },{ transaction });
 
       await transaction.commit();

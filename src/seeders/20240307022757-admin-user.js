@@ -11,15 +11,22 @@ module.exports = {
     // Password hash
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(userCode, salt);
-    try { 
+    try {
 
       const seederName = 'AdminUser';
-      
+
       const executedSeeders =await SeederMeta.findOne({
         where: {
           name: seederName
-        }
+        },
+        transaction,
+        logging: false,
       });
+
+      if(executedSeeders) {
+        await transaction.commit();
+        return;
+      }
 
       if(!executedSeeders){
         await queryInterface.bulkInsert('Users',[
@@ -60,7 +67,7 @@ module.exports = {
           await transaction.rollback();
           logger.error(`Seeder History was not created!`);
         }
-  
+
         await transaction.commit();
       }
 
@@ -74,7 +81,7 @@ module.exports = {
   async down (queryInterface) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      
+
       await queryInterface.bulkDelete('Users',{ username: 'hope' },{ transaction });
 
       await transaction.commit();
