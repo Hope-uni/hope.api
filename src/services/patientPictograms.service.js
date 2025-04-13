@@ -397,56 +397,17 @@ module.exports = {
   async all(query, payload) {
     try {
 
-      // variables
-      const { patientId } = query;
-      let patientWhereCondition = {
-        status: true,
-      };
-
-      if(patientId) {
-        patientWhereCondition = {
-          ...patientWhereCondition,
-          id: patientId
-        }
-      }
-
-      if(payload.roles.includes(constants.PATIENT_ROLE)) {
-        patientWhereCondition = {
-          ...patientWhereCondition,
-          userId: payload.id
-        }
-      }
-
-      if(payload.roles.includes(constants.TUTOR_ROLE)) {
-
-        // Get Tutor
-        const tutorExist = await TutorTherapist.findOne({
-          where: {
-            userId: payload.id
-          },
-        });
-        if(!tutorExist) {
-          return {
-            error: true,
-            message: messages.tutor.errors.not_found,
-            statusCode: 404
-          }
-        }
-
-        // adding tutor id for seek the correct patient and validate if this one does belong to the tutor logged.
-        patientWhereCondition = {
-          ...patientWhereCondition,
-          tutorId: tutorExist.id
-        }
-      }
 
       // get Patient
       const patientResponse = await Patient.findOne({
-        where: patientWhereCondition,
+        where: {
+          status: true,
+        },
         include: [
           {
             model: User,
             where: {
+              id: payload.id,
               status: true,
               userVerified: true
             }
