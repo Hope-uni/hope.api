@@ -405,6 +405,20 @@ module.exports = {
       description: data.HealthRecord.TeaDegree.description,
     } : null;
 
+    // Achievements
+    const patientAchievements = [];
+    if(Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && data.HealthRecord.AchievementsHealthRecords !== null ) {
+      data.HealthRecord.AchievementsHealthRecords.map((item) => {
+        if (item.status === true) {
+          patientAchievements.push({
+            id: item.Achievement.id,
+            name: item.Achievement.name,
+            imageUrl: item.Achievement.imageUrl
+          });
+        }
+      });
+    }
+
     return {
       id: data.id,
       userId: data.userId,
@@ -429,7 +443,7 @@ module.exports = {
         phaseProgress: data.phaseProgress,
       },
       observations: observationsGotit.length > 0 ?  observationsGotit : null,
-      achievements: null,
+      achievements: patientAchievements.length > 0 ? patientAchievements : null,
 
       /*
         Lista de logros Conseguidos: {

@@ -1,38 +1,71 @@
 const { Op } = require('sequelize');
-const { Achievement, AchievementsHealthRecord, Patient, TutorTherapist, User, UserRoles, HealthRecord, sequelize } = require('@models/index');
+const { Achievement, AchievementsHealthRecord, Patient, TutorTherapist, User, UserRoles, HealthRecord, Phase, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { 
-  messages, 
-  dataStructure, 
+const {
+  messages,
+  dataStructure,
   formatErrorMessages,
   pagination,
-  fixtures 
-} = require('../utils');
-const { roleConstants: constants } = require('../constants');
+  fixtures
+} = require('@utils');
+const { roleConstants: constants } = require('@constants');
 
 
 
 module.exports = {
 
   /* eslint-disable radix */
-  async getAllAchievements(query) {
+  async getAllAchievements(query, payload) {
     try {
+
+      // Variables
+      let whereCondition = {
+        status: true,
+      }
+
+      if(query.name) {
+        whereCondition = {
+          ...whereCondition,
+          name: {
+            [Op.iLike]: `%${query.name}%`
+          }
+        }
+      }
+
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+
+        const getAchievementIds = await Phase.findAll({
+          where: {
+            status: true,
+          },
+          attributes: ['id','achievementId'],
+        });
+
+        const achievementIds = getAchievementIds.map((item) => (item.achievementId));
+
+        // avoid show the phase Achievements
+        whereCondition = {
+          ...whereCondition,
+          id: {
+            [Op.notIn]: achievementIds
+          }
+        };
+
+      }
 
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
 
         const achievements = await Achievement.findAll({
-          where: {
-            status: true,
-          },
+          where: whereCondition,
           order: [['createdAt', 'ASC']],
         });
-      
+
         return {
           error: false,
           statusCode: 200,
           message: messages.achievements.success.all,
           data: achievements.length ? dataStructure.achievementsDataStructure(achievements) : [],
-        }; 
+        };
       }
 
       const {
@@ -45,9 +78,7 @@ module.exports = {
         offset,
         distinct: true,
         order: [['createdAt', 'ASC']],
-        where: {
-          status: true,
-        }
+        where: whereCondition,
       });
 
       if(!data) {
@@ -79,10 +110,29 @@ module.exports = {
       }
     }
   },
-  
-  async findAchievement(id) {
+
+  async findAchievement(id, payload) {
     try {
-      
+
+      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+
+        const phaseHasAchievement = await Phase.findOne({
+          where: {
+            achievementId: id,
+            status: true,
+          }
+        });
+
+        if(phaseHasAchievement) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.achievements.errors.not_found
+          }
+        }
+
+      }
+
       const data = await Achievement.findOne({
         where: {
           id,
@@ -193,7 +243,7 @@ module.exports = {
           validationErrors: formatErrorMessages('update', messages.achievements.errors.not_found),
         }
       }
-      
+
       // Verify if name exist
       if(body.name) {
         const achievementNameExist = await Achievement.findOne({
@@ -263,19 +313,27 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
+      // Verify if achievement does not belong to Phase
+      const phaseHasAchievement = await Phase.findOne({
+        where: {
+          status: true,
+          achievementId: id
+        },
+      });
+
+      if(phaseHasAchievement) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.achievements.errors.service.delete_not_allowed
+        }
+      }
+
       // Verify if achievement exist
       const achievementExist = await Achievement.findOne({
         where: {
-          [Op.and]: [
-            {
-              id,
-            },
-            {
-              id: {
-                [Op.notIn]: [1,2,3,4,5,6]
-              }
-            }
-          ],
+          id,
           status: true,
         }
       });
@@ -284,8 +342,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 404,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('delete', messages.achievements.errors.not_found),
+          message: messages.achievements.errors.not_found,
         }
       }
 
@@ -316,8 +373,7 @@ module.exports = {
         return {
           error: true,
           statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('delete', messages.achievements.errors.service.delete),
+          message: messages.achievements.errors.service.delete,
         }
       }
 
@@ -344,12 +400,29 @@ module.exports = {
   async assignAchievement({ patientId, achievementId }, payload) {
     const transaction = await sequelize.transaction();
     try {
-
       // Variables
       let patientWhereCondition = {
         status: true,
         id: patientId,
       };
+
+      // Verify if achievementId belongs to some phase
+      const getAchievementIds = await Phase.findAll({
+        where: {
+          status: true,
+        },
+        attributes: ['id','achievementId'],
+      });
+
+      const achievementIds = getAchievementIds.map((item) => (item.achievementId));
+
+      if(achievementIds.includes(achievementId)) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.achievements.errors.service.assign_not_allowed
+        }
+      }
 
 
       // Find the therapist
@@ -391,8 +464,8 @@ module.exports = {
           therapistId: therapistResponse.id
         }
       }
-      
-      // Verify if patient exist 
+
+      // Verify if patient exist
       const patientExist = await Patient.findOne({
         where: patientWhereCondition,
         include: [
@@ -429,16 +502,7 @@ module.exports = {
       // Verify if achievement exist
       const achievementExist = await Achievement.findOne({
         where: {
-          [Op.and]: [
-            {
-              id: achievementId,
-            },
-            {
-              id: {
-                [Op.notIn]: [1,2,3,4,5,6]
-              }
-            }
-          ],
+          id: achievementId,
           status: true,
         }
       });
@@ -495,6 +559,138 @@ module.exports = {
       }
 
     } catch (error) {
+      await transaction.rollback();
+      logger.error(`${messages.achievements.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }
+    }
+  },
+
+  async unassignAchievement({ patientId, achievementId }) {
+    const transaction = await sequelize.transaction();
+    try {
+
+      // Verify if achievementId belongs to some phase
+      const getAchievementIds = await Phase.findAll({
+        where: {
+          status: true,
+        },
+        attributes: ['id','achievementId'],
+      });
+
+      const achievementIds = getAchievementIds.map((item) => (item.achievementId));
+
+      if(achievementIds.includes(achievementId)) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.achievements.errors.service.unAssign_not_allowed
+        }
+      }
+
+      // Verify if patient exist
+      const patientExist = await Patient.findOne({
+        where: {
+          status: true,
+          id: patientId
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+              userVerified: true,
+            }
+          },
+          {
+            model: HealthRecord,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status','patientId']
+            },
+            include: [
+              {
+                model: AchievementsHealthRecord
+              }
+            ],
+          }
+        ]
+      });
+
+      if(!patientExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.patient.errors.not_found,
+        }
+      }
+
+      // Verify if achievement exist
+      const achievementExist = await Achievement.findOne({
+        where: {
+          id: achievementId,
+        }
+      });
+      if(!achievementExist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.achievements.errors.not_found,
+        }
+      }
+
+      // AchievementsHealthRecord Validation
+      const patientAchievementExist = await AchievementsHealthRecord.findOne({
+        where: {
+          achievementId,
+          healthRecordId: patientExist.HealthRecord.id,
+          status: true
+        }
+      });
+
+      // verify if patient has the achievement associated
+      if(!patientAchievementExist) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.achievements.errors.service.assign,
+        }
+      }
+
+      // unAssign achievement
+      const data = await AchievementsHealthRecord.update({
+        status: false
+      },{
+        where: {
+          status: true,
+          achievementId,
+          healthRecordId: patientExist.HealthRecord.id,
+        },
+        transaction
+      });
+
+      if(!data) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.achievements.errors.service.assign,
+        }
+      }
+
+      // Commit Transaction
+      await transaction.commit();
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.achievements.success.unassign,
+      }
+    } catch(error) {
       await transaction.rollback();
       logger.error(`${messages.achievements.errors.service.base}: ${error}`);
       return {

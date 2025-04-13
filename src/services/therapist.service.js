@@ -13,6 +13,8 @@ const {
   Observation,
   Activity,
   PatientActivity,
+  Achievement,
+  AchievementsHealthRecord,
   sequelize } = require('@models/index');
 const { pagination, generatePassword, messages, dataStructure, formatErrorMessages } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
@@ -240,6 +242,13 @@ module.exports = {
             exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
           },
           include: [
+            {
+              model: AchievementsHealthRecord,
+              include: {
+                model: Achievement,
+                attributes: ['id', 'name', 'imageUrl']
+              }
+            },
             {
               model: TeaDegree,
               attributes: {

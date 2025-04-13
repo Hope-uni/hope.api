@@ -24,6 +24,9 @@ module.exports = {
       fullName = `${data.Person.firstName} ${data.Person.surname}`;
     }
 
+    // Achievements
+    const getAchievements = data.HealthRecord.AchievementsHealthRecords.length > 0 ? data.HealthRecord.AchievementsHealthRecords.filter((item) => item.status === true) : null
+
     return {
       id: data.id,
       userId: data.userId,
@@ -31,9 +34,10 @@ module.exports = {
       age: childAge.Person.dataValues.age,
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
-      achievementCount: 0,
+      achievementCount: getAchievements ? getAchievements.length : null,
       image: data.Person.imageProfile ?? null,
       isVerified: data.User.userVerified,
+
       // Cantidad de logros
     };
   }

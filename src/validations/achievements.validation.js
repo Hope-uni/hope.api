@@ -1,5 +1,6 @@
 const joi = require('joi');
 const { messages } = require('../utils');
+const {paginationFields } = require('./pagination.validation');
 
 
 module.exports = {
@@ -47,7 +48,7 @@ module.exports = {
     return schema.validate(data);
   },
 
-  assignAchievementValidation(data) {
+  patientAchievementValidation(data) {
     const schema = joi.object().keys({
       patientId: joi.number().positive().strict().required().messages({
         'any.required': messages.patient.fields.id.required,
@@ -58,6 +59,20 @@ module.exports = {
         'any.required': messages.achievements.fields.id.required,
         'number.base': messages.achievements.fields.id.base,
         'number.positive': messages.achievements.fields.id.positive,
+      }),
+    }).unknown(false).options({ abortEarly: false }).messages({
+      'object.unknown': messages.generalMessages.unknown_object,
+    });
+    return schema.validate(data);
+  },
+
+  filtersValidation(data) {
+    const schema = joi.object().keys({
+      ...paginationFields,
+      name: joi.string().strict().trim().empty(' ').messages({
+        'string.base': messages.achievements.fields.name.base,
+        'string.empty': messages.achievements.fields.name.empty,
+        'string.trim': messages.achievements.fields.name.trim,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

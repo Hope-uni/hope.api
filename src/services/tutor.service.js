@@ -12,6 +12,8 @@ const {
   TeaDegree,
   Phase,
   Observation,
+  Achievement,
+  AchievementsHealthRecord,
   sequelize
 } = require('@models/index.js');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
@@ -295,6 +297,13 @@ module.exports = {
                 },
                 include: [
                   {
+                    model: AchievementsHealthRecord,
+                    include: {
+                      model: Achievement,
+                      attributes: ['id', 'name', 'imageUrl']
+                    }
+                  },
+                  {
                     model: TeaDegree,
                     attributes: {
                       exclude: ['createdAt','updatedAt'],
@@ -397,6 +406,13 @@ module.exports = {
                 exclude: ['createdAt','updatedAt','status','patientId']
               },
               include: [
+                {
+                  model: AchievementsHealthRecord,
+                  include: {
+                    model: Achievement,
+                    attributes: ['id', 'name', 'imageUrl']
+                  }
+                },
                 {
                   model: TeaDegree,
                   attributes: {

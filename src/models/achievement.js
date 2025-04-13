@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'achievementId',
     });
 
+    Achievement.hasMany(models.Phase, {
+      foreignKey: 'achievementId'
+    });
+
   }
 
   return Achievement;
