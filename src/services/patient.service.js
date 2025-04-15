@@ -13,6 +13,8 @@ const {
   Observation,
   PatientActivity,
   Activity,
+  AchievementsHealthRecord,
+  Achievement,
   sequelize
 } = require('@models/index.js');
 const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
@@ -71,6 +73,7 @@ module.exports = {
         }
       }
 
+      // Patient include variable
       let conditinalInclude = [
         {
           model: Person,
@@ -129,6 +132,13 @@ module.exports = {
             exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
           },
           include: [
+            {
+              model: AchievementsHealthRecord,
+              include: {
+                model: Achievement,
+                attributes: ['id', 'name', 'imageUrl']
+              }
+            },
             {
               model: TeaDegree,
               attributes: {
@@ -374,6 +384,13 @@ module.exports = {
               },
               include: [
                 {
+                  model: AchievementsHealthRecord,
+                  include: {
+                    model: Achievement,
+                    attributes: ['id', 'name', 'imageUrl']
+                  }
+                },
+                {
                   model: TeaDegree,
                   attributes: {
                     exclude: ['createdAt', 'updatedAt'],
@@ -472,6 +489,13 @@ module.exports = {
               exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
             },
             include: [
+              {
+                model: AchievementsHealthRecord,
+                include: {
+                  model: Achievement,
+                  attributes: ['id', 'name', 'imageUrl']
+                }
+              },
               {
                 model: TeaDegree,
                 attributes: {
@@ -585,6 +609,13 @@ module.exports = {
               },
               include: [
                 {
+                  model: AchievementsHealthRecord,
+                  include: {
+                    model: Achievement,
+                    attributes: ['id', 'name', 'imageUrl']
+                  }
+                },
+                {
                   model: TeaDegree,
                   attributes: {
                     exclude: ['createdAt','updatedAt'],
@@ -684,6 +715,13 @@ module.exports = {
               exclude: ['createdAt','updatedAt','status','patientId']
             },
             include: [
+              {
+                model: AchievementsHealthRecord,
+                include: {
+                  model: Achievement,
+                  attributes: ['id', 'name', 'imageUrl']
+                }
+              },
               {
                 model: TeaDegree,
                 attributes: {
@@ -946,6 +984,13 @@ module.exports = {
             },
             include: [
               {
+                model: AchievementsHealthRecord,
+                include: {
+                  model: Achievement,
+                  attributes: ['id', 'name', 'imageUrl']
+                }
+              },
+              {
                 model: TeaDegree,
                 attributes: {
                   exclude: ['createdAt','updatedAt'],
@@ -968,7 +1013,7 @@ module.exports = {
                     attributes: ['username'],
                   }
                 ]
-              }
+              },
             ],
           }
         ],

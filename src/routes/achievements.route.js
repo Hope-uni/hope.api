@@ -5,12 +5,13 @@ const {
   create,
   update,
   deleteAchievement,
-  assign
-} = require('../controllers/achievements.controller');
+  assign,
+  unassign
+} = require('@controllers/achievements.controller');
 const {
   verifyToken,
   rolePermissions
-} = require('../middlewares');
+} = require('@middlewares');
 
 
 
@@ -23,7 +24,8 @@ router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['actual
 
 router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['borrar logros']), deleteAchievement);
 
-router.post('/assign', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['asignar-logros']), assign);
+router.post('/assign-achievement', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta'],['asignar-logros']), assign);
+router.post('/unassign-achievement', verifyToken, rolePermissions(['Superadmin', 'Admin'], []), unassign);
 
 
 module.exports = router;

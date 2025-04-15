@@ -21,7 +21,6 @@ module.exports = {
     try {
 
       const { error } = patientPictogramsEntry.patientPictogramsFilterValidation({
-        patientId: req.params.id,
         ...req.query
       });
       if( error ) return res.status(400).json({
@@ -32,7 +31,6 @@ module.exports = {
       });
 
       const { error: dataError, message, statusCode, ...resData } = await all({
-        patientId: req.params.id,
         ...req.query
       }, req.payload);
 

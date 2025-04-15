@@ -34,6 +34,8 @@ async function assignPermissionsRoles() {
       'listar categorias',
       'listar fases',
       'asignar-logros',
+      'listar logros',
+      'buscar logros',
     ]
 
     const tutorPermissions = [

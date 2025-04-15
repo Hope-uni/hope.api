@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'phaseId',
     });
 
+    Phase.belongsTo(models.Achievement, {
+      foreignKey: 'achievementId',
+    });
+
   }
 
   return Phase;
