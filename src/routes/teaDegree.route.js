@@ -4,11 +4,18 @@ const {
 } = require('@controllers/teaDegree.controller');
 const {
   verifyToken,
-} = require('@middlewares/index');
+  rolePermissions,
+} = require('@middlewares');
+const {
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE },
+  permissionsConstants: {
+    LIST_TEA_DEGREE
+  }
+} = require('@constants');
 
 
 
-router.get('', verifyToken, allTeaDegrees);
+router.get('', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_TEA_DEGREE]), allTeaDegrees);
 
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const { User, HealthRecord, Patient, UserRoles, TutorTherapist, Phase } = require('@models/index');
 const logger = require('@config/logger.config');
-const constants = require('@constants/role.constant');
 const { messages } = require('@utils');
+const { roleConstants } = require('@constants');
 
 
 const patientBelongsToTherapist = async (payload, patientId, transaction) => {
@@ -13,7 +13,7 @@ const patientBelongsToTherapist = async (payload, patientId, transaction) => {
       status: true,
     }
 
-    if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+    if(payload.roles.includes(roleConstants.THERAPIST_ROLE)) {
       // validate if therapist exist
       const therapistExist = await TutorTherapist.findOne({
         where: {

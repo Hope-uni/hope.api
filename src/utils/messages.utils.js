@@ -845,7 +845,7 @@ const messages = {
         update: `Logro no actualizado`,
         delete: `Logro no fue eliminado`,
         all: `Logros no encontrados`,
-        not_alowed: `No se puede borrar el logro que pertenece a una fase por defecto`,
+        not_allowed: `No se puede borrar el logro que pertenece a una fase por defecto`,
         patient_already_has: `El paciente ya tiene este logro asignado`,
         assign: `Logro no fue asignado al paciente`,
         already_inactive: `Paciente ya no tiene el logro asignado`,

@@ -18,8 +18,8 @@ const {
   sequelize
 } = require('@models/index.js');
 const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
-const constants = require('@constants/role.constant');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils');
+const { roleConstants } = require('@constants');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
@@ -298,7 +298,7 @@ module.exports = {
 
 
       // Validate if therapist has the patient in charged.
-      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
+      if(payload.roles.includes(roleConstants.THERAPIST_ROLE)) {
         const therapistExist = await TutorTherapist.findOne({
           where: {
             userId: payload.id,
@@ -777,7 +777,7 @@ module.exports = {
       }
 
       // Validate if the user logged is Therapist, if this true, we validate searching just patients assigned to him.
-      if(payload.roles.includes(constants.THERAPIST_ROLE) && !payload.roles.includes(constants.TUTOR_ROLE)) {
+      if(payload.roles.includes(roleConstants.THERAPIST_ROLE) && !payload.roles.includes(roleConstants.TUTOR_ROLE)) {
         // Find the therapist
         const therapistResponse = await TutorTherapist.findOne({
           where: {
@@ -813,7 +813,7 @@ module.exports = {
       }
 
       // Validate if the user logged is Tutor, if this true, we validate searching just patients assigned to him.
-      if(payload.roles.includes(constants.TUTOR_ROLE) && !payload.roles.includes(constants.THERAPIST_ROLE)) {
+      if(payload.roles.includes(roleConstants.TUTOR_ROLE) && !payload.roles.includes(roleConstants.THERAPIST_ROLE)) {
         // Find the tutor
         const tutorResponse = await TutorTherapist.findOne({
           where: {
@@ -848,7 +848,7 @@ module.exports = {
         }
       }
 
-      if(payload.roles.includes(constants.THERAPIST_ROLE) && payload.roles.includes(constants.TUTOR_ROLE)) {
+      if(payload.roles.includes(roleConstants.THERAPIST_ROLE) && payload.roles.includes(roleConstants.TUTOR_ROLE)) {
         // Find the tutor
         const tutorTherapistResponse = await TutorTherapist.findOne({
           where: {
@@ -1090,13 +1090,19 @@ module.exports = {
         include: [
           {
             model: User,
+            where: {
+              status: true,
+            },
             include: [
               {
                 model: UserRoles,
+                where: {
+                  roleId: 5,
+                },
                 include: {
                   model: Role,
                   where: {
-                    name: 'Tutor',
+                    name: roleConstants.TUTOR_ROLE,
                   }
                 }
               }
@@ -1104,6 +1110,7 @@ module.exports = {
           }
         ]
       });
+
       if(!tutorExist) {
         await transaction.rollback();
         return {
@@ -1124,13 +1131,19 @@ module.exports = {
           include: [
             {
               model: User,
+              where: {
+                status: true,
+              },
               include: [
                 {
                   model: UserRoles,
+                  where: {
+                    roleId: 3,
+                  },
                   include: {
                     model: Role,
                     where: {
-                      name: 'Terapeuta',
+                      name: roleConstants.THERAPIST_ROLE,
                     }
                   }
                 }
@@ -1311,6 +1324,13 @@ module.exports = {
             },
             include: [
               {
+                model: AchievementsHealthRecord,
+                include: {
+                  model: Achievement,
+                  attributes: ['id', 'name', 'imageUrl']
+                }
+              },
+              {
                 model: TeaDegree,
                 attributes: {
                   exclude: ['createdAt','updatedAt'],
@@ -1353,7 +1373,7 @@ module.exports = {
         data: dataStructure.patientDataStructure(newData, true),
       };
     } catch (error) {
-      await transaction.rollback();
+      // await transaction.rollback();
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
@@ -1373,7 +1393,7 @@ module.exports = {
         status: true,
       }
 
-      if(payload.roles.includes(constants.TUTOR_ROLE)) {
+      if(payload.roles.includes(roleConstants.TUTOR_ROLE)) {
         const tutorExist = await TutorTherapist.findOne({
           where:{
             userId: payload.id
@@ -1453,7 +1473,7 @@ module.exports = {
         };
       };
 
-      if(payload.roles.some(name => name === constants.SUPERADMIN_ROLE || name === constants.ADMIN_ROLE)) {
+      if(payload.roles.some(name => name === roleConstants.SUPERADMIN_ROLE || name === roleConstants.ADMIN_ROLE)) {
         // Tutor Exist validation
         if(tutorId) {
           const tutorExist = await TutorTherapist.findOne({

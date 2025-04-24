@@ -18,7 +18,7 @@ const {
   sequelize } = require('@models/index');
 const { pagination, generatePassword, messages, dataStructure, formatErrorMessages } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
-const constants = require('@constants/role.constant');
+const { roleConstants } = require('@constants');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 
 
@@ -302,7 +302,7 @@ module.exports = {
         ]
       });
 
-      if(!therapistExist || therapistExist.User.UserRoles[0].name === constants.THERAPIST_ROLE) {
+      if(!therapistExist || therapistExist.User.UserRoles[0].name === roleConstants.THERAPIST_ROLE) {
         return {
           error: true,
           statusCode: 403,
@@ -758,29 +758,40 @@ module.exports = {
    * - `data`: If the update was successful, it includes the updated data of the therapist.
    * - `statusCode`: An HTTP status code indicating the result of the update operation.
    */
-  async update(id,body) {
+  async update(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables
+      let therapistWhereCondition = {
+        status: true,
+      }
+
+      if(payload.roles.includes(roleConstants.THERAPIST_ROLE)) {
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          userId: payload.id
+        }
+      } else {
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          id,
+        }
+      }
+
       // validate if therapist exist
       const therapistExist = await TutorTherapist.findOne({
-        where: {
-          id,
-          status: true
-        },
+        where: therapistWhereCondition,
         include: [
           {
             model: User,
             where: {
-              status: true
+              status: true,
             },
             include: {
               model: UserRoles,
               where: {
                 roleId: 3,
-                userId: {
-                  [Op.col]: 'User.id'
-                }
               }
             }
           }
@@ -812,7 +823,7 @@ module.exports = {
             identificationNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: therapistExist.id
             }
           }
         });
@@ -834,7 +845,7 @@ module.exports = {
             phoneNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: therapistExist.id
             }
           }
         });
@@ -848,6 +859,7 @@ module.exports = {
           };
         };
       };
+
 
       // User and Person update
       if(resBody) {
@@ -875,7 +887,7 @@ module.exports = {
           },
           {
             where: {
-              id
+              id: therapistExist.id
             },
             transaction
           }
@@ -896,7 +908,9 @@ module.exports = {
 
       // Get Therapist data
       const data = await TutorTherapist.findOne({
-        where: {id},
+        where: {
+          id: therapistExist.id
+        },
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
@@ -1090,8 +1104,18 @@ module.exports = {
         where: {
           id: {
             [Op.in]: body.patients
+          },
+          status: true,
+        },
+        includeL: [
+          {
+            model: User,
+            where: {
+              status: true,
+              userVerified: true
+            }
           }
-        }
+        ]
       });
 
       if(patientsExist.length < 0 || !patientsExist) {

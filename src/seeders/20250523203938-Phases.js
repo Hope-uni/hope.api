@@ -1,6 +1,6 @@
 const logger = require('../config/logger.config');
 const {  SeederMeta } = require('../models/index');
-const { initialPhases } = require('../utils/fixtures.util');
+const { initialPhases } = require('../fixtures');
 
 
 /** @type {import('sequelize-cli').Migration} */
@@ -25,12 +25,7 @@ module.exports = {
       }
 
       if(!executedSeeders) {
-        await queryInterface.bulkInsert('Phases', initialPhases[0], {transaction});
-        await queryInterface.bulkInsert('Phases', initialPhases[1], {transaction});
-        await queryInterface.bulkInsert('Phases', initialPhases[2], {transaction});
-        await queryInterface.bulkInsert('Phases', initialPhases[3], {transaction});
-        await queryInterface.bulkInsert('Phases', initialPhases[4], {transaction});
-        await queryInterface.bulkInsert('Phases', initialPhases[5], {transaction});
+        await queryInterface.bulkInsert('Phases', initialPhases, {transaction});
 
 
         const seederRegistered = await SeederMeta.create({

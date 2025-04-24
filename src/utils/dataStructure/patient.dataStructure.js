@@ -27,6 +27,7 @@ module.exports = {
     // Achievements
     const getAchievements = data.HealthRecord.AchievementsHealthRecords.length > 0 ? data.HealthRecord.AchievementsHealthRecords.filter((item) => item.status === true) : null
 
+
     return {
       id: data.id,
       userId: data.userId,
@@ -37,7 +38,6 @@ module.exports = {
       achievementCount: getAchievements ? getAchievements.length : null,
       image: data.Person.imageProfile ?? null,
       isVerified: data.User.userVerified,
-
       // Cantidad de logros
     };
   }

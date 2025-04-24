@@ -7,11 +7,12 @@ const {
   rolePermissions
 } = require('@middlewares');
 const {
-  SUPERADMIN_ROLE,
-  ADMIN_ROLE,
-  THERAPIST_ROLE
-} = require('../constants/role.constant');
+  roleConstants: { ADMIN_ROLE, SUPERADMIN_ROLE, THERAPIST_ROLE },
+  permissionsConstants: {
+    ADD_OBSERVATION
+  }
+} = require('@constants');
 
-router.post('/id-patient', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE], ['crear observaciones']), addPatientObservation);
+router.post('/id-patient', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE], [ADD_OBSERVATION]), addPatientObservation);
 
 module.exports = router;

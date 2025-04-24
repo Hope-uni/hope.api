@@ -1,7 +1,8 @@
-const roleConstants = require('./role.constant');
-
+const roleConstants = require('./roles.constants');
+const permissionsConstants = require('./permissions.constants');
 
 
 module.exports = {
-  roleConstants
+  roleConstants,
+  permissionsConstants
 }

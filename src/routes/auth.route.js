@@ -10,13 +10,18 @@ const {
   changePasswordPatient
 } = require('@controllers/auth.controller');
 const { verifyToken, rolePermissions } = require('@middlewares/index');
+const {
+  roleConstants: { ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE, THERAPIST_ROLE, PATIENT_ROLE },
+  permissionsConstants: {
+    CHANGE_PASSWORD_ASSIGNED_PATIENT,
+    GET_PROFILE
+  }
+} = require('@constants');
 
 
 router.put('/:id', verifyToken, rolePermissions([
-  'Superadmin',
-  'Admin',
-  'Tutor'
-],['modificar paciente-tutor']) ,changePasswordPatient);
+  ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE
+],[CHANGE_PASSWORD_ASSIGNED_PATIENT]) ,changePasswordPatient);
 
 router.post('/login', login);
 
@@ -27,7 +32,7 @@ router.post('/reset-password', verifyToken ,resetPassword);
 router.post('/change-password', verifyToken ,changePassword);
 
 
-router.get('/me', verifyToken,me);
+router.get('/me', verifyToken, rolePermissions([ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE, THERAPIST_ROLE, PATIENT_ROLE],[GET_PROFILE]), me);
 
 router.post('/newToken', getRefreshToken);
 

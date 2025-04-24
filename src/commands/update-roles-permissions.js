@@ -1,6 +1,7 @@
 require('./command-line');
 const { Permission, RolesPermission } = require('@models/index');
 const logger = require('@config/logger.config');
+const { permissionsConstants } = require('../constants');
 
 /* eslint-disable no-plusplus */
 /* eslint-disable no-restricted-syntax */
@@ -13,86 +14,146 @@ async function assignPermissionsRoles() {
 
 
     const therapistPermissions = [
-      'listar pacientes',
-      'buscar pacientes',
-      // 'listar tutores',
-      // 'buscar tutores',
-      'actualizar perfil',
-      'buscarme',
-      'modificar paciente-terapeuta',
-      'listar pictogramas',
-      'buscar pictogramas',
-      // 'listar pictogramas-personalizados',
-      'listar actividades',
-      'buscar actividades',
-      'crear actividades',
-      'crear observaciones',
-      'actualizar actividades',
-      'borrar actividades',
-      'desasignar-actividad',
-      'asignar-actividad',
-      'listar categorias',
-      'listar fases',
-      'asignar-logros',
-      'listar logros',
-      'buscar logros',
-    ]
+      // Patient
+      permissionsConstants.GET_PATIENT,
+      permissionsConstants.SEARCH_PATIENT,
+      permissionsConstants.LIST_ASSIGNED_PATIENT,
+      permissionsConstants.GET_ASSIGNED_PATIENT,
+
+      // Profile
+      permissionsConstants.UPDATE_PROFILE,
+      permissionsConstants.GET_PROFILE,
+
+      // Category
+      permissionsConstants.LIST_CATEGORY,
+
+      // Pictogram
+      permissionsConstants.SEARCH_PICTOGRAM,
+      permissionsConstants.GET_PICTOGRAM,
+      permissionsConstants.LIST_PICTOGRAM,
+
+      // Phase
+      permissionsConstants.LIST_PHASE,
+      permissionsConstants.ADVANCE_PHASE,
+
+      // Observation
+      permissionsConstants.ADD_OBSERVATION,
+
+      // Activity
+      permissionsConstants.SEARCH_ACTIVITY,
+      permissionsConstants.LIST_ACTIVITY,
+      permissionsConstants.GET_ACTIVITY,
+      permissionsConstants.ASSIGN_ACTIVITY,
+      permissionsConstants.UNASSIGN_ACTIVITY,
+      permissionsConstants.CREATE_ACTIVITY,
+      permissionsConstants.DELETE_ACTIVITY,
+
+      // Achievement
+      permissionsConstants.LIST_ACHIEVEMENT,
+      permissionsConstants.SEARCH_ACHIEVEMENT,
+      permissionsConstants.ASSIGN_ACHIEVEMENT,
+      permissionsConstants.GET_ACHIEVEMENT,
+    ];
 
     const tutorPermissions = [
-      'listar pacientes',
-      'buscar pacientes',
-      'actualizar perfil',
-      // 'actualizar pacientes',
-      'buscarme',
-      'modificar paciente-tutor',
-      'listar pictogramas-personalizados',
-      'crear pictogramas-personalizados',
-      'actualizar pictogramas-personalizados',
-      'borrar pictogramas-personalizados',
-      'listar categorias',
-    ]
+      // Patient
+      permissionsConstants.GET_PATIENT,
+      permissionsConstants.SEARCH_PATIENT,
+      permissionsConstants.UPDATE_PATIENT,
+      permissionsConstants.CHANGE_PASSWORD_ASSIGNED_PATIENT,
+      permissionsConstants.LIST_ASSIGNED_PATIENT,
+      permissionsConstants.GET_ASSIGNED_PATIENT,
+
+      // Profile
+      permissionsConstants.UPDATE_PROFILE,
+      permissionsConstants.GET_PROFILE,
+
+      // Category
+      permissionsConstants.LIST_CATEGORY,
+
+      // Pictogram
+      permissionsConstants.LIST_PICTOGRAM,
+      permissionsConstants.CREATE_CUSTOM_PICTOGRAM,
+      permissionsConstants.GET_CUSTOM_PICTOGRAM,
+      permissionsConstants.UPDATE_CUSTOM_PICTOGRAM,
+      permissionsConstants.DELETE_CUSTOM_PICTOGRAM,
+
+    ];
+
+    const adminPermissionsNotAllowed = [
+      permissionsConstants.SEARCH_ROLE,
+      permissionsConstants.CREATE_ROLE,
+      permissionsConstants.UPDATE_ROLE,
+      permissionsConstants.DELETE_ROLE,
+      permissionsConstants.UPDATE_PROFILE,
+      permissionsConstants.LIST_CUSTOM_PICTOGRAM,
+      permissionsConstants.CHANGE_PASSWORD_ASSIGNED_PATIENT,
+      permissionsConstants.LIST_ASSIGNED_PATIENT,
+      permissionsConstants.GET_ASSIGNED_PATIENT,
+      permissionsConstants.VERIFY_ACTIVITY_ANSWER,
+    ];
+
+    const superAdminPermissionsNotAllowed = [
+      permissionsConstants.UPDATE_PROFILE,
+      permissionsConstants.LIST_CUSTOM_PICTOGRAM,
+      permissionsConstants.LIST_ASSIGNED_PATIENT,
+      permissionsConstants.GET_ASSIGNED_PATIENT,
+      permissionsConstants.VERIFY_ACTIVITY_ANSWER,
+    ];
 
     const patientPermissions = [
-      'listar pictogramas-personalizados',
-      'verify-activity-answer',
-      'listar categorias',
-      'listar actividades',
+      // Profile
+      permissionsConstants.GET_PROFILE,
+
+      // Category
+      permissionsConstants.LIST_CATEGORY,
+
+      // Pictogram
+      permissionsConstants.LIST_CUSTOM_PICTOGRAM,
+
+      // Activity
+      permissionsConstants.VERIFY_ACTIVITY_ANSWER,
+      permissionsConstants.GET_ACTIVITY
     ]
 
     for(let i=0; i<permissionsData.length; i++) {
 
       // SuperAdmin
-      RolesPermission.findOne({
-        where: {
-          roleId: 1,
-          permissionId: permissionsData[i].id
-        }
-      }).then((exist) => {
-        if(!exist) {
-          RolesPermission.create({
+      if(!superAdminPermissionsNotAllowed.includes(permissionsData[i].code)) {
+        RolesPermission.findOne({
+          where: {
             roleId: 1,
             permissionId: permissionsData[i].id
-          });
-        }
-      });
+          }
+        }).then((exist) => {
+          if(!exist) {
+            RolesPermission.create({
+              roleId: 1,
+              permissionId: permissionsData[i].id
+            });
+          }
+        });
+      }
 
       // Admin
-      RolesPermission.findOne({
-        where: {
-          roleId: 2,
-          permissionId: permissionsData[i].id
-        }
-      }).then((exist) => {
-        if(!exist) {
-          RolesPermission.create({
+      if(!adminPermissionsNotAllowed.includes(permissionsData[i].code)) {
+        RolesPermission.findOne({
+          where: {
             roleId: 2,
             permissionId: permissionsData[i].id
-          });
-        }
-      });
+          }
+        }).then((exist) => {
+          if(!exist) {
+            RolesPermission.create({
+              roleId: 2,
+              permissionId: permissionsData[i].id
+            });
+          }
+        });
+      }
 
       // Patient
-      if(patientPermissions.includes(permissionsData[i].description)) {
+      if(patientPermissions.includes(permissionsData[i].code)) {
         RolesPermission.findOne({
           where: {
             roleId: 4,
@@ -109,7 +170,7 @@ async function assignPermissionsRoles() {
       }
 
       //  Therapist
-      if(therapistPermissions.includes(permissionsData[i].description)) {
+      if(therapistPermissions.includes(permissionsData[i].code)) {
         RolesPermission.findOne({
           where: {
             roleId: 3,
@@ -126,7 +187,7 @@ async function assignPermissionsRoles() {
       }
 
       // Tutor
-      if(tutorPermissions.includes(permissionsData[i].description)) {
+      if(tutorPermissions.includes(permissionsData[i].code)) {
         RolesPermission.findOne({
           where: {
             roleId: 5,

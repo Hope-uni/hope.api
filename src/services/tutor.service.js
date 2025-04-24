@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const constants = require('@constants/role.constant');
+const { roleConstants } = require('@constants');
 const {
   TutorTherapist,
   User,
@@ -220,7 +220,7 @@ module.exports = {
           ]
         });
 
-        if(!tutorExist || tutorExist.User.UserRoles[0].name === constants.TUTOR_ROLE) {
+        if(!tutorExist || tutorExist.User.UserRoles[0].name === roleConstants.TUTOR_ROLE) {
           return {
             error: true,
             statusCode: 404,
@@ -762,15 +762,29 @@ module.exports = {
     }
   },
 
-  async update(id,body) {
+  async update(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
+      // Variables
+      let tutorWhereCondition = {
+        status: true,
+      }
+
+      if(payload.roles.includes(roleConstants.TUTOR_ROLE)) {
+        tutorWhereCondition = {
+          ...tutorWhereCondition,
+          userId: payload.id
+        }
+      } else {
+        tutorWhereCondition = {
+          ...tutorWhereCondition,
+          id,
+        }
+      }
+
       // validate if tutor exist
       const tutorExist = await TutorTherapist.findOne({
-        where: {
-          id,
-          status: true
-        },
+        where: tutorWhereCondition,
         include: [
           {
             model: User,
@@ -781,9 +795,6 @@ module.exports = {
               model: UserRoles,
               where: {
                 roleId: 5,
-                userId: {
-                  [Op.col]: 'User.id'
-                }
               }
             }
           }
@@ -814,7 +825,7 @@ module.exports = {
             identificationNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: tutorExist.id
             }
           }
         });
@@ -835,7 +846,7 @@ module.exports = {
             phoneNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: tutorExist.id
             }
           }
         });
@@ -856,7 +867,7 @@ module.exports = {
             telephone,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: tutorExist.id
             }
           }
         });
@@ -899,7 +910,7 @@ module.exports = {
           },
           {
             where: {
-              id
+              id: tutorExist.id
             },
             transaction
           }
@@ -921,7 +932,7 @@ module.exports = {
       // find Tutor
       const newData = await TutorTherapist.findOne({
         where: {
-          id,
+          id: tutorExist.id,
           status: true
         },
         attributes: {

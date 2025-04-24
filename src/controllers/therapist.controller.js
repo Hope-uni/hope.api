@@ -214,7 +214,7 @@ module.exports = {
       }
 
 
-      const { error:dataError, message, statusCode,  validationErrors, data } = await update(req.params.id,req.body);
+      const { error:dataError, message, statusCode,  validationErrors, data } = await update(req.params.id,req.body, req.payload);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,

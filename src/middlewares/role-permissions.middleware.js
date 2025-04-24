@@ -2,7 +2,6 @@ const { User, Role, Permission, UserRoles } = require('@models/index');
 
 module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
 
-
   /* eslint-disable no-unused-vars */
   /* eslint-disable array-callback-return */
   /* eslint-disable no-restricted-syntax */
@@ -71,7 +70,7 @@ module.exports = function rolePermissions(permittedRoles,permittedPermissions) {
       for (const iterator of permittedPermissions) {
         user.UserRoles.map((element) => {
           element.Role.permissions.some((permission) => {
-            if(permission.description === iterator) {
+            if(permission.code === iterator) {
               havePermission = true;
             }
           });

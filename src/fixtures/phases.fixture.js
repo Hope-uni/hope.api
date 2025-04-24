@@ -8,6 +8,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 1,
     status: true,
+    achievementId: 1,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -31,6 +32,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 2,
     status: true,
+    achievementId: 2,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -54,6 +56,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 3,
     status: true,
+    achievementId: 3,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -77,6 +80,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 4,
     status: true,
+    achievementId: 4,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -100,6 +104,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 5,
     status: true,
+    achievementId: 5,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -124,6 +129,7 @@ const initialPhases = [
     scoreActivities: 20,
     level: 6,
     status: true,
+    achievementId: 6,
     createdAt: new Date(
       date.getYear(),
       date.getMonth(),
@@ -143,137 +149,4 @@ const initialPhases = [
   },
 ];
 
-const initialAchievements = [
-  {
-    name: 'Fase 1 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-  {
-    name: 'Fase 2 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-  {
-    name: 'Fase 3 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-  {
-    name: 'Fase 4 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-  {
-    name: 'Fase 5 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-  {
-    name: 'Fase 6 completada',
-    imageUrl: 'https://picsum.photos/200/300',
-    status: true,
-    createdAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-    updatedAt: new Date(
-      date.getYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ),
-  },
-]
-
-
-module.exports = {
-  initialPhases,
-  initialAchievements
-}
+module.exports = {initialPhases};

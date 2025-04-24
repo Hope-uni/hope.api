@@ -1,6 +1,6 @@
 const logger = require('../config/logger.config');
 const {  SeederMeta } = require('../models/index');
-const { initialAchievements } = require('../utils/fixtures.util');
+const { initialAchievements } = require('../fixtures');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {

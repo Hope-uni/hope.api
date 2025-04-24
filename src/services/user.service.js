@@ -7,7 +7,7 @@ const {
 } = require('@models/index.js');
 const bcrypt = require('bcrypt');
 const logger = require('@config/logger.config');
-const constants = require('@constants/role.constant');
+const { roleConstants } = require('@constants');
 const { Op } = require('sequelize');
 const { isAdmin } = require('@config/variables.config');
 const { userSendEmail } = require('@helpers/index');
@@ -17,7 +17,7 @@ const {
   formatErrorMessages,
   generatePassword,
   pagination,
-} = require('@utils/index');
+} = require('@utils');
 
 
 module.exports = {
@@ -834,7 +834,7 @@ module.exports = {
                   model: Role,
                   where: {
                     id: 2,
-                    name: constants.ADMIN_ROLE,
+                    name: roleConstants.ADMIN_ROLE,
                   },
                   attributes: {
                     exclude: ['createdAt','updatedAt','status']

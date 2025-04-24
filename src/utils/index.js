@@ -3,7 +3,6 @@ const messages = require('./messages.utils');
 const userPersonEntries = require('./user-person-entries.util');
 const dates = require('./dates.util');
 const dataStructure = require('./dataStructure/data-structure.util');
-const fixtures = require('./fixtures.util');
 const { formatJoiMessages, formatErrorMessages } = require('./formatErrorMessages.util');
 const { generatePassword } = require('./generatePassword.util');
 
@@ -13,7 +12,6 @@ module.exports = {
   userPersonEntries,
   dates,
   dataStructure,
-  fixtures,
   formatJoiMessages,
   formatErrorMessages,
   generatePassword
