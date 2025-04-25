@@ -13,7 +13,6 @@ const {
   permissionsConstants: {
     LIST_TUTOR,
     GET_TUTOR,
-    SEARCH_TUTOR,
     CREATE_TUTOR,
     UPDATE_TUTOR,
     DELETE_TUTOR,
@@ -25,7 +24,7 @@ const {
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_TUTOR]), allTutors);
 router.get('/patients', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[LIST_ASSIGNED_PATIENT]), allPatientsTutor);
-router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_TUTOR, SEARCH_TUTOR]), findTutor);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_TUTOR]), findTutor);
 
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_TUTOR]), createTutor);
 
