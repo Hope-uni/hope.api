@@ -1107,7 +1107,7 @@ module.exports = {
           },
           status: true,
         },
-        includeL: [
+        include: [
           {
             model: User,
             where: {
