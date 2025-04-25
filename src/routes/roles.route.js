@@ -12,7 +12,6 @@ const {
   permissionsConstants: {
     LIST_ROLE,
     GET_ROLE,
-    SEARCH_ROLE,
     CREATE_ROLE,
     UPDATE_ROLE,
     DELETE_ROLE
