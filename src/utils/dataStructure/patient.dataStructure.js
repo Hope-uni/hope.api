@@ -38,7 +38,6 @@ module.exports = {
       achievementCount: getAchievements ? getAchievements.length : null,
       image: data.Person.imageProfile ?? null,
       isVerified: data.User.userVerified,
-      // Cantidad de logros
     };
   }
 
