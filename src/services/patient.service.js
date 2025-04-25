@@ -1373,7 +1373,7 @@ module.exports = {
         data: dataStructure.patientDataStructure(newData, true),
       };
     } catch (error) {
-      // await transaction.rollback();
+      await transaction.rollback();
       logger.error(`${messages.patient.errors.service.base}: ${error}`);
       return {
         error: true,
