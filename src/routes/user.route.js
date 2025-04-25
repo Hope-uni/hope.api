@@ -14,7 +14,6 @@ const {
   permissionsConstants: {
     LIST_USER,
     GET_USER,
-    SEARCH_USER,
     CREATE_USER,
     UPDATE_USER,
     DELETE_USER
@@ -24,7 +23,7 @@ const {
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_USER]), verifyToken, all);
 
-router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_USER,SEARCH_USER]), findUser);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_USER]), findUser);
 
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_USER]) ,create);
 
