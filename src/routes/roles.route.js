@@ -21,7 +21,7 @@ const {
 
 router.get('/',verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_ROLE]), all);
 
-router.get('/:id',verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_ROLE, SEARCH_ROLE]), findOne);
+router.get('/:id',verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_ROLE]), findOne);
 
 router.post('/',verifyToken, rolePermissions([SUPERADMIN_ROLE],[CREATE_ROLE]), create);
 
