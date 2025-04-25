@@ -18,7 +18,6 @@ async function assignPermissionsRoles() {
       permissionsConstants.GET_PATIENT,
       permissionsConstants.SEARCH_PATIENT,
       permissionsConstants.LIST_ASSIGNED_PATIENT,
-      permissionsConstants.GET_ASSIGNED_PATIENT,
 
       // Profile
       permissionsConstants.UPDATE_PROFILE,
@@ -52,7 +51,6 @@ async function assignPermissionsRoles() {
       permissionsConstants.LIST_ACHIEVEMENT,
       permissionsConstants.SEARCH_ACHIEVEMENT,
       permissionsConstants.ASSIGN_ACHIEVEMENT,
-      permissionsConstants.GET_ACHIEVEMENT,
     ];
 
     const tutorPermissions = [
@@ -62,7 +60,6 @@ async function assignPermissionsRoles() {
       permissionsConstants.UPDATE_PATIENT,
       permissionsConstants.CHANGE_PASSWORD_ASSIGNED_PATIENT,
       permissionsConstants.LIST_ASSIGNED_PATIENT,
-      permissionsConstants.GET_ASSIGNED_PATIENT,
 
       // Profile
       permissionsConstants.UPDATE_PROFILE,
@@ -89,7 +86,6 @@ async function assignPermissionsRoles() {
       permissionsConstants.LIST_CUSTOM_PICTOGRAM,
       permissionsConstants.CHANGE_PASSWORD_ASSIGNED_PATIENT,
       permissionsConstants.LIST_ASSIGNED_PATIENT,
-      permissionsConstants.GET_ASSIGNED_PATIENT,
       permissionsConstants.VERIFY_ACTIVITY_ANSWER,
     ];
 
@@ -97,7 +93,6 @@ async function assignPermissionsRoles() {
       permissionsConstants.UPDATE_PROFILE,
       permissionsConstants.LIST_CUSTOM_PICTOGRAM,
       permissionsConstants.LIST_ASSIGNED_PATIENT,
-      permissionsConstants.GET_ASSIGNED_PATIENT,
       permissionsConstants.VERIFY_ACTIVITY_ANSWER,
     ];
 

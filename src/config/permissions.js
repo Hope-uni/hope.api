@@ -1,38 +1,37 @@
 const actionMap = {
-  "update": "Actualizar",
-  "delete": "Eliminar",
-  "search": "Buscar",
-  "create": "Crear",
-  "list": "Listar",
-  "view": "Ver",
   "add": "Agregar",
   "assign": "Asignar",
-  "unassign": "Desasignar",
-  "access": "Acceder",
-  "get": "Obtener",
-  "change-password": "Cambiar contraseña",
-  "verify": "Verificar",
-  "advance": "Avanzar"
+  "change": "Cambiar",
+  "create": "Crear",
+  "delete": "Eliminar",
+  "search": "Buscar",
+  "get": "Get",
+  "list": "Listar",
+  "unassign": "Unassign",
+  "update": "Actualizar",
+  "verify": "Verify",
+  "advance": "Advance"
 };
 
 const subjectMap = {
-  "role": "rol",
-  "user": "usuario",
-  "therapist": "terapeuta",
-  "tutor": "tutor",
-  "patient": "paciente",
-  "profile": "perfil",
-  "category": "categoría",
-  "pictogram": "pictograma",
-  "custom-pictogram": "pictograma personalizado",
-  "phase": "fase",
-  "assigned-patient": "paciente asignado",
   "observation": "observación",
   "activity": "actividad",
-  "communication-board": "tablero de comunicación",
+  "password-assigned-patient": "contraseña de paciente asignado",
+  "category": "categoría",
+  "custom-pictogram": "pictograma personalizado",
+  "patient": "paciente",
+  "pictogram": "pictograma",
+  "role": "rol",
+  "therapist": "terapeuta",
+  "tutor": "tutor",
+  "user": "usuario",
+  "profile": "perfil",
+  "assigned-patient": "paciente asignado",
+  "phase": "fase",
   "tea-degree": "grado TEA",
   "activity-answer": "respuesta de actividad",
-  "achievement": "logro"
+  "achievement": "logro",
+  "monochrome": "monocromo",
 };
 
 const permissionsMatrix = [
@@ -40,13 +39,13 @@ const permissionsMatrix = [
     "subject": "achievement",
     "actions": [
       "assign",
-      "unassign",
-      "get",
       "create",
       "delete",
+      "get",
       "list",
       "search",
-      "update"
+      "unassign",
+      "update",
     ]
   },
   {
@@ -72,8 +71,6 @@ const permissionsMatrix = [
     "subject": "assigned-patient",
     "group": "patient",
     "actions": [
-      "change-password",
-      "get",
       "list"
     ],
   },
@@ -100,10 +97,24 @@ const permissionsMatrix = [
     ],
   },
   {
+    "subject": "monochrome",
+    "group": "healthRecord",
+    "actions": [
+      "change",
+    ]
+  },
+  {
     "subject": "observation",
     "actions": [
       "add"
     ]
+  },
+  {
+    "subject": "password-assigned-patient",
+    "group": "patient",
+    "actions": [
+      "change",
+    ],
   },
   {
     "subject": "patient",
@@ -119,9 +130,9 @@ const permissionsMatrix = [
   {
     "subject": "phase",
     "actions": [
+      "advance",
       "list",
       "update",
-      "advance"
     ]
   },
   {
@@ -172,6 +183,14 @@ const permissionsMatrix = [
     ]
   },
   {
+    "subject": "therapist",
+    "group": "patient",
+    "actions": [
+	    "assign",
+	    "change",
+    ]
+  },
+  {
     "subject": "tutor",
     "actions": [
       "create",
@@ -192,9 +211,8 @@ const permissionsMatrix = [
       "search",
       "update"
     ]
-  }
+  },
 ];
-
 
 
 module.exports = {

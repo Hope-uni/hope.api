@@ -1838,6 +1838,142 @@ module.exports = {
         message: messages.generalMessages.server,
       }
     }
+  },
+
+  async assignTherapist(body) {
+    const transaction = await sequelize.transaction();
+    try {
+
+      // Verify if therapist exists
+      const therapistExist = await TutorTherapist.findOne({
+        where: {
+          id: body.therapistId,
+          status: true
+        },
+        include: [
+          {
+            model: User,
+            include: [
+              {
+                model: UserRoles,
+                include: {
+                  model: Role,
+                  where: {
+                    name: 'Terapeuta',
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      });
+
+      if(!therapistExist || therapistExist.User.UserRoles.length === 0) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.therapist.errors.not_found,
+        };
+      };
+
+      // Verify if patient exists and if patient does not have therapist assigned
+      const patientsExist = await Patient.findAll({
+        where: {
+          id: {
+            [Op.in]: body.patients
+          },
+          status: true,
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              status: true,
+              userVerified: true
+            }
+          }
+        ]
+      });
+
+      if(patientsExist.length < 0 || !patientsExist) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.patient.errors.service.no_registered,
+        }
+      }
+
+      // validate if all patients were found
+      const patientsFound = patientsExist.map(item => item.id);
+      const patientsNotFound = body.patients.filter(item => !patientsFound.includes(item));
+
+      if(patientsNotFound.length > 0) {
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.therapist.errors.service.patient_to_assign
+        }
+      }
+
+
+      // validate if therapist already assigned
+      const therapistAssigned = patientsExist.every(item => item.therapistId !== null);
+
+      if(therapistAssigned)  {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.therapist.errors.service.therapist_assigned,
+        }
+      }
+
+
+      // Assign Therapist to Patient
+
+      await Promise.all(body.patients.map(async (item) => {
+
+        const updatePatientResponse = await Patient.update(
+          {
+            therapistId: body.therapistId
+          },
+          {
+            where: {
+              id: item
+            },
+            transaction
+          }
+        );
+
+        if(!updatePatientResponse) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.therapist.errors.service.therapist_not_assigned,
+          };
+        }
+      }));
+
+      // commit transaction
+      await transaction.commit();
+
+      return {
+        error: false,
+        statusCode: 200,
+        message: messages.therapist.success.assign,
+      }
+
+    } catch (error) {
+      await transaction.rollback();
+      logger.error(`${messages.patient.errors.service.base}: ${error}`);
+      return {
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      }
+    }
   }
 
 }

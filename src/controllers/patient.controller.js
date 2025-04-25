@@ -7,10 +7,11 @@ const {
   removePatient,
   allPatientsWithoutTherapist,
   allPatientsAvailableForActivities,
-  changeTherapist
+  changeTherapist,
+  assignTherapist
 } = require('@services/patient.service');
 const { messages, userPersonEntries, formatJoiMessages } = require('@utils');
-const { patientEntry, idEntry, paginationEntry } = require('@validations');
+const { patientEntry, idEntry, paginationEntry, therapistEntry } = require('@validations');
 
 module.exports = {
 
@@ -357,6 +358,43 @@ module.exports = {
       });
 
     } catch(error) {
+      logger.error(`${messages.patient.errors.controller}: ${error}`);
+      return res.status(500).json({
+        error: true,
+        statusCode: 500,
+        message: messages.generalMessages.server,
+      });
+    }
+  },
+
+  async assignTherapist(req, res) {
+    try {
+
+      const { error } = therapistEntry.assignPatientValidation(req.body);
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
+
+      const { error:dataError, message, statusCode } = await assignTherapist(req.body);
+
+      if(dataError) {
+        return res.status(statusCode).json({
+          error:dataError,
+          statusCode,
+          message
+        });
+      };
+
+      return res.status(statusCode).json({
+        error: dataError,
+        statusCode,
+        message
+      });
+
+    } catch (error) {
       logger.error(`${messages.patient.errors.controller}: ${error}`);
       return res.status(500).json({
         error: true,

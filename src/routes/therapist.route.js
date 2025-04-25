@@ -5,7 +5,6 @@ const {
   createTherapist,
   updateTherapist,
   removeTherapist,
-  assignPatient,
   allPatientsTherapist
 } = require('@controllers/therapist.controller');
 const { verifyToken, rolePermissions } = require('@middlewares');
@@ -16,11 +15,12 @@ const {
     LIST_THERAPIST,
     GET_THERAPIST,
     CREATE_THERAPIST,
-    UPDATE_THERAPIST,
+    CHANGE_THERAPIST,
     DELETE_THERAPIST,
-    UPDATE_PROFILE
+    UPDATE_PROFILE,
+    ASSIGN_THERAPIST,
   }
-} = require('@constants');
+} = require('../constants');
 
 
 
@@ -33,9 +33,7 @@ router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[G
 
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_THERAPIST]), createTherapist);
 
-router.post('/assignPatient', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE]), assignPatient);
-
-router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[UPDATE_THERAPIST, UPDATE_PROFILE]), updateTherapist);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[CHANGE_THERAPIST, UPDATE_PROFILE]), updateTherapist);
 
 router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_THERAPIST]), removeTherapist);
 

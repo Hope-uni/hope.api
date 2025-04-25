@@ -32,7 +32,7 @@ const {
 
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[LIST_ACHIEVEMENT]), all);
-router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[GET_ACHIEVEMENT]), find);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_ACHIEVEMENT]), find);
 
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_ACHIEVEMENT]), create);
 
