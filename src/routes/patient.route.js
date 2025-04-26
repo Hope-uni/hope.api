@@ -26,7 +26,7 @@ const {
 
 
 router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],[LIST_PATIENT]), all);
-router.get('/patients-therapist', verifyToken, rolePermissions([SUPERADMIN_ROLE,ADMIN_ROLE]), allPatientsWithoutTherapist);
+router.get('/patients-therapist', verifyToken, rolePermissions([SUPERADMIN_ROLE,ADMIN_ROLE], [LIST_PATIENT]), allPatientsWithoutTherapist);
 router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE, TUTOR_ROLE],[GET_PATIENT]), findPatient);
 router.get('/availableForActivity/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE, ],[LIST_ASSIGNED_PATIENT]), allPatientsAvailableForActivities);
 
