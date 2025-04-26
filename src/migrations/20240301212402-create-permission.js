@@ -8,9 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      description: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      code: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       group: {
         type: Sequelize.STRING,

@@ -39,8 +39,7 @@ module.exports = {
 
   updateTutorValidation(data) {
     const schema = joi.object().keys({
-      id: joi.number().positive().required().messages({
-        'any.required': messages.tutor.fields.id.required,
+      id: joi.number().positive().empty(' ').messages({
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),

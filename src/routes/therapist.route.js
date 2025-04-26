@@ -5,26 +5,36 @@ const {
   createTherapist,
   updateTherapist,
   removeTherapist,
-  assignPatient,
   allPatientsTherapist
 } = require('@controllers/therapist.controller');
-const { verifyToken, rolePermissions } = require('@middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares');
+const {
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE },
+  permissionsConstants: {
+    LIST_ASSIGNED_PATIENT,
+    LIST_THERAPIST,
+    GET_THERAPIST,
+    CREATE_THERAPIST,
+    CHANGE_THERAPIST,
+    DELETE_THERAPIST,
+    UPDATE_PROFILE,
+    ASSIGN_THERAPIST,
+  }
+} = require('../constants');
 
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar terapeutas']), all);
+router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_THERAPIST]), all);
 
-router.get('/patients', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'], ['listar pacientes']), allPatientsTherapist);
+router.get('/patients', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE], [LIST_ASSIGNED_PATIENT]), allPatientsTherapist);
 
-router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin', 'something'],['buscar terapeutas']), findTherapist);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_THERAPIST]), findTherapist);
 
 
-router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear terapeutas']), createTherapist);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_THERAPIST]), createTherapist);
 
-router.post('/assignPatient', verifyToken, rolePermissions(['Superadmin','Admin']), assignPatient);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[CHANGE_THERAPIST, UPDATE_PROFILE]), updateTherapist);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin','Terapeuta'],['actualizar terapeutas', 'actualizar perfil']), updateTherapist);
-
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar terapeutas']), removeTherapist);
+router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_THERAPIST]), removeTherapist);
 
 module.exports = router;

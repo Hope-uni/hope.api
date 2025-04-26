@@ -7,16 +7,26 @@ const {
   removePatientPictogram
 } = require('@controllers/patientPictograms.controller');
 const { verifyToken, rolePermissions } = require('@middlewares/index');
+const {
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE, PATIENT_ROLE },
+  permissionsConstants: {
+    LIST_CUSTOM_PICTOGRAM,
+    LIST_PICTOGRAM,
+    CREATE_CUSTOM_PICTOGRAM,
+    UPDATE_CUSTOM_PICTOGRAM,
+    DELETE_CUSTOM_PICTOGRAM
+  }
+} = require('@constants');
 
 
-router.get('/', verifyToken, rolePermissions(['Paciente'],['listar pictogramas-personalizados']), verifyToken, all);
+router.get('/', verifyToken, rolePermissions([PATIENT_ROLE],[LIST_CUSTOM_PICTOGRAM]), verifyToken, all);
 
-router.get('/patient-pictograms/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['listar pictogramas-personalizados']), allCustomPictograms);
+router.get('/patient-pictograms/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[LIST_PICTOGRAM]), allCustomPictograms);
 
-router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['crear pictogramas-personalizados']), create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[CREATE_CUSTOM_PICTOGRAM]), create);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['actualizar pictogramas-personalizados']), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[UPDATE_CUSTOM_PICTOGRAM]), update);
 
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Tutor'],['borrar pictogramas-personalizados']), removePatientPictogram);
+router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[DELETE_CUSTOM_PICTOGRAM]), removePatientPictogram);
 
 module.exports = router;

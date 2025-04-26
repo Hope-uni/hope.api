@@ -6,16 +6,26 @@ const {
   update,
   removePictogram
 } = require('@controllers/pictogram.controller');
-const { verifyToken, rolePermissions } = require('@middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares');
+const {
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE },
+  permissionsConstants: {
+    LIST_PICTOGRAM,
+    GET_PICTOGRAM,
+    CREATE_PICTOGRAM,
+    UPDATE_PICTOGRAM,
+    DELETE_PICTOGRAM
+  }
+} = require('@constants');
 
-router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta'],['listar pictogramas']), all);
-router.get('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin','Terapeuta'],['buscar pictogramas']), findOne);
+router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[LIST_PICTOGRAM]), all);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[GET_PICTOGRAM]), findOne);
 
-router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin'],['crear pictogramas']), create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_PICTOGRAM]), create);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['actualizar pictogramas']), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_PICTOGRAM]), update);
 
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['borrar pictogramas']), removePictogram);
+router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_PICTOGRAM]), removePictogram);
 
 
 module.exports = router;

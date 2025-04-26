@@ -18,7 +18,7 @@ const {
   sequelize } = require('@models/index');
 const { pagination, generatePassword, messages, dataStructure, formatErrorMessages } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
-const constants = require('@constants/role.constant');
+const { roleConstants } = require('@constants');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 
 
@@ -302,7 +302,7 @@ module.exports = {
         ]
       });
 
-      if(!therapistExist || therapistExist.User.UserRoles[0].name === constants.THERAPIST_ROLE) {
+      if(!therapistExist || therapistExist.User.UserRoles[0].name === roleConstants.THERAPIST_ROLE) {
         return {
           error: true,
           statusCode: 403,
@@ -758,29 +758,40 @@ module.exports = {
    * - `data`: If the update was successful, it includes the updated data of the therapist.
    * - `statusCode`: An HTTP status code indicating the result of the update operation.
    */
-  async update(id,body) {
+  async update(id,body, payload) {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables
+      let therapistWhereCondition = {
+        status: true,
+      }
+
+      if(payload.roles.includes(roleConstants.THERAPIST_ROLE)) {
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          userId: payload.id
+        }
+      } else {
+        therapistWhereCondition = {
+          ...therapistWhereCondition,
+          id,
+        }
+      }
+
       // validate if therapist exist
       const therapistExist = await TutorTherapist.findOne({
-        where: {
-          id,
-          status: true
-        },
+        where: therapistWhereCondition,
         include: [
           {
             model: User,
             where: {
-              status: true
+              status: true,
             },
             include: {
               model: UserRoles,
               where: {
                 roleId: 3,
-                userId: {
-                  [Op.col]: 'User.id'
-                }
               }
             }
           }
@@ -812,7 +823,7 @@ module.exports = {
             identificationNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: therapistExist.id
             }
           }
         });
@@ -834,7 +845,7 @@ module.exports = {
             phoneNumber,
             status: true,
             id: {
-              [Op.ne]: id
+              [Op.ne]: therapistExist.id
             }
           }
         });
@@ -848,6 +859,7 @@ module.exports = {
           };
         };
       };
+
 
       // User and Person update
       if(resBody) {
@@ -875,7 +887,7 @@ module.exports = {
           },
           {
             where: {
-              id
+              id: therapistExist.id
             },
             transaction
           }
@@ -896,7 +908,9 @@ module.exports = {
 
       // Get Therapist data
       const data = await TutorTherapist.findOne({
-        where: {id},
+        where: {
+          id: therapistExist.id
+        },
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
@@ -1047,131 +1061,5 @@ module.exports = {
       }
     }
   },
-
-  async assignPatient(body) {
-    const transaction = await sequelize.transaction();
-    try {
-
-      // Verify if therapist exists
-      const therapistExist = await TutorTherapist.findOne({
-        where: {
-          id: body.therapistId,
-          status: true
-        },
-        include: [
-          {
-            model: User,
-            include: [
-              {
-                model: UserRoles,
-                include: {
-                  model: Role,
-                  where: {
-                    name: 'Terapeuta',
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      });
-
-      if(!therapistExist || therapistExist.User.UserRoles.length === 0) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 404,
-          message: messages.therapist.errors.not_found,
-        };
-      };
-
-      // Verify if patient exists and if patient does not have therapist assigned
-      const patientsExist = await Patient.findAll({
-        where: {
-          id: {
-            [Op.in]: body.patients
-          }
-        }
-      });
-
-      if(patientsExist.length < 0 || !patientsExist) {
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.patient.errors.service.no_registered,
-        }
-      }
-
-      // validate if all patients were found
-      const patientsFound = patientsExist.map(item => item.id);
-      const patientsNotFound = body.patients.filter(item => !patientsFound.includes(item));
-
-      if(patientsNotFound.length > 0) {
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.therapist.errors.service.patient_to_assign
-        }
-      }
-
-
-      // validate if therapist already assigned
-      const therapistAssigned = patientsExist.every(item => item.therapistId !== null);
-
-      if(therapistAssigned)  {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.therapist.errors.service.therapist_assigned,
-        }
-      }
-
-
-      // Assign Therapist to Patient
-
-      await Promise.all(body.patients.map(async (item) => {
-
-        const updatePatientResponse = await Patient.update(
-          {
-            therapistId: body.therapistId
-          },
-          {
-            where: {
-              id: item
-            },
-            transaction
-          }
-        );
-
-        if(!updatePatientResponse) {
-          await transaction.rollback();
-          return {
-            error: true,
-            statusCode: 409,
-            message: messages.therapist.errors.service.therapist_not_assigned,
-          };
-        }
-      }));
-
-      // commit transaction
-      await transaction.commit();
-
-      return {
-        error: false,
-        statusCode: 200,
-        message: messages.therapist.success.assign,
-      }
-
-    } catch (error) {
-      await transaction.rollback();
-      logger.error(`${messages.therapist.errors.service.base}: ${error}`);
-      return {
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server,
-      }
-    }
-  }
 
 }

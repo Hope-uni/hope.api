@@ -6,7 +6,6 @@ const {
   create,
   update,
   removeTherapist,
-  assignPatient,
   allPatientsTherapist,
 } = require('@services/therapist.service');
 const { therapistEntry, idEntry, patientEntry } = require('@validations');
@@ -214,7 +213,7 @@ module.exports = {
       }
 
 
-      const { error:dataError, message, statusCode,  validationErrors, data } = await update(req.params.id,req.body);
+      const { error:dataError, message, statusCode,  validationErrors, data } = await update(req.params.id,req.body, req.payload);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
@@ -281,42 +280,5 @@ module.exports = {
       });
     }
   },
-
-  async assignPatient(req, res) {
-    try {
-
-      const { error } = therapistEntry.assignPatientValidation(req.body);
-      if(error) return res.status(400).json({
-        error: true,
-        statusCode: 422,
-        message: messages.generalMessages.bad_request,
-        validationErrors: formatJoiMessages(error),
-      });
-
-      const { error:dataError, message, statusCode, data } = await assignPatient(req.body);
-
-      if(dataError) {
-        return res.status(statusCode).json({
-          error:dataError,
-          statusCode,
-          message
-        });
-      };
-
-      return res.status(statusCode).json({
-        error: dataError,
-        statusCode,
-        message
-      });
-
-    } catch (error) {
-      logger.error(`${messages.therapist.errors.controller}: ${error}`);
-      return res.status(500).json({
-        error: true,
-        statusCode: 500,
-        message: messages.generalMessages.server,
-      });
-    }
-  }
 
 }

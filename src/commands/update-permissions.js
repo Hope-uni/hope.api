@@ -1,92 +1,40 @@
 require('./command-line');
 const { Permission } = require('@models/index');
-
-const modules = {
-  role: "roles",
-  user: "usuarios",
-  therapist: "terapeutas",
-  tutor: "tutores",
-  patient: "pacientes",
-  profile: "perfil",
-  category: "categorias",
-  pictogram: "pictogramas",
-  customPictogram: "pictogramas-personalizados",
-  phase: "fases",
-  teaDegree: "grados-de-tea",
-  activity: "actividades",
-  observation: "observaciones",
-  achievement: "logros"
-}
-
-const permission = {
-  create: "crear",
-  read: "listar",
-  update: "actualizar",
-  delete: "borrar",
-  find: "buscar",
-}
+const { actionMap, subjectMap, permissionsMatrix } = require('../config/permissions');
 
 
-const dataToUpdate = Object.keys(modules).reduce(
-  (acc, curr) => ({
-      ...acc,
-      [curr]: Object.keys(permission).reduce(
-          (acc2, curr2) => ([
-              ...acc2, `${permission[curr2]} ${modules[curr]}`
-          ]),
-          []
-      )
-  }),
-  {}
-)
 
-Object.keys(dataToUpdate).forEach((group) => {
-  dataToUpdate[group].forEach((per) => {
-    Permission.findOne({ where: { description: per } }).then((exists) => {
-      if (!exists) {
-        Permission.create({ description: per, group });
-      }
-    });
-  });
-});
+const buildPermissionsToUpdate = permissionsMatrix.reduce((acc, current) => {
 
-// Custom Permissions
-const customPermissions = [
-  {
-    description: 'buscarme',
-    group: ' '
-  },
-  {
-    description: 'modificar paciente-terapeuta',
-    group: 'therapist'
-  },
-  {
-    description: 'modificar paciente-tutor',
-    group: 'tutor'
-  },
-  {
-    description: 'asignar-actividad',
-    group: 'therapist'
-  },
-  {
-    description: 'desasignar-actividad',
-    group: 'therapist'
-  },
-  {
-    description: 'verify-activity-answer',
-    group: 'activity'
-  },
-  {
-    description: 'asignar-logros',
-    group: 'achievement'
-  },
-]
+  const permissionsPerSubject = current.actions.reduce((acc1, current1) => [
+    ...acc1,
+    {
+      name: `${actionMap[current1]} ${subjectMap[current.subject]}`,
+      group: !('group' in current) ? current.subject : current.group,
+      code: `${current1}-${current.subject}`
+    }
+  ],[]);
 
+  return [
+    ...acc,
+    ...permissionsPerSubject
+  ];
+},[]);
+
+// create permissions
 /* eslint-disable no-restricted-syntax */
-for (const iterator of customPermissions) {
-  Permission.findOne({ where: { description: iterator.description } }).then((exists) => {
-    if (!exists) {
-      Permission.create({ description: iterator.description, group: iterator.group });
+for(const item of buildPermissionsToUpdate) {
+  Permission.findOne({
+    where: {
+      code: item.code
+    },
+  }).then((exist) => {
+    if(!exist) {
+      Permission.create({
+        name: item.name,
+        group: item.group,
+        code: item.code
+      });
     }
   });
 }

@@ -6,9 +6,9 @@ const {
   dataStructure,
   formatErrorMessages,
   pagination,
-  fixtures
 } = require('@utils');
 const { roleConstants: constants } = require('@constants');
+const { initialAchievements } = require('@fixtures');
 
 
 
@@ -348,13 +348,13 @@ module.exports = {
 
 
       // Verify if this achievement belong to default achivement per phase.
-      const validateAChievement = fixtures.initialAchievements.find((item) => item.name === achievementExist.name);
+      const validateAChievement = initialAchievements.find((item) => item.name === achievementExist.name);
       if(validateAChievement) {
         await transaction.rollback();
         return {
           error: true,
           statusCode: 409,
-          message: messages.achievements.errors.service.not_alowed,
+          message: messages.achievements.errors.service.not_allowed,
         }
       }
 

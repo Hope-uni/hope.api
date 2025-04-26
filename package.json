@@ -24,7 +24,8 @@
     "@views": "./src/view",
     "@events": "./src/events",
     "@listeners": "./src/listeners",
-    "@constants": "./src/constants"
+    "@constants": "./src/constants",
+    "@fixtures": "./src/fixtures"
   },
   "_moduleDirectories": [
     "node_modules_custom"

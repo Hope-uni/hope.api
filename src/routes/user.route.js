@@ -8,21 +8,31 @@ const {
   addRolesUser,
   removeRolesUser
 } = require('@controllers/user.controller');
-const { verifyToken, rolePermissions } = require('@middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares');
+const {
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE },
+  permissionsConstants: {
+    LIST_USER,
+    GET_USER,
+    CREATE_USER,
+    UPDATE_USER,
+    DELETE_USER
+  }
+} = require('../constants');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],['listar usuarios']), verifyToken, all);
+router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_USER]), verifyToken, all);
 
-router.get('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['buscar usuarios']), findUser);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_USER]), findUser);
 
-router.post('/', verifyToken, rolePermissions(['Superadmin','Admin'],['crear usuarios']) ,create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_USER]) ,create);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['actualizar usuarios']), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_USER]), update);
 
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin','Admin'],['borrar usuarios']), removeUser);
+router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_USER]), removeUser);
 
-router.post('/addRole', verifyToken, rolePermissions(['Superadmin','Admin']), addRolesUser);
+router.post('/addRole', verifyToken, rolePermissions([SUPERADMIN_ROLE]), addRolesUser);
 
-router.post('/removeRole', verifyToken, rolePermissions(['Superadmin','Admin']), removeRolesUser);
+router.post('/removeRole', verifyToken, rolePermissions([SUPERADMIN_ROLE]), removeRolesUser);
 
 module.exports = router;

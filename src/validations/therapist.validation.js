@@ -33,8 +33,7 @@ module.exports = {
 
   updateTherapistValidation(data) {
     const schema = joi.object().keys({
-      id: joi.number().positive().required().messages({
-        'any.required': messages.therapist.fields.id.required,
+      id: joi.number().positive().empty(' ').messages({
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,
       }),

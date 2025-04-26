@@ -6,17 +6,27 @@ const {
   findOne,
   remove
 } = require('@controllers/category.controller');
-const { verifyToken, rolePermissions } = require('../middlewares/index');
+const { verifyToken, rolePermissions } = require('@middlewares/index');
+const {
+  roleConstants: { ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE, THERAPIST_ROLE, PATIENT_ROLE },
+  permissionsConstants: {
+    LIST_CATEGORY,
+    GET_CATEGORY,
+    CREATE_CATEGORY,
+    UPDATE_CATEGORY,
+    DELETE_CATEGORY
+  }
+} = require('@constants');
 
 
-router.get('/', verifyToken, rolePermissions(['Superadmin', 'Admin', 'Terapeuta', 'Tutor', 'Paciente'],['listar categorias']), all);
-router.get('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['buscar categorias']), findOne);
+router.get('/', verifyToken, rolePermissions([ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE, THERAPIST_ROLE, PATIENT_ROLE],[LIST_CATEGORY]), all);
+router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_CATEGORY]), findOne);
 
-router.post('/', verifyToken, rolePermissions(['Superadmin', 'Admin'],['crear categorias']), create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_CATEGORY]), create);
 
-router.put('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['actualizar categorias']), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_CATEGORY]), update);
 
-router.delete('/:id', verifyToken, rolePermissions(['Superadmin', 'Admin'],['borrar categorias']), remove);
+router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_CATEGORY]), remove);
 
 
 module.exports = router;
