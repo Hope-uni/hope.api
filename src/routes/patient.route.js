@@ -20,9 +20,10 @@ const {
     CREATE_PATIENT,
     UPDATE_PATIENT,
     DELETE_PATIENT,
-    ASSIGN_THERAPIST
+    ASSIGN_THERAPIST,
+    CHANGE_THERAPIST,
   }
-} = require('@constants');
+} = require('../constants');
 
 
 router.get('/', verifyToken, rolePermissions(['Superadmin','Admin'],[LIST_PATIENT]), all);
@@ -33,7 +34,7 @@ router.get('/availableForActivity/:id', verifyToken, rolePermissions([SUPERADMIN
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_PATIENT]), createPatient);
 router.post('/assignTherapist', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[ASSIGN_THERAPIST]), assignTherapist);
 
-router.patch('/change-therapist/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_PATIENT]), changeTherapist);
+router.patch('/change-therapist/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CHANGE_THERAPIST]), changeTherapist);
 
 router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[UPDATE_PATIENT]), updatePatient);
 
