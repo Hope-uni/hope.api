@@ -18,7 +18,7 @@ module.exports = {
 
   currentPatientActivity(data) {
 
-    const currentActivity = data.filter(item => item.isCompleted === false && item.status === true).map(item => ({
+    const currentActivity = data.filter(item => item.status === true && item.isCompleted === false).map(item => ({
       id: item.Activity.id,
       name: item.Activity.name ?? null,
       satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
@@ -34,22 +34,24 @@ module.exports = {
 
     // Get the last activity completed in case the patient does not have activities assigned.
     let lastActivity = null;
-    if(!currentActivity) {
+    if(!currentActivity || currentActivity.length <= 0) {
 
       const activityFound = data.find((item) => item.status === true && item.isCompleted === true);
 
-      lastActivity = {
-        id: activityFound.Activity.id,
-        name: activityFound.Activity.name ?? null,
-        satisfactoryPoints: activityFound.Activity.satisfactoryPoints ?? null,
-        satisfactoryAttempts: activityFound.satisfactoryAttempts ?? null,
-        progress: (activityFound.satisfactoryAttempts / activityFound.Activity.satisfactoryPoints) * 100,
-        description: activityFound.Activity.description ?? null,
-        phase: {
-          id: activityFound.Activity.Phase.id,
-          name: activityFound.Activity.Phase.name,
-          description: activityFound.Activity.Phase.description,
-        },
+      if(activityFound !== undefined) {
+        lastActivity = {
+          id: activityFound.Activity.id,
+          name: activityFound.Activity.name ?? null,
+          satisfactoryPoints: activityFound.Activity.satisfactoryPoints ?? null,
+          satisfactoryAttempts: activityFound.satisfactoryAttempts ?? null,
+          progress: (activityFound.satisfactoryAttempts / activityFound.Activity.satisfactoryPoints) * 100,
+          description: activityFound.Activity.description ?? null,
+          phase: {
+            id: activityFound.Activity.Phase.id,
+            name: activityFound.Activity.Phase.name,
+            description: activityFound.Activity.Phase.description,
+          },
+        }
       }
     }
 
