@@ -6,7 +6,7 @@ const { getFullName } = require('@utils/dataStructure/index');
 
 module.exports = {
 
-  async getPatient(id) {
+  async getPatient(id, imageProfile) {
     try {
 
       const patientResponse = await Patient.findOne({
@@ -49,7 +49,7 @@ module.exports = {
         secondName: patientResponse.Person.secondName,
         surname: patientResponse.Person.surname,
         secondSurname: patientResponse.Person.secondSurname,
-        image: patientResponse.Person.imageProfile,
+        imageUrl: imageProfile,
         address: patientResponse.Person.address,
         birthday: patientResponse.Person.birthday,
         gender: patientResponse.Person.gender,
@@ -72,7 +72,7 @@ module.exports = {
     }
   },
 
-  async getTutorTherapist(id) {
+  async getTutorTherapist(id, imageProfile) {
     try {
 
       const tutorTherapistResponse = await TutorTherapist.findOne({
@@ -109,7 +109,7 @@ module.exports = {
         secondName: tutorTherapistResponse.Person.secondName,
         surname: tutorTherapistResponse.Person.surname,
         secondSurname: tutorTherapistResponse.Person.secondSurname,
-        image: tutorTherapistResponse.Person.imageProfile,
+        imageUrl: imageProfile,
         identificationNumber: tutorTherapistResponse.identificationNumber,
         phoneNumber: tutorTherapistResponse.phoneNumber ? `${tutorTherapistResponse.phoneNumber}` : null,
         telephone: tutorTherapistResponse.telephone ? `${tutorTherapistResponse.telephone}` : null,

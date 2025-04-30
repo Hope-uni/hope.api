@@ -312,7 +312,11 @@ const messages = {
         base: `Identificador del rol debe ser un número válido`,
         positive: `Identificador del rol debe ser un número positivo`,
         unique: `Debe asignar roles diferentes a un mismo usuario`
-      }
+      },
+      imageProfile: {
+        base: `Imagen de perfil debe ser un texto válido`,
+        empty: `Imagen de perfil no debe estar vacía`,
+      },
     },
     errors: {
       controller: `Hubo un error en el controlador de usuario`,
@@ -421,10 +425,6 @@ const messages = {
         base: `Segundo Apellido debe ser un texto válido`,
         characters: `Segundo Apellido debe tener como minimo 3 y como máximo 15 caracteres`,
         trim: `Segundo Apellido contiente espacios adicionales`,
-      },
-      imageProfile: {
-        base: `Imagen de perfil debe ser un texto válido`,
-        empty: `Imagen de perfil no debe estar vacía`,
       },
       address: {
         required: `Dirección es requerida`,

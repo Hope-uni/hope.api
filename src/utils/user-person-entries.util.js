@@ -14,7 +14,7 @@ module.exports = {
       secondName,
       surname,
       secondSurname,
-      imageProfile,
+      imageUrl,
       address,
       birthday,
       gender
@@ -22,7 +22,8 @@ module.exports = {
 
     const { error:userError } = createUserValidation({
       username,
-      email
+      email,
+      imageUrl,
     });
 
     const { error:personError } = createPersonValidation({
@@ -30,7 +31,6 @@ module.exports = {
       secondName,
       surname,
       secondSurname,
-      imageProfile,
       address,
       birthday,
       gender
@@ -61,7 +61,7 @@ module.exports = {
 
     // Variables
     let userError;
-    let personError;                                       
+    let personError;
 
     // destructuring Object
     const {
@@ -71,7 +71,7 @@ module.exports = {
       secondName,
       surname,
       secondSurname,
-      imageProfile,
+      imageUrl,
       address,
       userId,
       personId,
@@ -79,22 +79,21 @@ module.exports = {
       gender
     } = data;
 
-    if(userId || username || email) {
+    if(userId || username || email || imageUrl) {
       const { error } = updateUserValidation({
         username,
         email,
-        // roles
+        imageUrl,
       });
       if(error)  userError = error;
     }
 
-    if(personId || firstName || secondName || surname || secondSurname || imageProfile || address || birthday || gender) {
+    if(personId || firstName || secondName || surname || secondSurname || address || birthday || gender) {
       const { error } = updatePersonValidation({
         firstName,
         secondName,
         surname,
         secondSurname,
-        imageProfile,
         address,
         birthday,
         gender
