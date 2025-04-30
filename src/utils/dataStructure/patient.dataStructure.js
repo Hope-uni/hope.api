@@ -25,8 +25,7 @@ module.exports = {
     }
 
     // Achievements
-    const getAchievements = data.HealthRecord.AchievementsHealthRecords.length > 0 ? data.HealthRecord.AchievementsHealthRecords.filter((item) => item.status === true) : null
-
+    const getAchievements = data.HealthRecord.AchievementsHealthRecords  ? data.HealthRecord.AchievementsHealthRecords.filter((item) => item.status === true) : []
 
     return {
       id: data.id,
@@ -35,8 +34,8 @@ module.exports = {
       age: childAge.Person.dataValues.age,
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
-      achievementCount: getAchievements ? getAchievements.length : null,
-      image: data.Person.imageProfile ?? null,
+      achievementCount: getAchievements.length > 0 ? getAchievements.length : null,
+      image: data.User.imageUrl ?? null,
       isVerified: data.User.userVerified,
     };
   }

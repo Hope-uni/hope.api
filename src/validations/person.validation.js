@@ -33,9 +33,6 @@ module.exports = {
         'string.min': messages.person.fields.secondSurname.characters,
         'string.max': messages.person.fields.secondSurname.characters,
       }),
-      imageProfile: joi.string().empty(' ').messages({
-        'string.base': messages.person.fields.imageProfile.base
-      }),
       address: joi.string().strict().trim().required().min(6, 'utf8').max(255, 'utf8').messages({
         'any.required': messages.person.fields.address.required,
         'string.base': messages.person.fields.address.base,
@@ -87,10 +84,6 @@ module.exports = {
         'string.trim': messages.person.fields.secondSurname.trim,
         'string.min': messages.person.fields.secondSurname.characters,
         'string.max': messages.person.fields.secondSurname.characters,
-      }),
-      imageProfile: joi.string().empty(' ').messages({
-        'string.base': messages.person.fields.imageProfile.base,
-        'string.empty': messages.person.fields.imageProfile.empty,
       }),
       address: joi.string().strict().trim().empty(' ').min(6, 'utf8').max(255, 'utf8').messages({
         'string.base': messages.person.fields.address.base,
