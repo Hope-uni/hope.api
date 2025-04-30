@@ -469,7 +469,6 @@ module.exports = {
         secondName: resBody.secondName,
         surname: resBody.surname,
         secondSurname: resBody.secondSurname,
-        imageProfile: resBody.imageProfile,
         address: resBody.address,
         birthday: resBody.birthday,
         gender: resBody.gender
@@ -513,7 +512,7 @@ module.exports = {
         secondName,
         surname,
         secondSurname,
-        imageProfile,
+        imageUrl,
         address,
         birthday,
         gender,
@@ -748,7 +747,7 @@ module.exports = {
       };
 
       // This quote is for updating person
-      if(firstName || secondName || surname || secondSurname || imageProfile || address || birthday || gender) {
+      if(firstName || secondName || surname || secondSurname || address || birthday || gender) {
         // validate if person exist
         const personExist = await Person.findOne({
           where: {
@@ -770,7 +769,6 @@ module.exports = {
           secondName,
           surname,
           secondSurname,
-          imageProfile,
           address,
           birthday,
           gender
