@@ -45,7 +45,7 @@ module.exports = {
         }
       }
 
-      let element = {
+      const element = {
         id: iterator.id,
         profileId: iterator.dataValues.profileId ?? null,
         username: iterator.username,
@@ -54,12 +54,6 @@ module.exports = {
         isVerified: iterator.userVerified,
       }
 
-      if(!iterator.dataValues.profileId) {
-        element = {
-          ...element,
-          imageUrl: iterator.imageUrl,
-        }
-      }
 
       newData.push(element);
     }
@@ -105,7 +99,6 @@ module.exports = {
         username: data.dataValues.username,
         email: data.dataValues.email,
         roles: rolesData ?? null,
-        imageUrl: data.imageUrl,
         isVerified: data.userVerified,
       }
     } else {
@@ -139,7 +132,7 @@ module.exports = {
       createDataStructure = {
         id: data.id,
         userId: data.userId,
-        image: data.User.imageUrl ?? null,
+        imageUrl: data.User.imageUrl ?? null,
         fullName: getFullName(data.Person),
         email: data.User.email,
         username: data.User.username,
@@ -155,7 +148,7 @@ module.exports = {
         const element = {
           id: iterator.id,
           userId: iterator.userId,
-          image: iterator.User.imageUrl ?? null,
+          imageUrl: iterator.User.imageUrl ?? null,
           fullName: getFullName(iterator.Person),
           email: iterator.User.email,
           username: iterator.User.username,
@@ -196,7 +189,7 @@ module.exports = {
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday,
       age: therapistAge.Person.dataValues.age,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       identificationNumber: data.identificationNumber,
@@ -238,7 +231,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname ?? null,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday ?? null,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       identificationNumber: data.identificationNumber ?? null,
@@ -260,7 +253,7 @@ module.exports = {
       createDataStructure = {
         id: data.id,
         userId: data.userId ?? null,
-        image: data.User.imageUrl ?? null,
+        imageUrl: data.User.imageUrl ?? null,
         fullName: getFullName(data.Person),
         email: data.User.email ?? null,
         username: data.User.username,
@@ -278,7 +271,7 @@ module.exports = {
         const element = {
           id: iterator.id,
           userId: iterator.userId,
-          image: iterator.User.imageUrl ?? null,
+          imageUrl: iterator.User.imageUrl ?? null,
           fullName: getFullName(iterator.Person),
           email: iterator.User.email ?? null,
           username: iterator.User.username,
@@ -319,7 +312,7 @@ module.exports = {
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday,
       age: tutorAge.Person.dataValues.age,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       identificationNumber: data.identificationNumber,
@@ -344,7 +337,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname ?? null,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday ?? null,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       identificationNumber: data.identificationNumber,
@@ -437,7 +430,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       age: childAge.Person.dataValues.age,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       birthday: data.Person.birthday,
@@ -514,7 +507,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname ?? null,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       age: dates.getAge(data).Person.dataValues.age,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
       birthday: data.Person.birthday,

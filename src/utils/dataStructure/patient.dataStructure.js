@@ -35,7 +35,7 @@ module.exports = {
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
       achievementCount: getAchievements.length > 0 ? getAchievements.length : null,
-      image: data.User.imageUrl ?? null,
+      imageUrl: data.User.imageUrl ?? null,
       isVerified: data.User.userVerified,
     };
   }
