@@ -9,10 +9,10 @@ const {
 const {
   roleConstants: { ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE },
   permissionsConstants: {
-    UPDATE_PATIENT
+    CHANGE_MONOCHROME
   }
 } = require('@constants');
 
-router.patch('/change-monochrome/:id', verifyToken, rolePermissions([ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE],[UPDATE_PATIENT]), changeMonochrome);
+router.patch('/change-monochrome/:id', verifyToken, rolePermissions([ADMIN_ROLE, SUPERADMIN_ROLE, TUTOR_ROLE],[CHANGE_MONOCHROME]), changeMonochrome);
 
 module.exports = router;

@@ -597,7 +597,7 @@ module.exports = {
                   model: Permission,
                   as: 'permissions',
                   attributes: {
-                    exclude: ['group','createdAt','updatedAt']
+                    exclude: ['group','createdAt','updatedAt','status']
                   },
                   through: {
                     attributes: {
