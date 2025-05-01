@@ -75,6 +75,8 @@ async function assignPermissionsRoles() {
       permissionsConstants.UPDATE_CUSTOM_PICTOGRAM,
       permissionsConstants.DELETE_CUSTOM_PICTOGRAM,
 
+      // HealthRecords
+      permissionsConstants.CHANGE_MONOCHROME
     ];
 
     const adminPermissionsNotAllowed = [

@@ -548,7 +548,7 @@ module.exports = {
 
     // customizing UserRoles
 
-    const { UserRoles, ...resData } = data.dataValues;
+    const { UserRoles,imageUrl, ...resData } = data.dataValues;
 
     const newData = {
       ...resData,
