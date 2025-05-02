@@ -22,9 +22,6 @@ module.exports = {
         'string.min': messages.user.fields.email.characters,
         'string.max': messages.user.fields.email.characters,
       }),
-      imageUrl: joi.string().empty(' ').messages({
-        'string.base': messages.user.fields.imageProfile.base
-      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
@@ -46,10 +43,6 @@ module.exports = {
         'string.empty': messages.user.fields.email.empty,
         'string.min': messages.user.fields.email.characters,
         'string.max': messages.user.fields.email.characters,
-      }),
-      imageUrl: joi.string().empty(' ').messages({
-        'string.base': messages.user.fields.imageProfile.base,
-        'string.empty': messages.user.fields.imageProfile.empty,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

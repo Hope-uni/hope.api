@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const multer = require('multer');
 const {
   all,
   findTherapist,
@@ -21,7 +22,7 @@ const {
   }
 } = require('@constants');
 
-
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_THERAPIST]), all);
 
@@ -30,9 +31,9 @@ router.get('/patients', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROL
 router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_THERAPIST]), findTherapist);
 
 
-router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_THERAPIST]), createTherapist);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_THERAPIST]), upload.single('imageFile'), createTherapist);
 
-router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[UPDATE_PROFILE,UPDATE_THERAPIST]), updateTherapist);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[UPDATE_PROFILE,UPDATE_THERAPIST]), upload.single('imageFile'), updateTherapist);
 
 router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_THERAPIST]), removeTherapist);
 

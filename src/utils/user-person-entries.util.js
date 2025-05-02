@@ -14,7 +14,6 @@ module.exports = {
       secondName,
       surname,
       secondSurname,
-      imageUrl,
       address,
       birthday,
       gender
@@ -23,7 +22,6 @@ module.exports = {
     const { error:userError } = createUserValidation({
       username,
       email,
-      imageUrl,
     });
 
     const { error:personError } = createPersonValidation({
@@ -71,7 +69,6 @@ module.exports = {
       secondName,
       surname,
       secondSurname,
-      imageUrl,
       address,
       userId,
       personId,
@@ -79,11 +76,10 @@ module.exports = {
       gender
     } = data;
 
-    if(userId || username || email || imageUrl) {
+    if(userId || username || email) {
       const { error } = updateUserValidation({
         username,
         email,
-        imageUrl,
       });
       if(error)  userError = error;
     }

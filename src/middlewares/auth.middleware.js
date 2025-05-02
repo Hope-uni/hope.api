@@ -50,7 +50,7 @@ module.exports = {
         ]
       });
 
-      if(validUser.userVerified === false && req.originalUrl.split('/')[3] !== 'change-password') {
+      if(validUser.userVerified === false && req.path !== '/change-password') {
         return res.status(401).json({
           error: true,
           statusCode: 401,
