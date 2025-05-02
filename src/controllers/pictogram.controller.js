@@ -96,7 +96,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await createPictogram(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await createPictogram(req.body, req.file);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
@@ -134,7 +134,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await updatePictogram(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updatePictogram(req.params.id,req.body, req.file);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,

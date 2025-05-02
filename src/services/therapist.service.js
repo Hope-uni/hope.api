@@ -16,9 +16,10 @@ const {
   Achievement,
   AchievementsHealthRecord,
   sequelize } = require('@models/index');
-const { pagination, generatePassword, messages, dataStructure, formatErrorMessages } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
 const { roleConstants } = require('@constants');
+const { pagination, generatePassword, messages, dataStructure, formatErrorMessages, azureImages } = require('@utils');
+const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 
 
@@ -564,7 +565,7 @@ module.exports = {
   * - `data`: If no error occurred, this property contains the newly created therapist data.
   * - `statusCode`: An HTTP status code indicating the result of the operation.
   */
-  async create(body) {
+  async create(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -616,7 +617,7 @@ module.exports = {
       resBody.roles = [3];
 
       // User and Person creation
-      const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser(resBody,transaction);
+      const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser({...resBody,file},transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -742,23 +743,8 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `update` in JavaScript updates therapist information in a database transaction,
-   * handling validations and returning the updated data or error messages.
-   * @param id - The `id` parameter in the `update` function is used to identify the therapist that
-   * needs to be updated. It is typically a unique identifier for the therapist in the database, such
-   * as a numeric ID or a UUID. This ID is used to locate the specific therapist record that requires
-   * updating in the
-   * @param body - The `update` function you provided is responsible for updating therapist information
-   * in a database transaction. It first validates if the therapist exists, then updates the
-   * therapist's personal information, user information, and therapist-specific information.
-   * @returns The `update` method returns an object with the following properties:
-   * - `error`: A boolean indicating if an error occurred during the update process.
-   * - `message`: A message describing the outcome of the update operation.
-   * - `data`: If the update was successful, it includes the updated data of the therapist.
-   * - `statusCode`: An HTTP status code indicating the result of the update operation.
-   */
-  async update(id,body, payload) {
+
+  async update(id,body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -865,6 +851,7 @@ module.exports = {
       if(resBody) {
         const { error:userPersonError, statusCode, message, validationErrors  } = await updateUser(therapistExist.userId,{
           ...resBody,
+          file,
           personId: therapistExist.personId,
         }, transaction);
         if(userPersonError) {
@@ -999,6 +986,13 @@ module.exports = {
         where: {
           id,
           status: true
+        },
+        include: {
+          model: User,
+          where: {
+            status: true,
+          },
+          attributes: ['imageUrl']
         }
       });
       if(!therapistExist) {
@@ -1041,6 +1035,21 @@ module.exports = {
           message: messages.therapist.errors.service.delete,
         };
       };
+
+      // delete the user image in the azure container
+      if(therapistExist.User.imageUrl !== defaultUserImage) {
+        const imageName = therapistExist.User.imageUrl.split('/').pop();
+        const { error, statusCode:imageStatus, message } = await azureImages.deleteAzureImage(imageName, userBlockContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode:imageStatus,
+            message
+          }
+        }
+      }
 
       // commit transaction
       await transaction.commit();

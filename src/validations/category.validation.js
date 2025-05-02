@@ -14,11 +14,6 @@ module.exports = {
         'string.max': messages.category.fields.name.characters,
         'string.trim': messages.category.fields.name.trim,
       }),
-      icon: joi.string().required().messages({
-        'any.required': messages.category.fields.icon.required,
-        'string.base': messages.category.fields.icon.base,
-        'string.empty': messages.category.fields.icon.empty,
-      })
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
@@ -39,10 +34,6 @@ module.exports = {
         'string.max': messages.category.fields.name.characters,
         'string.trim': messages.category.fields.name.trim,
       }),
-      icon: joi.string().empty(' ').messages({
-        'string.base': messages.category.fields.icon.base,
-        'string.empty': messages.category.fields.icon.empty,
-      })
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });

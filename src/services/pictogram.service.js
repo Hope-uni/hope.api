@@ -1,7 +1,14 @@
 const { Op } = require('sequelize');
 const { Pictogram, Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, pagination, formatErrorMessages, dataStructure } = require('@utils');
+const {
+  messages,
+  pagination,
+  formatErrorMessages,
+  dataStructure,
+  azureImages
+} = require('@utils');
+const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
 
 
 /* eslint-disable radix */
@@ -189,7 +196,7 @@ module.exports = {
   },
 
 
-  async createPictogram(body) {
+  async createPictogram(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -228,6 +235,23 @@ module.exports = {
       }
 
       // TODO: Image exist logic has to be here.
+      if(file) {
+        const { error, statusCode, message, url } = await azureImages.uploadImage(file, pictogramContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('upload', message),
+          }
+        }
+
+        body.imageUrl = url;
+      } else {
+        body.imageUrl = defaultPictogramImage;
+      }
 
 
       const data = await Pictogram.create(
@@ -287,7 +311,7 @@ module.exports = {
   },
 
 
-  async updatePictogram(id, body) {
+  async updatePictogram(id, body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -350,8 +374,33 @@ module.exports = {
       }
 
       // Image validation
-      if(body.imageUrl) {
-        // TODO: Image exist logic has to be here.
+      if(file) {
+        const imageName = pictogramExist.imageUrl.split('/').pop();
+        let handleError;
+
+        if(pictogramExist.imageUrl === defaultPictogramImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, pictogramContainer);
+          handleError = restResponse;
+
+          body.imageUrl = url;
+        }
+
+        if(pictogramExist.imageUrl !== defaultPictogramImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, imageName, pictogramContainer);
+          handleError = restResponse;
+
+          body.imageUrl = url;
+        }
+
+        if(handleError.error) {
+          await transaction.rollback();
+          return {
+            error: handleError.error,
+            statusCode: handleError.statusCode,
+            message: messages.generalMessages.server,
+            validationErrors: formatErrorMessages('upload', handleError.message),
+          }
+        }
       }
 
       const data = await Pictogram.update(
@@ -433,6 +482,7 @@ module.exports = {
         }
       }
 
+
       const pictogramUpdated = await Pictogram.update(
         {
           status: false,
@@ -451,6 +501,21 @@ module.exports = {
           error: true,
           statusCode: 400,
           message: messages.pictogram.errors.service.delete,
+        }
+      }
+
+      // Delete the pictogram image in the azure container
+      if(pictogramExist.imageUrl !== defaultPictogramImage) {
+        const imageName = pictogramExist.imageUrl.split('/').pop();
+        const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, pictogramContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message
+          }
         }
       }
 

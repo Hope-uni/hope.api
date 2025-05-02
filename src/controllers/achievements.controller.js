@@ -108,7 +108,7 @@ module.exports = {
         });
       }
 
-      const { error: dataError, statusCode, message, validationErrors, data } = await createAchievement(req.body);
+      const { error: dataError, statusCode, message, validationErrors, data } = await createAchievement(req.body, req.file);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -148,7 +148,7 @@ module.exports = {
         });
       }
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await updateAchievement(req.params.id, req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updateAchievement(req.params.id, req.body, req.file);
 
       if(dataError) {
         return res.status(statusCode).json({

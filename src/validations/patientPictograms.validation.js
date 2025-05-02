@@ -15,12 +15,7 @@ module.exports = {
         'string.min': messages.pictogram.fields.name.characters,
         'string.max': messages.pictogram.fields.name.characters,
       }),
-      imageUrl: joi.string().required().messages({
-        'any.required': messages.pictogram.fields.image.required,
-        'string.base': messages.pictogram.fields.image.base,
-        'string.empty': messages.pictogram.fields.image.empty,
-      }),
-      patientId: joi.number().positive().strict().required().messages({
+      patientId: joi.number().positive().required().messages({
         'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
@@ -43,7 +38,7 @@ module.exports = {
         'number.base': messages.pictogram.fields.id.base,
         'number.positive': messages.pictogram.fields.id.positive,
       }),
-      patientId: joi.number().positive().strict().required().messages({
+      patientId: joi.number().positive().required().messages({
         'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
@@ -54,10 +49,6 @@ module.exports = {
         'string.trim': messages.pictogram.fields.name.trim,
         'string.min': messages.pictogram.fields.name.characters,
         'string.max': messages.pictogram.fields.name.characters,
-      }),
-      imageUrl: joi.string().empty(' ').messages({
-        'string.base': messages.pictogram.fields.image.base,
-        'string.empty': messages.pictogram.fields.image.empty,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

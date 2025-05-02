@@ -15,12 +15,7 @@ module.exports = {
         'string.min': messages.pictogram.fields.name.characters,
         'string.max': messages.pictogram.fields.name.characters,
       }),
-      imageUrl: joi.string().required().messages({
-        'any.required': messages.pictogram.fields.image.required,
-        'string.base': messages.pictogram.fields.image.base,
-        'string.empty': messages.pictogram.fields.image.empty,
-      }),
-      categoryId: joi.number().positive().strict().required().messages({
+      categoryId: joi.number().positive().required().messages({
         'any.required': messages.category.fields.id.required,
         'number.base': messages.category.fields.id.base,
         'number.positive': messages.category.fields.id.positive,
@@ -45,11 +40,7 @@ module.exports = {
         'string.min': messages.pictogram.fields.name.characters,
         'string.max': messages.pictogram.fields.name.characters,
       }),
-      imageUrl: joi.string().empty(' ').messages({
-        'string.base': messages.pictogram.fields.image.base,
-        'string.empty': messages.pictogram.fields.image.empty,
-      }),
-      categoryId: joi.number().positive().strict().empty(' ').messages({
+      categoryId: joi.number().positive().empty(' ').messages({
         'number.base': messages.category.fields.id.base,
         'number.positive': messages.category.fields.id.positive,
       }),

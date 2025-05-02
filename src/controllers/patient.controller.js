@@ -209,7 +209,7 @@ module.exports = {
       }
 
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload);
+      const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload, req.file);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,
@@ -265,7 +265,7 @@ module.exports = {
         });
       }
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body, req.payload);
+      const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body, req.payload, req.file);
       if(dataError) {
         return res.status(statusCode).json({
           error:dataError,

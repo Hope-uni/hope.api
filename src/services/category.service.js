@@ -1,7 +1,8 @@
 const { Op } = require('sequelize');
 const { Category, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages, pagination, formatErrorMessages } = require('@utils/index');
+const { messages, pagination, formatErrorMessages, azureImages } = require('@utils');
+const { categoryContainer, defaultCategoryImage } = require('@config/variables.config');
 
 module.exports = {
   /* eslint-disable radix */
@@ -99,7 +100,7 @@ module.exports = {
     }
   },
 
-  async createCategory(body) {
+  async createCategory(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -121,21 +122,22 @@ module.exports = {
       }
 
       // Icon exist validation
-      // TODO: This will change when the API consume azure bucket
-      const iconExist = await Category.findOne({
-        where: {
-          icon: body.icon,
-          status: true
+      if(file) {
+        const { error, statusCode, message, url } = await azureImages.uploadImage(file, categoryContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('upload', message),
+          }
         }
-      });
-      if(iconExist) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.generalMessages.base,
-          validationErrors: formatErrorMessages('icon', messages.category.errors.in_use.icon),
-        }
+
+        body.icon = url;
+      } else {
+        body.icon = defaultCategoryImage;
       }
 
       // Create Category
@@ -189,7 +191,7 @@ module.exports = {
     }
   },
 
-  async updateCategory(id,body) {
+  async updateCategory(id,body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -233,24 +235,31 @@ module.exports = {
       }
 
       // Icon exist validation
-      // TODO: This will change when the API consume azure bucket
-      if(body.icon) {
-        const iconExist = await Category.findOne({
-          where: {
-            icon: body.icon,
-            status: true,
-            id: {
-              [Op.ne]: id
-            }
-          }
-        });
-        if(iconExist) {
+      if(file) {
+        const imageName = categoryExist.icon.split('/').pop();
+        let handleError;
+
+        if(categoryExist.icon === defaultCategoryImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, categoryContainer);
+          handleError = restResponse;
+
+          body.icon = url;
+        }
+
+        if(categoryExist.icon !== defaultCategoryImage) {
+          const { url, ...restResponse} = await azureImages.updateAndUploadImage(file, imageName, categoryContainer);
+          handleError = restResponse;
+
+          body.icon = url;
+        }
+
+        if(handleError.error) {
           await transaction.rollback();
           return {
-            error: true,
-            statusCode: 400,
-            message: messages.generalMessages.base,
-            validationErrors: formatErrorMessages('icon', messages.category.errors.in_use.icon),
+            error: handleError.error,
+            statusCode: handleError.statusCode,
+            message: messages.generalMessages.server,
+            validationErrors: formatErrorMessages('upload', handleError.message),
           }
         }
       }
@@ -330,6 +339,7 @@ module.exports = {
         }
       }
 
+
       // Update Category
       const categoryResponse = await Category.update(
         {
@@ -350,6 +360,22 @@ module.exports = {
           message: messages.category.errors.service.delete,
         }
       }
+
+      // delete the category image in the azure container
+      if(categoryExist.icon !== defaultCategoryImage) {
+        const imageName = categoryExist.icon.split('/').pop();
+        const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, categoryContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message
+          }
+        }
+      }
+
 
       // Commit transaction
       await transaction.commit();
