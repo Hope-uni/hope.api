@@ -455,7 +455,7 @@ module.exports = {
       tutor: data.tutor ?  {
         id: data.tutor.id,
         userId: data.tutor.userId,
-        image: data.tutor.User.imageUrl ?? null,
+        imageUrl: data.tutor.User.imageUrl ?? null,
         fullName: getFullName(data.tutor.Person),
         email: data.tutor.User.email,
         username: data.tutor.User.username,
@@ -465,7 +465,7 @@ module.exports = {
       therapist: data.therapist ? {
         id: data.therapist.id,
         userId: data.therapist.userId,
-        image: data.therapist.User.imageUrl,
+        imageUrl: data.therapist.User.imageUrl,
         fullName: getFullName(data.therapist.Person),
         email: data.therapist.User.email,
         username: data.therapist.User.username,

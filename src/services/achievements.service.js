@@ -602,7 +602,8 @@ module.exports = {
         achievementId,
         healthRecordId: patientExist.HealthRecord.id,
       },{
-        transaction
+        transaction,
+        returning: true,
       });
 
       if(!data) {
@@ -617,10 +618,18 @@ module.exports = {
       // Commit transaction
       await transaction.commit();
 
+      const newData = await Achievement.findOne({
+        where: {
+          id: data.id,
+          status: true,
+        }
+      });
+
       return {
         error: false,
         statusCode: 201,
         message: messages.achievements.success.assign,
+        data: dataStructure.findAchievementDataStructure(newData)
       }
 
     } catch (error) {
