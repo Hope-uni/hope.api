@@ -16,8 +16,9 @@ const {
   AchievementsHealthRecord,
   sequelize
 } = require('@models/index.js');
-const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils/index');
 const { userSendEmail } = require('@helpers/index');
+const { pagination, messages, dataStructure, formatErrorMessages, generatePassword, azureImages } = require('@utils');
+const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
 const {
   deleteUser,
   createUser,
@@ -573,7 +574,7 @@ module.exports = {
   },
 
 
-  async create(body) {
+  async create(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -639,7 +640,7 @@ module.exports = {
       resBody.roles = [5];
 
       // Validate and create User and Person
-      const { error:userPersonError, message, statusCode, validationErrors, data } = await createUser(resBody, transaction);
+      const { error: userPersonError, message, statusCode, validationErrors, data } = await createUser({...resBody, file}, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -764,7 +765,7 @@ module.exports = {
     }
   },
 
-  async update(id,body, payload) {
+  async update(id,body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
       // Variables
@@ -888,6 +889,7 @@ module.exports = {
       if(resData) {
         const { error:userPersonError, statusCode, message, validationErrors } = await updateUser(tutorExist.userId,{
           ...resData,
+          file,
           personId: tutorExist.personId
         }, transaction);
         if(userPersonError) {
@@ -1017,6 +1019,13 @@ module.exports = {
         where: {
           id,
           status: true
+        },
+        include: {
+          model: User,
+          where: {
+            status: true,
+          },
+          attributes: ['imageUrl']
         }
       });
       if(!tutorExist) {
@@ -1059,6 +1068,21 @@ module.exports = {
           message: messages.tutor.errors.service.delete,
         };
       };
+
+      // delete the user image in the azure container
+      if(tutorExist.User.imageUrl !== defaultUserImage) {
+        const imageName = tutorExist.User.imageUrl.split('/').pop();
+        const { error, statusCode:imageStatus, message } = await azureImages.deleteAzureImage(imageName, userBlockContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode:imageStatus,
+            message
+          }
+        }
+      }
 
       // commit transaction
       await transaction.commit();

@@ -28,15 +28,16 @@ const {
     GET_ACHIEVEMENT,
   },
 } = require('@constants');
+const multer = require('multer');
 
-
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[LIST_ACHIEVEMENT]), all);
 router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_ACHIEVEMENT]), find);
 
-router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_ACHIEVEMENT]), create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_ACHIEVEMENT]),upload.single('imageFile'), create);
 
-router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_ACHIEVEMENT]), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_ACHIEVEMENT]),upload.single('imageFile'), update);
 
 router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_ACHIEVEMENT]), deleteAchievement);
 

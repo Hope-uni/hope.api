@@ -2,8 +2,15 @@ const { Op, Sequelize } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, UserRoles, sequelize } = require('@models');
 const logger = require('@config/logger.config');
 const { getPictogramsPatient } = require('@helpers');
-const { messages, dataStructure, formatErrorMessages, pagination } = require('@utils');
 const { roleConstants: constants } = require('@constants');
+const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
+const {
+  messages,
+  dataStructure,
+  formatErrorMessages,
+  pagination,
+ azureImages
+} = require('../utils');
 
 
 module.exports = {
@@ -436,7 +443,7 @@ module.exports = {
     }
   },
 
-  async createPatientPictogram(body) {
+  async createPatientPictogram(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -516,6 +523,23 @@ module.exports = {
       }
 
       // TODO: ImageUrl validation has to be here
+      if(file) {
+        const { error, statusCode, message, url } = await azureImages.uploadImage(file, pictogramContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('upload', message),
+          }
+        }
+
+        body.imageUrl = url;
+      } else {
+        body.imageUrl = defaultPictogramImage;
+      }
 
       const data = await PatientPictogram.create(
         {
@@ -582,7 +606,7 @@ module.exports = {
     }
   },
 
-  async updatePatientPictogram(id,body, payload) {
+  async updatePatientPictogram(id,body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -697,8 +721,33 @@ module.exports = {
         }
       }
 
-      if(resBody.imageUrl) {
-        // TODO: ImageUrl validation has to be here
+      if(file) {
+        const imageName = patientPictogramExist.imageUrl.split('/').pop();
+        let handleError;
+
+        if(patientPictogramExist.imageUrl === defaultPictogramImage) {
+          const { url, ...restResponse}  = await azureImages.updateAndUploadImage(file, null, pictogramContainer);
+          handleError = restResponse;
+
+          resBody.imageUrl = url;
+        }
+
+        if(patientPictogramExist.imageUrl !== defaultPictogramImage) {
+          const { url, ...restResponse}  = await azureImages.updateAndUploadImage(file, imageName, pictogramContainer);
+          handleError = restResponse;
+
+          resBody.imageUrl = url;
+        }
+
+        if(handleError.error) {
+          await transaction.rollback();
+          return {
+            error: handleError.error,
+            statusCode: handleError.statusCode,
+            message: messages.generalMessages.server,
+            validationErrors: formatErrorMessages('upload', handleError.message),
+          }
+        }
       }
 
       const data = await PatientPictogram.update(
@@ -877,6 +926,21 @@ module.exports = {
           error: true,
           statusCode: 400,
           message: messages.pictogram.errors.service.delete,
+        }
+      }
+
+      // Delete patientPictogram image in the azure container
+      if(patientPictogramExist.imageUrl !== defaultPictogramImage) {
+        const imageName = patientPictogramExist.imageUrl.split('/').pop();
+        const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, pictogramContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message
+          }
         }
       }
 

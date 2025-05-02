@@ -35,4 +35,15 @@ module.exports = {
   isAdmin: process.env.IS_ADMIN,
   isTutor: process.env.IS_TUTOR,
   isTherapist: process.env.IS_THERAPIST,
+
+  // Azure variables.
+  azureConection: process.env.CONECTION_STRING,
+  userBlockContainer: process.env.USER_BLOCKCONTAINER,
+  categoryContainer: process.env.CATEGORY_BLOCKCONTAINER,
+  pictogramContainer: process.env.PICTOGRAM_BLOCKCONTAINER,
+  achievementsContainer: process.env.ACHIEVEMENTS_BLOCKCONTAINER,
+  defaultUserImage: process.env.DEFAULT_USER_IMAGE,
+  defaultCategoryImage: process.env.DEFAULT_CATEGORY_IMAGE,
+  defaultPictogramImage: process.env.DEFAULT_PICTOGRAM_IMAGE,
+  defaultAchievementImage: process.env.DEFAULT_ACHIEVEMENT_IMAGE
 }

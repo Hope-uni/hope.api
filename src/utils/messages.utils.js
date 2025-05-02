@@ -10,6 +10,17 @@ const messages = {
     unknown_object: 'Esta propiedad no está permitida',
   },
 
+  // azure messages
+  azure: {
+    errors: {
+      create: `There was an error uploading the image in the azure util`,
+      update: `There was an error updating the image in the azure util`,
+      delete: `There was an error deleting the image in the azure util`,
+      not_found: `La imagen de perfil no ha sido registrada en el sistema`,
+      upload: `Imagen no pudo ser agregada, por favor intente mas tarde`,
+    }
+  },
+
   // Pagination
   pagination: {
     page: {

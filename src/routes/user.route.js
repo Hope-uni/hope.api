@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const multer = require('multer');
 const {
   all,
   findUser,
@@ -20,14 +21,15 @@ const {
   }
 } = require('../constants');
 
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[LIST_USER]), verifyToken, all);
 
 router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[GET_USER]), findUser);
 
-router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_USER]) ,create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_USER]), upload.single('imageFile'), create);
 
-router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_USER]), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[UPDATE_USER]), upload.single('imageFile'), update);
 
 router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[DELETE_USER]), removeUser);
 

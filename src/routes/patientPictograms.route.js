@@ -1,3 +1,4 @@
+const multer = require('multer');
 const router = require('express').Router();
 const {
   all,
@@ -19,13 +20,16 @@ const {
 } = require('@constants');
 
 
+const upload = multer({ storage: multer.memoryStorage() });
+
+
 router.get('/', verifyToken, rolePermissions([PATIENT_ROLE],[LIST_CUSTOM_PICTOGRAM]), verifyToken, all);
 
 router.get('/patient-pictograms/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[LIST_PICTOGRAM]), allCustomPictograms);
 
-router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[CREATE_CUSTOM_PICTOGRAM]), create);
+router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[CREATE_CUSTOM_PICTOGRAM]), upload.single('imageFile'), create);
 
-router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[UPDATE_CUSTOM_PICTOGRAM]), update);
+router.put('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[UPDATE_CUSTOM_PICTOGRAM]), upload.single('imageFile'), update);
 
 router.delete('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, TUTOR_ROLE],[DELETE_CUSTOM_PICTOGRAM]), removePatientPictogram);
 

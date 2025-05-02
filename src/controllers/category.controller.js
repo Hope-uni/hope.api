@@ -99,7 +99,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await createCategory(req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await createCategory(req.body,req.file);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -138,7 +138,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data } = await updateCategory(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data } = await updateCategory(req.params.id,req.body,req.file);
 
       if(dataError) {
         return res.status(statusCode).json({

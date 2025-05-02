@@ -7,21 +7,21 @@ module.exports = {
 
   createPatientValidation(data) {
     const schema = joi.object().keys({
-      tutorId: joi.number().positive().strict().required().messages({
+      tutorId: joi.number().positive().required().messages({
         'any.required': messages.tutor.fields.id.required,
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),
-      therapistId: joi.number().positive().strict().empty(' ').messages({
+      therapistId: joi.number().positive().empty(' ').messages({
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,
       }),
-      phaseId: joi.number().positive().strict().required().messages({
+      phaseId: joi.number().positive().required().messages({
       'any.required': messages.phase.fields.id.required,
       'number.base': messages.phase.fields.id.base,
       'number.positive': messages.phase.fields.id.positive,
     }),
-      teaDegreeId: joi.number().positive().strict().required().messages({
+      teaDegreeId: joi.number().positive().required().messages({
         'any.required': messages.teaDegree.fields.id.required,
         'number.base': messages.teaDegree.fields.id.base,
         'number.positive': messages.teaDegree.fields.id.positive,
@@ -45,7 +45,7 @@ module.exports = {
         'number.base': messages.patient.fields.id.base,
         'number.positive': messages.patient.fields.id.positive,
       }),
-      tutorId: joi.number().positive().strict().empty(' ').messages({
+      tutorId: joi.number().positive().empty(' ').messages({
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
       }),
