@@ -15,10 +15,6 @@ module.exports = {
         'string.min': messages.achievements.fields.name.characters,
         'string.max': messages.achievements.fields.name.characters,
       }),
-      imageUrl: joi.string().required().messages({
-        'string.base': messages.achievements.fields.imageUrl.base,
-        'string.required': messages.achievements.fields.imageUrl.required,
-      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
@@ -38,9 +34,6 @@ module.exports = {
         'string.trim': messages.achievements.fields.name.trim,
         'string.min': messages.achievements.fields.name.characters,
         'string.max': messages.achievements.fields.name.characters,
-      }),
-      imageUrl: joi.string().empty(' ').messages({
-        'string.base': messages.achievements.fields.imageUrl.base,
       }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,

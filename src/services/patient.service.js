@@ -18,12 +18,19 @@ const {
   sequelize
 } = require('@models/index.js');
 const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
-const { pagination, messages, dataStructure, formatErrorMessages, generatePassword } = require('@utils');
+const {
+  pagination,
+  messages,
+  dataStructure,
+  formatErrorMessages,
+  generatePassword,
+  azureImages
+} = require('@utils');
 const { roleConstants } = require('@constants');
+const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');
-
 
 
 
@@ -1066,7 +1073,7 @@ module.exports = {
     }
   },
 
-  async create(body, payload) {
+  async create(body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -1167,7 +1174,8 @@ module.exports = {
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
       resData.password = passwordTemp;
 
-      const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser(resData, transaction);
+
+      const { error: userPersonError, statusCode, message, validationErrors, data } = await createUser({...resData, file}, transaction);
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -1383,7 +1391,7 @@ module.exports = {
     }
   },
 
-  async update(id,body, payload) {
+  async update(id,body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -1459,10 +1467,12 @@ module.exports = {
       const { error:userPersonError, statusCode, message, validationErrors } = await updateUser(patientExist.userId,
         {
           ...resData,
-        personId: patientExist.personId,
-      },
-      transaction,
-    );
+          file,
+          personId: patientExist.personId,
+        },
+        transaction,
+      );
+
       if(userPersonError) {
         await transaction.rollback();
         return {
@@ -1657,6 +1667,13 @@ module.exports = {
         where: {
           id,
           status: true
+        },
+        include: {
+          model: User,
+          where:{
+            status: true,
+          },
+          attributes: ['imageUrl'],
         }
       });
       if(!patientExist) {
@@ -1698,6 +1715,21 @@ module.exports = {
           validationErrors: formatErrorMessages('delete', messages.patient.errors.service.delete),
         };
       };
+
+      // delete the user image in the azure container
+      if(patientExist.User.imageUrl !== defaultUserImage) {
+        const imageName = patientExist.User.imageUrl.split('/').pop();
+        const { error, statusCode:imageStatus, message } = await azureImages.deleteAzureImage(imageName, userBlockContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode:imageStatus,
+            message
+          }
+        }
+      }
 
       // Commit transaction
       await transaction.commit();

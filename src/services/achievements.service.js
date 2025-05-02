@@ -1,14 +1,16 @@
 const { Op } = require('sequelize');
 const { Achievement, AchievementsHealthRecord, Patient, TutorTherapist, User, UserRoles, HealthRecord, Phase, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
+const { roleConstants: constants } = require('@constants');
+const { initialAchievements } = require('@fixtures');
+const { achievementsContainer, defaultAchievementImage } = require('@config/variables.config');
 const {
   messages,
   dataStructure,
   formatErrorMessages,
   pagination,
+  azureImages
 } = require('@utils');
-const { roleConstants: constants } = require('@constants');
-const { initialAchievements } = require('@fixtures');
 
 
 
@@ -165,7 +167,7 @@ module.exports = {
     }
   },
 
-  async createAchievement(body) {
+  async createAchievement(body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -184,6 +186,25 @@ module.exports = {
           message: messages.generalMessages.base,
           validationErrors: formatErrorMessages('name', messages.achievements.errors.in_use.name),
         }
+      }
+
+      // Handle image upload
+      if(file) {
+        const { error, statusCode, message, url } = await azureImages.uploadImage(file, achievementsContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('upload', message),
+          }
+        }
+
+        body.imageUrl = url;
+      } else {
+        body.imageUrl = defaultAchievementImage;
       }
 
       // create achievement
@@ -223,7 +244,7 @@ module.exports = {
     }
   },
 
-  async updateAchievement(id, body) {
+  async updateAchievement(id, body, file) {
     const transaction = await sequelize.transaction();
     try {
 
@@ -262,6 +283,35 @@ module.exports = {
             statusCode: 409,
             message: messages.generalMessages.base,
             validationErrors: formatErrorMessages('name', messages.achievements.errors.in_use.name),
+          }
+        }
+      }
+
+      if(file) {
+        const imageName = achievementExist.imageUrl.split('/').pop();
+        let handleError;
+
+        if(achievementExist.imageUrl === defaultAchievementImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, achievementsContainer);
+          handleError = restResponse;
+
+          body.imageUrl = url;
+        }
+
+        if(achievementExist.imageUrl !== defaultAchievementImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, imageName, achievementsContainer);
+          handleError = restResponse;
+
+          body.imageUrl = url;
+        }
+
+        if(handleError.error) {
+          await transaction.rollback();
+          return {
+            error: handleError.error,
+            statusCode: handleError.statusCode,
+            message: messages.generalMessages.server,
+            validationErrors: formatErrorMessages('upload', handleError.message),
           }
         }
       }
@@ -374,6 +424,21 @@ module.exports = {
           error: true,
           statusCode: 409,
           message: messages.achievements.errors.service.delete,
+        }
+      }
+
+      // Delete achievement image in the azure container
+      if(achievementExist.imageUrl !== defaultAchievementImage) {
+        const imageName = achievementExist.imageUrl.split('/').pop();
+        const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, achievementsContainer);
+
+        if(error) {
+          await transaction.rollback();
+          return {
+            error,
+            statusCode,
+            message
+          }
         }
       }
 

@@ -10,13 +10,15 @@ const logger = require('@config/logger.config');
 const { roleConstants } = require('@constants');
 const { Op } = require('sequelize');
 const { isAdmin } = require('@config/variables.config');
-const { userSendEmail } = require('@helpers/index');
+const { userSendEmail } = require('@helpers');
+const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
 const {
   messages,
   dataStructure,
   formatErrorMessages,
   generatePassword,
   pagination,
+  azureImages
 } = require('@utils');
 
 
@@ -266,10 +268,31 @@ module.exports = {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(passwordTemp, salt);
 
+        // add image to azure
+        if(resBody.file) {
+          const { error, statusCode, message, url } = await azureImages.uploadImage(resBody.file, userBlockContainer);
+
+          if(error) {
+            await transaction.rollback();
+            return {
+              error,
+              statusCode,
+              message: messages.generalMessages.base,
+              validationErrors: formatErrorMessages('upload', message)
+            }
+          }
+
+          resBody.imageUrl = url;
+        } else {
+          resBody.imageUrl = defaultUserImage;
+        }
+
         // Create User
         const data = await User.create(
           {
-            ...resBody,
+            username: resBody.username,
+            email: resBody.email,
+            imageUrl: resBody.imageUrl,
             password: hashedPassword
           },
           {
@@ -427,10 +450,31 @@ module.exports = {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(resBody.password, salt);
 
+
+      // add image to azure
+      if(resBody.file) {
+        const { error, statusCode, message, url } = await azureImages.uploadImage(resBody.file, userBlockContainer);
+
+        if(error) {
+          return {
+            error,
+            statusCode,
+            message: messages.generalMessages.base,
+            validationErrors: formatErrorMessages('upload', message)
+          }
+        }
+
+        resBody.imageUrl = url;
+      } else {
+        resBody.imageUrl = defaultUserImage;
+      }
+
       // Create User
       const data = await User.create(
         {
-          ...resBody,
+          username: resBody.username,
+          email: resBody.email,
+          imageUrl: resBody.imageUrl,
           password: hashedPassword
         },
         {
@@ -512,7 +556,7 @@ module.exports = {
         secondName,
         surname,
         secondSurname,
-        imageUrl,
+        file,
         address,
         birthday,
         gender,
@@ -522,6 +566,8 @@ module.exports = {
 
       // this is when you try to create a user directly
       if(!transaction) {
+        // Variables
+        transaction = await sequelize.transaction();
 
         // User Exist
         const userExist = await User.findOne({
@@ -586,7 +632,6 @@ module.exports = {
           }
         }
 
-        transaction = await sequelize.transaction();
         // Username Validation
         if(resBody.username) {
           const usernameExist = await User.findOne({
@@ -630,6 +675,35 @@ module.exports = {
             }
           };
         };
+
+        if(file) {
+          const imageName = userExist.imageUrl.split('/').pop();
+          let handleError;
+
+          if(userExist.imageUrl === defaultUserImage) {
+            const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, userBlockContainer);
+            handleError = restResponse;
+
+            resBody.imageUrl = url;
+          }
+
+          if(userExist.imageUrl !== defaultUserImage) {
+            const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, imageName, userBlockContainer);
+            handleError = restResponse;
+
+            resBody.imageUrl = url;
+          }
+
+          if(handleError.error) {
+            await transaction.rollback();
+            return {
+              error: handleError.error,
+              statusCode: handleError.statusCode,
+              message: messages.generalMessages.server,
+              validationErrors: formatErrorMessages('upload', handleError.message),
+            }
+          }
+        }
 
         // Update User
         const data = await User.update({...resBody}, {
@@ -687,6 +761,36 @@ module.exports = {
         };
       }
 
+      // Getting user
+      // User Exist
+      const userExist = await User.findOne({
+        where: {
+          [Op.and]: [
+            {
+              id
+            },
+            {
+              id: {
+                [Op.ne]: 1
+              }
+            },
+            {
+              status: true,
+            }
+          ],
+        },
+      });
+
+      if(!userExist) {
+        return {
+          error: true,
+          statusCode: 404,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('user', messages.user.errors.not_found),
+        }
+      };
+
+
       // Username Validation
       if(resBody.username) {
         const usernameExist = await User.findOne({
@@ -728,6 +832,34 @@ module.exports = {
           }
         };
       };
+
+      if(file) {
+        const imageName = userExist.imageUrl.split('/').pop();
+        let handleError;
+
+        if(userExist.imageUrl === defaultUserImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, userBlockContainer);
+          handleError = restResponse;
+
+          resBody.imageUrl = url;
+        }
+
+        if(userExist.imageUrl !== defaultUserImage) {
+          const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, imageName, userBlockContainer);
+          handleError = restResponse;
+
+          resBody.imageUrl = url;
+        }
+
+        if(handleError.error) {
+          return {
+            error: handleError.error,
+            statusCode: handleError.statusCode,
+            message: messages.generalMessages.server,
+            validationErrors: formatErrorMessages('upload', handleError.message),
+          }
+        }
+      }
 
       const data = await User.update(resBody, {
         where: {
@@ -885,6 +1017,21 @@ module.exports = {
             },
             transaction
           });
+        }
+
+        // delete the user image in the azure container
+        if(userExist.imageUrl !== defaultUserImage) {
+          const imageName = userExist.imageUrl.split('/').pop();
+          const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, userBlockContainer);
+
+          if(error) {
+            await transaction.rollback();
+            return {
+              error,
+              statusCode,
+              message
+            }
+          }
         }
 
         await transaction.commit();
