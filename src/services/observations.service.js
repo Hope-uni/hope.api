@@ -86,7 +86,7 @@ const addObservation = async ({ description, patientId }, payload) => {
   const transaction = await sequelize.transaction();
   try {
 
-    const { error:verifyPatientError, message:verifyPatientMessage, statusCode: verifyPatientStatus, patientExist } = await patientBelongsToTherapist(payload, patientId,transaction);
+    const { error:verifyPatientError, message:verifyPatientMessage, statusCode: verifyPatientStatus, patientExist } = await patientBelongsToTherapist(payload, patientId);
 
     if(verifyPatientError) {
       await transaction.rollback();

@@ -1,10 +1,19 @@
-const { User, HealthRecord, Patient, UserRoles, TutorTherapist, Phase } = require('@models/index');
+const {
+  User,
+  HealthRecord,
+  Patient,
+  UserRoles,
+  TutorTherapist,
+  Phase,
+ AchievementsHealthRecord,
+ Achievement
+} = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages } = require('@utils');
 const { roleConstants } = require('@constants');
 
 
-const patientBelongsToTherapist = async (payload, patientId, transaction) => {
+const patientBelongsToTherapist = async (payload, patientId) => {
   try {
 
     // Variables
@@ -67,7 +76,15 @@ const patientBelongsToTherapist = async (payload, patientId, transaction) => {
           include: [
             {
               model: Phase,
-            }
+            },
+            {
+              model: AchievementsHealthRecord,
+              attributes: ['id'],
+              include: {
+                model: Achievement,
+                attributes: ['id', 'name', 'imageUrl']
+              }
+            },
           ]
         }
       ]
@@ -88,7 +105,6 @@ const patientBelongsToTherapist = async (payload, patientId, transaction) => {
     }
   } catch(error) {
     logger.error(`${messages.obsevations.service.base}: ${error}`);
-    await transaction.rollback();
     return {
       error: true,
       statusCode: 500,
