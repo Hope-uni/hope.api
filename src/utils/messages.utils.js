@@ -800,7 +800,7 @@ const messages = {
         patient_without_therapist: (patient) => {
           return `El paciente ${patient} no tiene un terapeuta asignado`;
         },
-        non_activity_patient: `Paciente sin historial de actividades realizadas o en proceso`,
+        non_activity_patient: `Sin actividad`,
       },
       not_found: `Actividad no encontrada`,
       in_use: {
