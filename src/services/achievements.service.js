@@ -11,6 +11,7 @@ const {
   pagination,
   azureImages
 } = require('@utils');
+const { patientBelongsToTherapist } = require('@helpers');
 
 
 
@@ -21,16 +22,37 @@ module.exports = {
     try {
 
       // Variables
+      let avoidTheseIds; // This variable will save all the ids from the achievements that are associated with phases or the patient.
       let whereCondition = {
         status: true,
       }
 
+      // Filter by name
       if(query.name) {
         whereCondition = {
           ...whereCondition,
           name: {
             [Op.iLike]: `%${query.name}%`
           }
+        }
+      }
+
+      // Filter Achievements not assigned to the patient.
+      if(query.patientId) {
+
+        const { error:verifyPatientError, message:verifyPatientMessage, statusCode: verifyPatientStatus, patientExist } = await patientBelongsToTherapist(payload, query.patientId);
+
+        if(verifyPatientError) {
+          return {
+            error:verifyPatientError,
+            statusCode: verifyPatientStatus,
+            message: verifyPatientMessage
+          }
+        }
+
+
+        if(patientExist.HealthRecord.AchievementsHealthRecords.length > 0) {
+          avoidTheseIds = patientExist.HealthRecord.AchievementsHealthRecords.map((item) => (item.Achievement.id))
         }
       }
 
@@ -43,16 +65,27 @@ module.exports = {
           attributes: ['id','achievementId'],
         });
 
+        // getting the achievements associated to phases
         const achievementIds = getAchievementIds.map((item) => (item.achievementId));
+        avoidTheseIds = avoidTheseIds ? [...avoidTheseIds, ...achievementIds] : achievementIds;
 
         // avoid show the phase Achievements
         whereCondition = {
           ...whereCondition,
           id: {
-            [Op.notIn]: achievementIds
+            [Op.notIn]: avoidTheseIds
           }
         };
+      }
 
+      // If the user logged is not a Therapist we just add the ids that the patient has already assigned and these ids will not be showed in the list
+      if(avoidTheseIds && avoidTheseIds.length > 0) {
+        whereCondition = {
+          ...whereCondition,
+          id: {
+            [Op.notIn]: avoidTheseIds
+          }
+        }
       }
 
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {

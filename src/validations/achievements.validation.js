@@ -67,6 +67,10 @@ module.exports = {
         'string.empty': messages.achievements.fields.name.empty,
         'string.trim': messages.achievements.fields.name.trim,
       }),
+      patientId: joi.number().positive().empty(' ').messages({
+        'number.base': messages.patient.fields.id.base,
+        'number.positive': messages.patient.fields.id.positive,
+      }),
     }).unknown(false).options({ abortEarly: false }).messages({
       'object.unknown': messages.generalMessages.unknown_object,
     });
