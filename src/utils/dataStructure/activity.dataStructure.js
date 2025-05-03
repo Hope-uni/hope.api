@@ -23,7 +23,7 @@ module.exports = {
       name: item.Activity.name ?? null,
       satisfactoryPoints: item.Activity.satisfactoryPoints ?? null,
       satisfactoryAttempts: item.satisfactoryAttempts ?? null,
-      progress: (item.satisfactoryAttempts / item.Activity.satisfactoryPoints) * 100,
+      progress: parseFloat(((item.satisfactoryAttempts / item.Activity.satisfactoryPoints) * 100).toFixed(2)),
       description: item.Activity.description ?? null,
       phase: {
         id: item.Activity.Phase.id,
@@ -44,7 +44,7 @@ module.exports = {
           name: activityFound.Activity.name ?? null,
           satisfactoryPoints: activityFound.Activity.satisfactoryPoints ?? null,
           satisfactoryAttempts: activityFound.satisfactoryAttempts ?? null,
-          progress: (activityFound.satisfactoryAttempts / activityFound.Activity.satisfactoryPoints) * 100,
+          progress: parseFloat(((activityFound.satisfactoryAttempts / activityFound.Activity.satisfactoryPoints) * 100).toFixed(2)),
           description: activityFound.Activity.description ?? null,
           phase: {
             id: activityFound.Activity.Phase.id,
