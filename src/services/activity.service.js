@@ -27,6 +27,7 @@ const {
   dataStructure,
   pagination
 } = require('@utils');
+const { getFullName } = require('../utils/dataStructure/fullName.dataStructure');
 
 
 module.exports = {
@@ -473,7 +474,7 @@ module.exports = {
             return {
               error: true,
               statusCode: 409,
-              message: messages.activity.errors.service.patient_without_therapist(dataStructure.getFullName(patientItem.Person)), // this message is a function that return the message with patient name
+              message: messages.activity.errors.service.patient_without_therapist(getFullName(patientItem.Person)), // this message is a function that return the message with patient name
               // and the getFullName has only one purpose like the function name says build the patient's fullname
             }
           }
@@ -485,7 +486,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: messages.activity.errors.service.activity_phase(dataStructure.getFullName(patientItem.Person)) // as ai mentioned before is the same purpose specify the patient name.
+            message: messages.activity.errors.service.activity_phase(getFullName(patientItem.Person)) // as ai mentioned before is the same purpose specify the patient name.
           }
         }
 
@@ -502,7 +503,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: `${messages.activity.errors.in_use.activityPatient}: ${dataStructure.getFullName(patientItem.Person)}`,
+            message: `${messages.activity.errors.in_use.activityPatient}: ${getFullName(patientItem.Person)}`,
           }
         }
 
@@ -520,7 +521,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: `${messages.activity.errors.service.already_completed} para el paciente: ${dataStructure.getFullName(patientItem.Person)}`,
+            message: `${messages.activity.errors.service.already_completed} para el paciente: ${getFullName(patientItem.Person)}`,
           }
         }
 
@@ -538,7 +539,7 @@ module.exports = {
           return {
             error: true,
             statusCode: 409,
-            message: messages.activity.errors.in_use.patient_activity_assigned(dataStructure.getFullName(patientItem.Person)),
+            message: messages.activity.errors.in_use.patient_activity_assigned(getFullName(patientItem.Person)),
           }
         }
 
@@ -569,7 +570,7 @@ module.exports = {
             return {
               error: true,
               statusCode: 409,
-              message: `${messages.activity.errors.service.create} para el paciente: ${dataStructure.getFullName(patientItem.Person)}`,
+              message: `${messages.activity.errors.service.create} para el paciente: ${getFullName(patientItem.Person)}`,
             }
           }
         } else {
@@ -603,7 +604,7 @@ module.exports = {
       }
 
     } catch (error) {
-      await transaction.rollback();
+      // await transaction.rollback();
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,

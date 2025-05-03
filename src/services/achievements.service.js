@@ -23,6 +23,7 @@ module.exports = {
 
       // Variables
       let avoidTheseIds; // This variable will save all the ids from the achievements that are associated with phases or the patient.
+      let achievementIds; // This variable is just for save achievements ids.
       let whereCondition = {
         status: true,
       }
@@ -54,9 +55,6 @@ module.exports = {
         if(patientExist.HealthRecord.AchievementsHealthRecords.length > 0) {
           avoidTheseIds = patientExist.HealthRecord.AchievementsHealthRecords.map((item) => (item.Achievement.id))
         }
-      }
-
-      if(payload.roles.includes(constants.THERAPIST_ROLE)) {
 
         const getAchievementIds = await Phase.findAll({
           where: {
@@ -66,7 +64,21 @@ module.exports = {
         });
 
         // getting the achievements associated to phases
-        const achievementIds = getAchievementIds.map((item) => (item.achievementId));
+        achievementIds = getAchievementIds.map((item) => (item.achievementId));
+        avoidTheseIds = avoidTheseIds ? [...avoidTheseIds, ...achievementIds] : achievementIds;
+      }
+
+      if(payload.roles.includes(constants.THERAPIST_ROLE) && !query.patientId) {
+
+        const getAchievementIds = await Phase.findAll({
+          where: {
+            status: true,
+          },
+          attributes: ['id','achievementId'],
+        });
+
+        // getting the achievements associated to phases
+        achievementIds = getAchievementIds.map((item) => (item.achievementId));
         avoidTheseIds = avoidTheseIds ? [...avoidTheseIds, ...achievementIds] : achievementIds;
 
         // avoid show the phase Achievements
