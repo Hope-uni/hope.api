@@ -440,8 +440,8 @@ module.exports = {
       teaDegree: getTeaDegree,
       currentPhase: getPhase,
       progress: {
-        generalProgress: parseFloat(data.generalProgress),
-        phaseProgress: parseFloat(data.phaseProgress),
+        generalProgress: data.generalProgress,
+        phaseProgress: data.phaseProgress,
       },
       observations: observationsGotit.length > 0 ?  observationsGotit : null,
       achievements: patientAchievements.length > 0 ? patientAchievements : null,
@@ -813,8 +813,8 @@ module.exports = {
         description: data.phase.description,
       },
       progress: {
-        generalProgress: parseFloat(data.generalProgress),
-        phaseProgress: parseFloat(data.phaseProgress)
+        generalProgress: data.generalProgress,
+        phaseProgress: data.phaseProgress
       }
     }
   },
