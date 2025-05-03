@@ -1134,9 +1134,13 @@ module.exports = {
 
       if(!data) {
         return {
-          error: true,
-          statusCode: 404,
+          error: false,
+          statusCode: 200,
           message: messages.activity.errors.service.non_activity_patient,
+          data: {
+            latestCompletedActivity: null,
+            currentActivity: null,
+          }
         }
       };
 
