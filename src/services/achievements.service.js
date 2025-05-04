@@ -665,7 +665,7 @@ module.exports = {
 
       const newData = await Achievement.findOne({
         where: {
-          id: data.id,
+          id: data.achievementId,
           status: true,
         }
       });
