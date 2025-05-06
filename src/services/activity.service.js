@@ -832,7 +832,7 @@ module.exports = {
         where: {
           id: activityId,
           status: true
-        }
+        },
       });
       if (!activityExist) {
         await transaction.rollback();
@@ -884,6 +884,12 @@ module.exports = {
           activityId,
           patientId: patientExist.id,
           status: true
+        },
+        include: {
+          model: Activity,
+          include: {
+            model: Phase
+          }
         }
       });
       if (!patientActivityExist) {
@@ -984,6 +990,7 @@ module.exports = {
         error: false,
         statusCode: 200,
         message: messages.activity.success.check_attempt,
+        data: dataStructure.checkActivityAnswerDataStructure(patientActivityExist),
       }
 
     } catch (error) {

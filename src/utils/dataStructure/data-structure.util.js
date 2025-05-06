@@ -793,6 +793,22 @@ module.exports = {
     return newData;
   },
 
+  checkActivityAnswerDataStructure(data) {
+    return {
+      id: data.Activity.id,
+      name: data.Activity.name,
+      description: data.Activity.description,
+      satisfactoryPoints: data.Activity.satisfactoryPoints,
+      satisfactoryAttempts: data.satisfactoryAttempts,
+      progress: ((data.satisfactoryAttempts / data.Activity.satisfactoryPoints) * 100).toFixed(2),
+      phase: {
+        id: data.Activity.Phase.id,
+        name: data.Activity.Phase.name,
+        description: data.Activity.Phase.description,
+      },
+    }
+  },
+
   // Observations Structure
   findObservationDataStructure(data) {
     return {

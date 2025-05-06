@@ -255,7 +255,7 @@ module.exports = {
         message: error.details[0].message
       });
 
-      const { error:dataError, statusCode, message } = await checkActivityAnswer(req.body, req.payload);
+      const { error:dataError, statusCode, message, data } = await checkActivityAnswer(req.body, req.payload);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -268,7 +268,8 @@ module.exports = {
       return res.status(statusCode).json({
         error: dataError,
         statusCode,
-        message
+        message,
+        data
       });
 
     } catch (error) {
