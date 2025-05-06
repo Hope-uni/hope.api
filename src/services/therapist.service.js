@@ -219,6 +219,7 @@ module.exports = {
           model: User,
           where: {
             status: true,
+            userVerified: true,
           },
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'status', 'password']
