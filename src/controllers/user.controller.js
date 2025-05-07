@@ -96,7 +96,8 @@ module.exports = {
         message: messages.generalMessages.bad_request,
         validationsErrors: formatJoiMessages(error)
       });
-      const { error:dataError, statusCode, message, validationErrors, data } = await createUser(req.body);
+
+      const { error:dataError, statusCode, message, validationErrors, data } = await createUser(req.body,null, req.file);
 
       if(dataError) {
         return res.status(statusCode).json({
@@ -138,7 +139,7 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      const { error:dataError, statusCode, message, validationErrors, data} = await updateUser(req.params.id,req.body);
+      const { error:dataError, statusCode, message, validationErrors, data} = await updateUser(req.params.id,req.body, null ,req.file);
 
       if(dataError) {
         return res.status(statusCode).json({

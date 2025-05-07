@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Category, sequelize } = require('@models/index');
+const { Category, Pictogram, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages, pagination, formatErrorMessages, azureImages } = require('@utils');
 const { categoryContainer, defaultCategoryImage } = require('@config/variables.config');
@@ -336,6 +336,23 @@ module.exports = {
           error: true,
           statusCode: 404,
           message: messages.category.errors.not_found,
+        }
+      }
+
+      // Validate if category is used it in Pictogram table
+      const isCategoryInPictogram = await Pictogram.findOne({
+        where: {
+          categoryId: id,
+          status: true,
+        }
+      });
+
+      if(isCategoryInPictogram) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.category.errors.in_use.delete,
         }
       }
 

@@ -494,12 +494,13 @@ const messages = {
         base: `Hubo un error en el servicio de Categoría`,
         create: `Categoría no creada`,
         update: `Categoría no actualizada`,
-        delete: `Categoría no fue eliminada`
+        delete: `Categoría no fue eliminada`,
       },
       not_found: `Categoría no encontrada`,
       in_use: {
         name: `Nombre de categoría ya está en uso`,
-        icon: `Icono ya está en uso`
+        icon: `Icono ya está en uso`,
+        delete: `La categoría que intenta eliminar esta asociada a pictogramas`,
       },
     },
     success: {
@@ -547,6 +548,8 @@ const messages = {
       not_found: `Pictograma no encontrado`,
       in_use: {
         name: `Nombre de pictograma ya está en uso`,
+        delete: `El pictograma que intenta eliminar esta asociado a pictogramas personalizados`,
+        in_activity: `El pictograma que intenta eliminar esta asociado con actividades`,
       },
     },
     success: {

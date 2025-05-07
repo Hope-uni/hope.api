@@ -218,7 +218,7 @@ module.exports = {
   /* eslint-disable no-param-reassign */
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
-  async createUser(body,transaction) {
+  async createUser(body,transaction, file) {
     try {
 
       // Destructuring data
@@ -269,8 +269,8 @@ module.exports = {
         const hashedPassword = await bcrypt.hash(passwordTemp, salt);
 
         // add image to azure
-        if(resBody.file) {
-          const { error, statusCode, message, url } = await azureImages.uploadImage(resBody.file, userBlockContainer);
+        if(file) {
+          const { error, statusCode, message, url } = await azureImages.uploadImage(file, userBlockContainer);
 
           if(error) {
             await transaction.rollback();
@@ -547,7 +547,7 @@ module.exports = {
   },
 
 
-  async updateUser(id, body, transaction) {
+  async updateUser(id, body,transaction, fileuser) {
     try {
       // Destructuring data
       const {
@@ -676,19 +676,19 @@ module.exports = {
           };
         };
 
-        if(file) {
+        if(fileuser) {
           const imageName = userExist.imageUrl.split('/').pop();
           let handleError;
 
           if(userExist.imageUrl === defaultUserImage) {
-            const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, null, userBlockContainer);
+            const { url, ...restResponse } = await azureImages.updateAndUploadImage(fileuser, null, userBlockContainer);
             handleError = restResponse;
 
             resBody.imageUrl = url;
           }
 
           if(userExist.imageUrl !== defaultUserImage) {
-            const { url, ...restResponse } = await azureImages.updateAndUploadImage(file, imageName, userBlockContainer);
+            const { url, ...restResponse } = await azureImages.updateAndUploadImage(fileuser, imageName, userBlockContainer);
             handleError = restResponse;
 
             resBody.imageUrl = url;

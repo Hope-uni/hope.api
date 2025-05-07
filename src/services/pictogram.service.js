@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Pictogram, Category, sequelize } = require('@models/index');
+const { Pictogram, Category, PatientPictogram, Activity, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
 const {
   messages,
@@ -482,6 +482,42 @@ module.exports = {
         }
       }
 
+      // Check if pictogram has been used by PatientPictogram Table
+      const isPictogramInPatientPictogram = await PatientPictogram.findOne({
+        where: {
+          pictogramId: id,
+          status: true,
+        }
+      });
+
+      if(isPictogramInPatientPictogram) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.pictogram.errors.in_use.delete
+        }
+      }
+
+      // Check if pictogram has been used in activity.
+      const isPictogramInActivity = await Activity.findAll({
+        where: {
+          status: true,
+        }
+      });
+
+      /* eslint-disable */
+      for(const item of isPictogramInActivity) {
+        const pictograms = item.pictogramSentence.split("-");
+        if(pictograms.includes(id)) {
+          await transaction.rollback();
+          return {
+            error: true,
+            statusCode: 409,
+            message: messages.pictogram.errors.in_use.in_activity
+          }
+        }
+      }
 
       const pictogramUpdated = await Pictogram.update(
         {
