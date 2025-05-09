@@ -526,9 +526,7 @@ const messages = {
         trim: `Nombre del pictograma contiene espacios adicionales`,
       },
       image: {
-        base: `Imagen del pictograma debe ser un texto válido`,
-        required: `Imagen del pictograma es requerido`,
-        empty: `Imagen del pictograma no debe estar vacío`,
+        required: `Imagen del pictograma es requerida`,
       },
     },
     errors: {

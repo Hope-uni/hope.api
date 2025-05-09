@@ -96,16 +96,9 @@ const deleteAzureImage = async (blobName, containerName) => {
     const blobClient = containerClient.getBlobClient(blobName);
     const blobClientExist = await blobClient.exists();
 
-    if(!blobClientExist) {
-      return {
-        error: true,
-        statusCode: 404,
-        message: messages.errors.not_found,
-      }
-    };
-
-
-    await blobClient.delete();
+    if(blobClientExist) {
+      await blobClient.delete();
+    }
 
     return {
       error: false
