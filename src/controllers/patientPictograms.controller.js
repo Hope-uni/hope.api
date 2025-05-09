@@ -119,7 +119,7 @@ module.exports = {
           error: true,
           statusCode: 422,
           message: messages.generalMessages.bad_request,
-          validationErrors: formatErrorMessages('imageUrl', messages.pictogram.fields.image.required)
+          validationErrors: formatErrorMessages('imageFile', messages.pictogram.fields.image.required)
         })
       }
 
