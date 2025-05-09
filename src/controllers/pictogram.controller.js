@@ -1,8 +1,9 @@
 const logger = require('@config/logger.config');
 const {
   messages,
-  formatJoiMessages
-} = require('@utils/index');
+  formatJoiMessages,
+  formatErrorMessages
+} = require('@utils');
 const {
   allPictograms,
   findPictogram,
@@ -13,7 +14,7 @@ const {
 const {
   pictogramEntry,
   idEntry
-} = require('@validations/index');
+} = require('@validations');
 
 
 
@@ -95,6 +96,15 @@ module.exports = {
         message: messages.generalMessages.bad_request,
         validationErrors: formatJoiMessages(error),
       });
+
+      if(!req.file) {
+        return res.status(400).json({
+          error: true,
+          statusCode: 422,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatErrorMessages('imageUrl', messages.pictogram.fields.image.required)
+        })
+      }
 
       const { error:dataError, statusCode, message, validationErrors, data } = await createPictogram(req.body, req.file);
       if(dataError) {
