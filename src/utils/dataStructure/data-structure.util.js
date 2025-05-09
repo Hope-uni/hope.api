@@ -19,6 +19,7 @@ module.exports = {
   and organizes it into a new structure. Here's a breakdown of what it does: */
   async userDataStructure(data) {
 
+    // Variables
     const newData = [];
 
      /* eslint-disable no-restricted-syntax */
@@ -52,6 +53,7 @@ module.exports = {
         email: iterator.email,
         roles: rolesData ?? null,
         isVerified: iterator.userVerified,
+        imageUrl: iterator.imageUrl
       }
 
 
