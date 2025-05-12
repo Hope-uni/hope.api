@@ -1,11 +1,15 @@
 const joi = require('joi');
-const { messages } = require('@utils/index');
+const { messages } = require('@utils');
+const { createPersonObjectFields, updatePersonObjectFields } = require('./person.validation');
+const { createUserObjectFields, updateUserObjectFields } = require('./user.validation');
 
 module.exports = {
 
   createTherapistValidation(data) {
     /* eslint-disable prefer-regex-literals */
     const schema = joi.object().keys({
+      ...createPersonObjectFields,
+      ...createUserObjectFields,
       identificationNumber: joi
       .string()
       .required()
@@ -33,6 +37,8 @@ module.exports = {
 
   updateTherapistValidation(data) {
     const schema = joi.object().keys({
+      ...updatePersonObjectFields,
+      ...updateUserObjectFields,
       id: joi.number().positive().empty(' ').messages({
         'number.base': messages.therapist.fields.id.base,
         'number.positive': messages.therapist.fields.id.positive,

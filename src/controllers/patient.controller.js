@@ -10,7 +10,7 @@ const {
   changeTherapist,
   assignTherapist
 } = require('@services/patient.service');
-const { messages, userPersonEntries, formatJoiMessages } = require('@utils');
+const { messages, formatJoiMessages } = require('@utils');
 const { patientEntry, idEntry, paginationEntry, therapistEntry } = require('@validations');
 
 module.exports = {
@@ -179,35 +179,14 @@ module.exports = {
 
   async createPatient(req,res) {
     try {
-      // Destructuring Object
-      const { tutorId, therapistId, phaseId, teaDegreeId, observations, ...resBody } = req.body;
-
       // Patient joi validation
-      const { error } = patientEntry.createPatientValidation({ tutorId, therapistId, phaseId, teaDegreeId, observations});
-
-
-      // User and Person joi validation
-      const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
-
-      if(error || customError) {
-        const userPersonErrors = customError ? customError.details : [];
-        const patientErrors = error ? error.details : [];
-
-        const joinErrors = {
-          details: [
-            ...userPersonErrors,
-            ...patientErrors
-          ]
-        }
-
-        return res.status(400).json({
-          error: true,
-          statusCode: 422,
-          message: messages.generalMessages.bad_request,
-          validationErrors: formatJoiMessages(joinErrors),
-        });
-      }
-
+      const { error } = patientEntry.createPatientValidation(req.body);
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
       const { error:dataError, statusCode, message, validationErrors, data } = await create(req.body, req.payload, req.file);
       if(dataError) {
@@ -237,33 +216,16 @@ module.exports = {
 
   async updatePatient(req,res) {
     try {
-      // Destructuring Object
-      const { tutorId,...resBody } = req.body;
 
       // Patient joi validation
-      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, tutorId});
+      const { error } = patientEntry.updatePatientValidation({ id: req.params.id, ...req.body});
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
-      // User and Person joi validation
-      const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
-
-      if(error || customError) {
-        const userPersonErrors = customError ? customError.details : [];
-        const patientErrors = error ? error.details : [];
-
-        const joinErrors = {
-          details: [
-            ...userPersonErrors,
-            ...patientErrors
-          ]
-        }
-
-        return res.status(400).json({
-          error: true,
-          statusCode: 422,
-          message: messages.generalMessages.bad_request,
-          validationErrors: formatJoiMessages(joinErrors),
-        });
-      }
 
       const { error:dataError, statusCode, message, validationErrors, data } = await update(req.params.id, req.body, req.payload, req.file);
       if(dataError) {
