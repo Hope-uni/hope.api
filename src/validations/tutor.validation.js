@@ -1,11 +1,15 @@
 const joi = require('joi');
 const messages = require('@utils/messages.utils');
+const { createPersonObjectFields, updatePersonObjectFields } = require('./person.validation');
+const { createUserObjectFields, updateUserObjectFields } = require('./user.validation');
 
 module.exports = {
 
   createTutorValidation(data) {
     /* eslint-disable prefer-regex-literals */
     const schema = joi.object().keys({
+      ...createPersonObjectFields,
+      ...createUserObjectFields,
       identificationNumber: joi
       .string()
       .required()
@@ -39,6 +43,8 @@ module.exports = {
 
   updateTutorValidation(data) {
     const schema = joi.object().keys({
+      ...updatePersonObjectFields,
+      ...updateUserObjectFields,
       id: joi.number().positive().empty(' ').messages({
         'number.base': messages.tutor.fields.id.base,
         'number.positive': messages.tutor.fields.id.positive,
