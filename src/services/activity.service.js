@@ -885,12 +885,6 @@ module.exports = {
           patientId: patientExist.id,
           status: true
         },
-        include: {
-          model: Activity,
-          include: {
-            model: Phase
-          }
-        }
       });
       if (!patientActivityExist) {
         await transaction.rollback();
@@ -986,11 +980,25 @@ module.exports = {
       // Commit transaction
       await transaction.commit();
 
+      const getNewPatientActivityStatus = await PatientActivity.findOne({
+        where: {
+          activityId,
+          patientId: patientExist.id,
+          status: true
+        },
+        include: {
+          model: Activity,
+          include: {
+            model: Phase
+          }
+        }
+      });
+
       return {
         error: false,
         statusCode: 200,
         message: messages.activity.success.check_attempt,
-        data: dataStructure.checkActivityAnswerDataStructure(patientActivityExist),
+        data: dataStructure.checkActivityAnswerDataStructure(getNewPatientActivityStatus),
       }
 
     } catch (error) {

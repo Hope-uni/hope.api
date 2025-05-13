@@ -51,9 +51,9 @@ module.exports = {
       });
 
       if(validUser.userVerified === false && req.path !== '/change-password') {
-        return res.status(401).json({
+        return res.status(403).json({
           error: true,
-          statusCode: 401,
+          statusCode: 403,
           message: messages.user.errors.user_verified,
           data: {
             role: {

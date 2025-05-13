@@ -1,5 +1,5 @@
 const logger = require('@config/logger.config');
-const { messages, userPersonEntries, formatJoiMessages } = require('@utils/index');
+const { messages, formatJoiMessages } = require('@utils');
 const {
   all,
   findOne,
@@ -123,33 +123,15 @@ module.exports = {
   async createTherapist(req,res) {
     try {
 
-      // destructuring object
-      const { phoneNumber, identificationNumber, ...resBody } = req.body;
-
-      // User and Person joi validation
-      const { error:customError } = userPersonEntries.userPersonCreateValidation(resBody);
 
       // Therapist joi validation
-      const { error } = therapistEntry.createTherapistValidation({ phoneNumber, identificationNumber });
-
-      if(error || customError) {
-        const personError = customError ? customError.details : [];
-        const therapistError = error ? error.details : [];
-
-        const joinError = {
-          details: [
-            ...personError,
-            ...therapistError
-          ]
-        }
-
-        return res.status(400).json({
-          error: true,
-          statusCode: 422,
-          message: messages.generalMessages.bad_request,
-          validationErrors: formatJoiMessages(joinError),
-        });
-      }
+      const { error } = therapistEntry.createTherapistValidation(req.body);
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
 
       const { error:dataError, statusCode, validationErrors, message, data } = await create(req.body, req.file);
@@ -179,38 +161,18 @@ module.exports = {
     }
   },
 
-  /* This `async updateTherapist(req, res)` function is responsible for handling the updating of a
-  therapist's information. Here is a breakdown of what the function is doing: */
+
   async updateTherapist(req,res) {
     try {
 
-      // destructuring obejct
-      const { phoneNumber, identificationNumber,...resBody } = req.body;
-
-      // User and Person joi validation
-      const { error:customError } = userPersonEntries.userPersonUpdateValidation(resBody);
-
       // Therapist joi validation
-      const { error } = therapistEntry.updateTherapistValidation({id:req.params.id, phoneNumber, identificationNumber });
-
-      if(error || customError) {
-        const personError = customError ? customError.details : [];
-        const therapistError = error ? error.details : [];
-
-        const joinError = {
-          details: [
-            ...personError,
-            ...therapistError
-          ]
-        }
-
-        return res.status(400).json({
-          error: true,
-          statusCode: 422,
-          message: messages.generalMessages.bad_request,
-          validationErrors: formatJoiMessages(joinError),
-        });
-      }
+      const { error } = therapistEntry.updateTherapistValidation({id:req.params.id, ...req.body });
+      if(error) return res.status(400).json({
+        error: true,
+        statusCode: 422,
+        message: messages.generalMessages.bad_request,
+        validationErrors: formatJoiMessages(error),
+      });
 
 
       const { error:dataError, message, statusCode,  validationErrors, data } = await update(req.params.id,req.body, req.payload, req.file);

@@ -1,12 +1,15 @@
 const joi = require('joi');
 const { messages } = require('@utils');
 const { paginationFields } = require('./pagination.validation'); // Pagination fields is for add this fields to any joi model and not use the entire joi model just for pagination.
-
+const { createPersonObjectFields, updatePersonObjectFields } = require('./person.validation');
+const { createUserObjectFields, updateUserObjectFields } = require('./user.validation');
 
 module.exports = {
 
   createPatientValidation(data) {
     const schema = joi.object().keys({
+      ...createPersonObjectFields,
+      ...createUserObjectFields,
       tutorId: joi.number().positive().required().messages({
         'any.required': messages.tutor.fields.id.required,
         'number.base': messages.tutor.fields.id.base,
@@ -40,6 +43,8 @@ module.exports = {
 
   updatePatientValidation(data) {
     const schema = joi.object().keys({
+      ...updatePersonObjectFields,
+      ...updateUserObjectFields,
       id: joi.number().positive().required().messages({
         'any.required': messages.patient.fields.id.required,
         'number.base': messages.patient.fields.id.base,
