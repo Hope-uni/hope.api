@@ -8,7 +8,7 @@ const {
 } = require('@controllers/pictogram.controller');
 const { verifyToken, rolePermissions } = require('@middlewares');
 const {
-  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE },
+  roleConstants: { SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE, TUTOR_ROLE },
   permissionsConstants: {
     LIST_PICTOGRAM,
     GET_PICTOGRAM,
@@ -21,7 +21,7 @@ const multer = require('multer');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[LIST_PICTOGRAM]), all);
+router.get('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE, TUTOR_ROLE],[LIST_PICTOGRAM]), all);
 router.get('/:id', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE, THERAPIST_ROLE],[GET_PICTOGRAM]), findOne);
 
 router.post('/', verifyToken, rolePermissions([SUPERADMIN_ROLE, ADMIN_ROLE],[CREATE_PICTOGRAM]),upload.single('imageFile'), create);
