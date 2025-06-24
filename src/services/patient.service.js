@@ -42,46 +42,9 @@ module.exports = {
     try {
 
       // Variables
-      let therapistWhereCondition = {
-        status: true,
-      }
-
-      if(query.therapistId) {
-        const therapistResponse = await TutorTherapist.findOne({
-          where: {
-            id: parseInt(query.therapistId)
-          },
-          include: [
-            {
-              model: User,
-              include: [
-                {
-                  model: UserRoles,
-                  where: {
-                    roleId: 3
-                  }
-                }
-              ]
-            }
-          ]
-        });
-
-        if(!therapistResponse) {
-          return {
-            error: true,
-            statusCode: 404,
-            message: messages.therapist.errors.not_found
-          }
-        }
-
-        therapistWhereCondition = {
-          ...therapistWhereCondition,
-          id: therapistResponse.id
-        }
-      }
 
       // Patient include variable
-      let conditinalInclude = [
+      let conditionalInclude = [
         {
           model: Person,
           attributes: {
@@ -113,18 +76,6 @@ module.exports = {
         {
           model: TutorTherapist,
           as: 'tutor',
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'status']
-          },
-          include: {
-            model: Person,
-            attributes: ['id', 'firstName', 'surname']
-          }
-        },
-        {
-          model: TutorTherapist,
-          as: 'therapist',
-          where: therapistWhereCondition,
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'status']
           },
@@ -168,10 +119,62 @@ module.exports = {
         },
       ];
 
+      if(query.therapistId) {
+        const therapistResponse = await TutorTherapist.findOne({
+          where: {
+            id: parseInt(query.therapistId)
+          },
+          include: [
+            {
+              model: User,
+              include: [
+                {
+                  model: UserRoles,
+                  where: {
+                    roleId: 3
+                  }
+                }
+              ]
+            }
+          ]
+        });
+
+        if(!therapistResponse) {
+          return {
+            error: true,
+            statusCode: 404,
+            message: messages.therapist.errors.not_found
+          }
+        }
+
+        // Build the therapist model for the conditionalInclude object;
+        const therapistWhereCondition = {
+          model: TutorTherapist,
+          as: 'therapist',
+          where: {
+            id: therapistResponse.id,
+            status: true,
+          },
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'status']
+          },
+          include: {
+            model: Person,
+            attributes: ['id', 'firstName', 'surname']
+          }
+        };
+
+        // assign therapist condition
+        conditionalInclude = [
+          ...conditionalInclude,
+          therapistWhereCondition
+        ]
+      }
+
       // validate if activityId query was retrieved in the request. This query param will allow us to get all patients that has this activity.
       if(query.activityId) {
-        conditinalInclude = [
-          ...conditinalInclude,
+        conditionalInclude = [
+          ...conditionalInclude,
           {
             model: PatientActivity,
             where: {
@@ -185,8 +188,8 @@ module.exports = {
 
       // This query param will allow us to get all patients that has an activity assigned
       if(!query.activityId && query.hasActiveActivity && query.hasActiveActivity === 'true') {
-        conditinalInclude = [
-          ...conditinalInclude,
+        conditionalInclude = [
+          ...conditionalInclude,
           {
             model: PatientActivity,
             where: {
@@ -207,7 +210,7 @@ module.exports = {
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
-          include: conditinalInclude,
+          include: conditionalInclude,
         });
 
         // Return Patient

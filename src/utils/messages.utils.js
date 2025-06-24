@@ -792,6 +792,8 @@ const messages = {
         already_completed: `La actividad ya fue completada`,
         delete_assigned_activity: `La actividad que desea eliminar, esta asignada a un paciente`,
         incomplete_phase_score: 'El paciente no ha completado los requerimientos necesarios para el cambio de fase',
+        activity_doesnt_belong: 'Solo el terapeuta que creó esta actividad puede eliminarla',
+        patient_not_available: `Uno de los pacientes que esta intentando asignar la actividad no existe, porfavor verifique que todos los pacientes esten en el sistema`,
         activity_phase: (patient) => {
           return `La actividad que desea asignarle al paciente ${patient} no pertenece a la fase que el paciente esta actualmente`
         },
