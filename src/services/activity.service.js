@@ -463,7 +463,7 @@ module.exports = {
           return {
             error:true,
             statusCode:409,
-            message: `${messages.patient.errors.not_found} con el id: ${element}`
+            message: messages.activity.errors.service.patient_not_available
           }
         }
 
@@ -634,7 +634,10 @@ module.exports = {
 
       // Activity exist validation
       const activityExist = await Activity.findOne({
-        where: whereCondition
+        where: {
+          id,
+          status: true,
+        }
       });
       if(!activityExist) {
         await transaction.rollback();
@@ -642,6 +645,19 @@ module.exports = {
           error: true,
           statusCode: 404,
           message: messages.activity.errors.not_found,
+        }
+      }
+
+      // Verify if activity belongs to therapist
+      const activityBelongsToTherapist = await Activity.findOne({
+        where: whereCondition
+      });
+      if(!activityBelongsToTherapist) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.activity.errors.service.activity_doesnt_belong,
         }
       }
 
