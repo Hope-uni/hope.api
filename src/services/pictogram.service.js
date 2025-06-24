@@ -8,7 +8,7 @@ const {
   dataStructure,
   azureImages
 } = require('@utils');
-const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
+const { pictogramContainer, defaultPictogramImage } = require('@config/variables.config');
 
 
 /* eslint-disable radix */
