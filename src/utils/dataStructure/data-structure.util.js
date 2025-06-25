@@ -833,6 +833,11 @@ module.exports = {
       progress: {
         generalProgress: data.generalProgress,
         phaseProgress: data.phaseProgress
+      },
+      achievement: {
+        id: data.phase.Achievement.id,
+        name: data.phase.Achievement.name,
+        imageUrl: data.phase.Achievement.imageUrl
       }
     }
   },

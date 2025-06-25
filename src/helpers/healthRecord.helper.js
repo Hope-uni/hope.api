@@ -1,4 +1,4 @@
-const { Phase, Patient, HealthRecord, TeaDegree, PatientActivity,Activity, Observation } = require('@models/index');
+const { Phase, Patient, HealthRecord, TeaDegree, PatientActivity,Activity, Observation, Achievement, HealthRecordPhase } = require('@models/index');
 const logger = require('@config/logger.config');
 const { messages } = require('@utils');
 
@@ -33,6 +33,9 @@ module.exports = {
                 model: Phase,
                 attributes: {
                   exclude: ['createdAt','updatedAt'],
+                },
+                include: {
+                  model: Achievement
                 }
               },
               {
@@ -40,6 +43,9 @@ module.exports = {
                 attributes: {
                   exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
                 }
+              },
+              {
+                model: HealthRecordPhase,
               }
             ],
           }
@@ -71,13 +77,22 @@ module.exports = {
       let generalProgress = 0;
       let phaseProgress = 0;
       // General Progress
-      const totalPhases = phaseData.count;
+      const totalPhases = phaseData.count; // 6
       let phaseIndex = 0;
 
-      if(patientData.HealthRecord !== null && patientData.HealthRecord.Phase !== null) {
-        phaseIndex = phaseData.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id);
+      if (patientData.HealthRecord !== null && patientData.HealthRecord.Phase !== null) {
+        phaseIndex = phaseData.rows.findIndex(item => item.id === patientData.HealthRecord.Phase.id); // 0 1 2 3 4 5
 
-        generalProgress = parseFloat(((phaseIndex + 1) / totalPhases) * 100).toFixed(2); // general progress value
+        if (phaseIndex === 0) {
+          generalProgress = 0
+        }
+
+        if ((phaseIndex + 1) === totalPhases && patientData.HealthRecord.HealthRecordPhase && patientData.HealthRecord.HealthRecordPhase.phaseCompleted === true) {
+          generalProgress = 100;
+        } else {
+          generalProgress = parseFloat(((phaseIndex) / totalPhases) * 100).toFixed(2); // general progress value
+        }
+
       }
 
       // Phase progress: phase progress is base in how many activities the patient has done in his current phase.

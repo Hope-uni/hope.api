@@ -1,7 +1,8 @@
 const { Patient, TutorTherapist, HealthRecord, Person } = require('@models/index');
 const logger = require('@config/logger.config');
-const { messages } = require('@utils/index');
 const { getFullName } = require('@utils/dataStructure/index');
+const { messages } = require('@utils');
+const { getAge } = require('@utils/dates.util');
 
 
 module.exports = {
@@ -52,6 +53,7 @@ module.exports = {
         imageUrl: imageProfile,
         address: patientResponse.Person.address,
         birthday: patientResponse.Person.birthday,
+        age: getAge(patientResponse).Person.dataValues.age,
         gender: patientResponse.Person.gender,
         isMonochrome: patientResponse.HealthRecord.isMonochrome
       }
@@ -115,6 +117,7 @@ module.exports = {
         telephone: tutorTherapistResponse.telephone ? `${tutorTherapistResponse.telephone}` : null,
         address: tutorTherapistResponse.Person.address,
         birthday: tutorTherapistResponse.Person.birthday,
+        age: getAge(tutorTherapistResponse).Person.dataValues.age,
         gender: tutorTherapistResponse.Person.gender,
       }
 
