@@ -210,13 +210,6 @@ module.exports = {
           description: item.Phase.description,
         },
       })) : null,
-      /*
-        Lista de actividaes creadas por el terapueta
-        name
-        description
-        points
-        fase
-      */
     }
 
     return element;
@@ -233,6 +226,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname ?? null,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday ?? null,
+      age: dates.getAge(data).Person.dataValues.age,
       imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
@@ -339,6 +333,7 @@ module.exports = {
       secondSurname: data.Person.secondSurname ?? null,
       gender: data.Person.gender ? `${data.Person.gender.charAt(0).toUpperCase() + data.Person.gender.slice(1)}` : null,
       birthday: data.Person.birthday ?? null,
+      age: dates.getAge(data).Person.dataValues.age,
       imageUrl: data.User.imageUrl ?? null,
       username: data.User.username,
       email: data.User.email,
