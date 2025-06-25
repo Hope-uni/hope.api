@@ -1,4 +1,4 @@
-const { Phase, PatientActivity, HealthRecord, Activity, sequelize } = require('@models/index');
+const { Phase, PatientActivity, HealthRecord, Activity,HealthRecordPhase, AchievementsHealthRecord, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { patientBelongsToTherapist, getProgress } = require('@helpers');
@@ -226,6 +226,28 @@ module.exports = {
         }
       }
 
+    // Update HealthRecordPhase for change the phaseCompleted to true before create new HealthRecordPhase
+      const updateHealthRecordPhaseResponse = await HealthRecordPhase.update({
+        phaseCompleted: true,
+      },{
+        where: {
+          healthRecordId: patientExist.HealthRecord.id,
+          phaseId: patientExist.HealthRecord.Phase.id,
+        },
+        transaction
+      });
+
+      if(!updateHealthRecordPhaseResponse) {
+        logger.error(`There was an error in phaseShifting: the current HealthRecordPhase was not update with the phaseCompleted to TRUE`);
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.phase.errors.service.phase_changed
+        }
+      }
+
+
       // Update Patient in order to change his phase
       const data = await HealthRecord.update({
         phaseId: phaseExist[getCurrentPhaseIndex + 1].id
@@ -237,6 +259,39 @@ module.exports = {
       });
 
       if(!data) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.phase.errors.service.phase_changed
+        }
+      }
+
+      // Add phase achievement to AchievementHealthRecord
+      const addNewAchivementToPatient = await AchievementsHealthRecord.create({
+        healthRecordId: patientExist.HealthRecord.id,
+        achievementId: patientExist.HealthRecord.Phase.achievementId
+      }, { transaction });
+
+      if(!addNewAchivementToPatient) {
+        logger.error(`There was an error in phaseShifting: phase achievement was not add to AchievementsHealthRecord.`);
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.phase.errors.service.phase_changed
+        }
+      }
+
+      // Create new register in healthRecordPhase
+      const newHealthRecordPhase = await HealthRecordPhase.create({
+        phaseCompleted: false,
+        healthRecordId: patientExist.HealthRecord.id,
+        phaseId: phaseExist[getCurrentPhaseIndex + 1].id
+      }, { transaction });
+
+      if(!newHealthRecordPhase) {
+        logger.error(`There was an error in phaseShifting: The new HealthRecordPhase was not created`);
         await transaction.rollback();
         return {
           error: true,
