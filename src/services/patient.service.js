@@ -235,7 +235,7 @@ module.exports = {
         attributes: {
           exclude: ['updatedAt','status']
         },
-        include: conditinalInclude,
+        include: conditionalInclude,
       });
 
       // get Patient structured
