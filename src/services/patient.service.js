@@ -17,7 +17,7 @@ const {
   Achievement,
   sequelize
 } = require('@models/index.js');
-const { getProgress, userSendEmail, getCustomPictograms } = require('@helpers');
+const { getProgress, userSendEmail, getCustomPictograms, getOnlyCustomPictogramsPatient } = require('@helpers');
 const {
   pagination,
   messages,
@@ -1041,7 +1041,7 @@ module.exports = {
         }
       };
 
-      const { error, data:pictogramData } = await getCustomPictograms({ patientResponse: data });
+      const { error, data: pictogramData } = await getOnlyCustomPictogramsPatient(data.id);
       if(!error) {
         data.pictograms = pictogramData;
       }
