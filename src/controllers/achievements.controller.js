@@ -144,7 +144,8 @@ module.exports = {
         return res.status(400).json({
           error: true,
           statusCode: 422,
-          message: error.details[0].message,
+          message: messages.generalMessages.bad_request,
+          validationErrors: formatJoiMessages(error),
         });
       }
 
