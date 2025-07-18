@@ -442,13 +442,6 @@ module.exports = {
       },
       observations: observationsGotit.length > 0 ?  observationsGotit : null,
       achievements: patientAchievements.length > 0 ? patientAchievements : null,
-
-      /*
-        Lista de logros Conseguidos: {
-          Nombre
-          Imagen
-        }
-      */
       tutor: data.tutor ?  {
         id: data.tutor.id,
         userId: data.tutor.userId,

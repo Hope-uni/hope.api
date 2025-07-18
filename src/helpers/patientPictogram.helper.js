@@ -602,7 +602,51 @@ async function getPictogramsPatient(patientResponse, { categoryId, pictogramName
   }
 };
 
+
+async function getOnlyCustomPictogramsPatient(patientId) {
+  try {
+
+    const data = await PatientPictogram.findAll({
+      where: {
+        patientId,
+        status: true
+      },
+      order: [['name', 'ASC']],
+      attributes: ['id', 'name', 'imageUrl'],
+      include: [
+        {
+          model: Pictogram,
+          attributes: {
+            exclude: ['createdAt','updatedAt','status','categoryId']
+          },
+          include: {
+            model: Category,
+            attributes: {
+              exclude: ['createdAt','updatedAt','status']
+            }
+          }
+        }
+      ]
+    });
+
+    return {
+      error: false,
+      statusCode: 200,
+      message: messages.pictogram.success.all,
+      data: data.length > 0 ?  dataStructure.customPictogramDataStructure(data) : null,
+    }
+  } catch(error) {
+    logger.error(`${messages.pictogram.errors.service.base2}: ${error}`);
+    return {
+      error: true,
+      statusCode: 500,
+      message: messages.generalMessages.server,
+    }
+  }
+}
+
 module.exports = {
   getCustomPictograms,
   getPictogramsPatient,
+  getOnlyCustomPictogramsPatient
 }

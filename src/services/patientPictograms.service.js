@@ -1,7 +1,7 @@
 const { Op, Sequelize } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, UserRoles, sequelize } = require('@models');
 const logger = require('@config/logger.config');
-const { getPictogramsPatient } = require('@helpers');
+const { getPictogramsPatient, getOnlyCustomPictogramsPatient } = require('@helpers');
 const { roleConstants: constants } = require('@constants');
 const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
 const {
@@ -139,7 +139,7 @@ module.exports = {
             error: false,
             statusCode: 200,
             message: messages.pictogram.success.all,
-            data: dataResponseByCategoryId.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponseByCategoryId) : [],
+            data: dataResponseByCategoryId.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponseByCategoryId) : null,
           }
         }
 
@@ -194,7 +194,7 @@ module.exports = {
             error: false,
             statusCode: 200,
             message: messages.pictogram.success.all,
-            data: dataResponse.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponse) : [],
+            data: dataResponse.length > 0 ?  dataStructure.customPictogramDataStructure(dataResponse) : null,
           }
         }
 
@@ -222,7 +222,7 @@ module.exports = {
           error: false,
           statusCode: 200,
           message: messages.pictogram.success.all,
-          data: data.length > 0 ?  dataStructure.customPictogramDataStructure(data) : [],
+          data: data.length > 0 ?  dataStructure.customPictogramDataStructure(data) : null,
         }
       }
 
@@ -284,6 +284,9 @@ module.exports = {
         dataResponseByCategoryId.rows = dataStructure.customPictogramDataStructure(dataResponseByCategoryId.rows);
 
         const dataResponse = pagination.getPageData(dataResponseByCategoryId, page, limit);
+        if(dataResponse.data.length === 0) {
+          dataResponse.data = null;
+        }
 
         return {
           error: false,
@@ -347,6 +350,9 @@ module.exports = {
         dtaResponseByFilters.rows = dataStructure.customPictogramDataStructure(dtaResponseByFilters.rows);
 
         const dataResponse = pagination.getPageData(dtaResponseByFilters, page, limit);
+        if(dataResponse.data.length === 0) {
+          dataResponse.data = null;
+        }
 
         return {
           error: false,
@@ -383,6 +389,9 @@ module.exports = {
       data.rows = dataStructure.customPictogramDataStructure(data.rows);
 
       const dataResponse = pagination.getPageData(data, page, limit);
+      if(dataResponse.data.length === 0) {
+        dataResponse.data = null;
+      }
 
       return {
         error: false,
