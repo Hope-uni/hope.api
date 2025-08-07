@@ -76,6 +76,9 @@ const patientBelongsToTherapist = async (payload, patientId) => {
           include: [
             {
               model: Phase,
+              include: {
+                model: Achievement
+              }
             },
             {
               model: AchievementsHealthRecord,

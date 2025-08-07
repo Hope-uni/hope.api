@@ -389,11 +389,13 @@ module.exports = {
       }
     }) : [];
 
-    // phase
+    // phase data structure
+    const phaseStatus = data.HealthRecord.HealthRecordPhases ? data.HealthRecord.HealthRecordPhases.find( (item) => item.phaseId === data.HealthRecord.Phase.id)  : null;
     const getPhase = Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null ? {
       id: data.HealthRecord.Phase.id,
       name: data.HealthRecord.Phase.name,
       description: data.HealthRecord.Phase.description,
+      phaseCompleted: phaseStatus ? phaseStatus.phaseCompleted : null,
     } : null;
 
     // TeaDegree
@@ -442,13 +444,6 @@ module.exports = {
       },
       observations: observationsGotit.length > 0 ?  observationsGotit : null,
       achievements: patientAchievements.length > 0 ? patientAchievements : null,
-
-      /*
-        Lista de logros Conseguidos: {
-          Nombre
-          Imagen
-        }
-      */
       tutor: data.tutor ?  {
         id: data.tutor.id,
         userId: data.tutor.userId,
@@ -830,9 +825,9 @@ module.exports = {
         phaseProgress: data.phaseProgress
       },
       achievement: {
-        id: data.phase.Achievement.id,
-        name: data.phase.Achievement.name,
-        imageUrl: data.phase.Achievement.imageUrl
+        id: data.phase.achievement.id,
+        name: data.phase.achievement.name,
+        imageUrl: data.phase.achievement.imageUrl
       }
     }
   },

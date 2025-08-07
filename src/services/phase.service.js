@@ -1,7 +1,7 @@
 const { Phase, PatientActivity, HealthRecord, Activity,HealthRecordPhase, AchievementsHealthRecord, sequelize } = require('@models/index');
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
-const { patientBelongsToTherapist, getProgress } = require('@helpers');
+const { patientBelongsToTherapist, getProgress, lastLevelHelper } = require('@helpers');
 const { messages, formatErrorMessages, dataStructure } = require('@utils');
 
 module.exports = {
@@ -143,6 +143,7 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
+      // beside of check if therapist has the patient in charge, we get the patient data before the phase update.
       const { error:verifyPatientError, message:verifyPatientMessage, statusCode: verifyPatientStatus, patientExist } = await patientBelongsToTherapist(payload, patientId);
 
       if(verifyPatientError) {
@@ -183,21 +184,6 @@ module.exports = {
       // Validate next phase order
       const getCurrentPhaseIndex = phaseExist.findIndex(item => item.id === patientExist.HealthRecord.phaseId);
 
-      // get the maximum level.
-      const lastLevel = phaseExist.reduce((acc, current) => {
-        return current.level > acc.level ? current : acc;
-      }, { level: -Infinity });
-
-      // Validate if patient has the last phase
-      /* eslint-disable radix */
-      if (parseInt(phaseExist[getCurrentPhaseIndex].level) === lastLevel.level) {
-        await transaction.rollback();
-        return {
-          error: true,
-          statusCode: 409,
-          message: messages.phase.errors.service.invalid_phase_shifting
-        }
-      }
 
       // Verify if the patient has complied with the phases scoreActivities.
       const countActivitiesCompleted = await PatientActivity.findAndCountAll({
@@ -226,7 +212,37 @@ module.exports = {
         }
       }
 
-    // Update HealthRecordPhase for change the phaseCompleted to true before create new HealthRecordPhase
+      // get the maximum level.
+      const lastLevel = phaseExist.reduce((acc, current) => {
+        return current.level > acc.level ? current : acc;
+      }, { level: -Infinity });
+
+      // Validate if patient has the last phase
+      /* eslint-disable radix */
+      if (parseInt(phaseExist[getCurrentPhaseIndex].level) === lastLevel.level) {
+
+        // Verify if patient already has the last phase completed
+        const lastPhaseCompleted = await HealthRecordPhase.findOne({
+          where: {
+            healthRecordId: patientExist.HealthRecord.id,
+            phaseId: patientExist.HealthRecord.Phase.id,
+            phaseCompleted: true,
+          }
+        });
+
+        if(lastPhaseCompleted) {
+          await transaction.rollback();
+          return {
+            error: false,
+            statusCode: 200,
+            message: messages.phase.success.last_phase_already_completed
+          }
+        }
+
+        return await lastLevelHelper(patientExist, transaction);
+      }
+
+      // Update HealthRecordPhase for change the phaseCompleted to true before create new HealthRecordPhase
       const updateHealthRecordPhaseResponse = await HealthRecordPhase.update({
         phaseCompleted: true,
       },{
@@ -247,7 +263,6 @@ module.exports = {
         }
       }
 
-
       // Update Patient in order to change his phase
       const data = await HealthRecord.update({
         phaseId: phaseExist[getCurrentPhaseIndex + 1].id
@@ -267,7 +282,7 @@ module.exports = {
         }
       }
 
-      // Add phase achievement to AchievementHealthRecord
+      // Add phase achievement to AchievementHealthRecord and this achievement will be send as achievement(phase achievement) in the response.
       const addNewAchivementToPatient = await AchievementsHealthRecord.create({
         healthRecordId: patientExist.HealthRecord.id,
         achievementId: patientExist.HealthRecord.Phase.achievementId
@@ -304,8 +319,9 @@ module.exports = {
       await transaction.commit();
 
       // get the current patient progress.
-      const { error:progressError, message: progressMessage, generalProgress, phaseProgress, patientPhase  } = await getProgress(patientExist.id);
+      const { error:progressError, message: progressMessage, generalProgress, phaseProgress, patientPhase  } = await getProgress(patientExist.id, true);
       if(progressError) {
+        await transaction.rollback();
         return {
           error: progressError,
           statusCode: 409,

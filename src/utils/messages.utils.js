@@ -608,6 +608,8 @@ const messages = {
       update: `Fase actualizada`,
       delete: `Fase eliminada`,
       phase_changed: `Cambio de fase exitoso`,
+      last_phase_completed: `Felicidades, has completado la fase final`,
+      last_phase_already_completed: `El paciente ya ha completado todas las fases`,
     }
   },
 
