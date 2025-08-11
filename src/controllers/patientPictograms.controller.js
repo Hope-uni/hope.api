@@ -114,15 +114,6 @@ module.exports = {
         validationErrors: formatJoiMessages(error),
       });
 
-      if(!req.file) {
-        return res.status(400).json({
-          error: true,
-          statusCode: 422,
-          message: messages.generalMessages.bad_request,
-          validationErrors: formatErrorMessages('imageFile', messages.pictogram.fields.image.required)
-        })
-      }
-
       const { error:dataError, statusCode, message, validationErrors, data } = await createPatientPictogram(req.body, req.file);
 
       if(dataError) {

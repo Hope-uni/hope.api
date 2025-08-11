@@ -1,7 +1,7 @@
 const { Op, Sequelize } = require('sequelize');
 const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, UserRoles, sequelize } = require('@models');
 const logger = require('@config/logger.config');
-const { getPictogramsPatient, getOnlyCustomPictogramsPatient } = require('@helpers');
+const { getPictogramsPatient } = require('@helpers');
 const { roleConstants: constants } = require('@constants');
 const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
 const {
@@ -500,7 +500,8 @@ module.exports = {
       const pictogramNameExist = await PatientPictogram.findOne({
         where: {
           status: true,
-          name: body.name
+          name: body.name,
+          patientId: body.patientId,
         }
       });
       if(pictogramNameExist) {
@@ -547,7 +548,7 @@ module.exports = {
 
         body.imageUrl = url;
       } else {
-        body.imageUrl = defaultPictogramImage;
+        body.imageUrl = pictogramResponse.imageUrl; // if the image was not sent, we will use the general pictograms image
       }
 
       const data = await PatientPictogram.create(
