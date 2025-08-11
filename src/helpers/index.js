@@ -6,5 +6,6 @@ module.exports = {
   ...require('./mailer.helper'),
   ...require('./patientPictogram.helper'),
   ...require('./user.helper'),
-  ...require('./patient.helper')
+  ...require('./patient.helper'),
+  ...require('./phase.helper'),
 }

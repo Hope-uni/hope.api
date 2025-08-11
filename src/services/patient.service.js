@@ -15,6 +15,7 @@ const {
   Activity,
   AchievementsHealthRecord,
   Achievement,
+  HealthRecordPhase,
   sequelize
 } = require('@models/index.js');
 const { getProgress, userSendEmail, getCustomPictograms, getOnlyCustomPictogramsPatient } = require('@helpers');
@@ -994,6 +995,10 @@ module.exports = {
             },
             include: [
               {
+                model: HealthRecordPhase,
+                attributes: ['phaseCompleted', 'phaseId'],
+              },
+              {
                 model: AchievementsHealthRecord,
                 include: {
                   model: Achievement,
@@ -1010,7 +1015,7 @@ module.exports = {
                 model: Phase,
                 attributes: {
                   exclude: ['createdAt','updatedAt'],
-                }
+                },
               },
               {
                 model: Observation,
