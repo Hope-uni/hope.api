@@ -9,7 +9,6 @@ const {
 const {
   messages,
   formatJoiMessages,
-  formatErrorMessages
 } = require('@utils');
 const {
   patientPictogramsEntry,
