@@ -533,6 +533,7 @@ module.exports = {
       }
 
       // TODO: ImageUrl validation has to be here
+      /* eslint-disable no-param-reassign */
       if(file) {
         const { error, statusCode, message, url } = await azureImages.uploadImage(file, pictogramContainer);
 
@@ -638,10 +639,9 @@ module.exports = {
           include: [
             {
               model: User,
-              where:
-               {
-                 status: true,
-               }
+              where:{
+                status: true,
+              }
             }
           ]
         });
@@ -735,14 +735,18 @@ module.exports = {
         const imageName = patientPictogramExist.imageUrl.split('/').pop();
         let handleError;
 
-        if(patientPictogramExist.imageUrl === defaultPictogramImage) {
+        // In case the imageUrl from the patientPictograms is the default one or the same as the pictogram imageUrl we will update the image without 
+        // delete the old one.
+        if(patientPictogramExist.imageUrl === defaultPictogramImage || pictogramExist.imageUrl === patientPictogramExist.imageUrl) {
           const { url, ...restResponse}  = await azureImages.updateAndUploadImage(file, null, pictogramContainer);
           handleError = restResponse;
 
           resBody.imageUrl = url;
         }
 
-        if(patientPictogramExist.imageUrl !== defaultPictogramImage) {
+        // on the other hand, if the imageUrl from the patientPictograms is not the default or is different from the pictogram imageUrl we wiil update the image
+        // and delete the old one.
+        if(patientPictogramExist.imageUrl !== defaultPictogramImage || pictogramExist.imageUrl !== patientPictogramExist.imageUrl) {
           const { url, ...restResponse}  = await azureImages.updateAndUploadImage(file, imageName, pictogramContainer);
           handleError = restResponse;
 
@@ -939,8 +943,10 @@ module.exports = {
         }
       }
 
-      // Delete patientPictogram image in the azure container
-      if(patientPictogramExist.imageUrl !== defaultPictogramImage) {
+      // Delete patientPictogram image in the azure container only if the image is not the default one or if the image
+      // belongs to General Pictograms
+      if(patientPictogramExist.imageUrl !== pictogramExist.imageUrl) {
+        if(patientPictogramExist.imageUrl !== defaultPictogramImage) {
         const imageName = patientPictogramExist.imageUrl.split('/').pop();
         const { error, statusCode, message } = await azureImages.deleteAzureImage(imageName, pictogramContainer);
 
@@ -952,6 +958,7 @@ module.exports = {
             message
           }
         }
+      }
       }
 
       // Commit transaction
