@@ -1,5 +1,3 @@
-
-
 const initialPictograms = {
   animals: [
     { name: "Pez", url: "https://hopedev.blob.core.windows.net/pictogram/2520_500.webp" },
@@ -170,7 +168,6 @@ const initialPictograms = {
     { name: "Cine", url: "https://hopedev.blob.core.windows.net/pictogram/30387_500.webp" },
     { name: "Hospital", url: "https://hopedev.blob.core.windows.net/pictogram/3116_500.webp" },
     { name: "Gasolinera", url: "https://hopedev.blob.core.windows.net/pictogram/6002_500.webp" },
-    { name: "Árbol", url: "https://hopedev.blob.core.windows.net/pictogram/2256_500.webp" },
     { name: "Día", url: "https://hopedev.blob.core.windows.net/pictogram/26799_500.webp" },
     { name: "Noche", url: "https://hopedev.blob.core.windows.net/pictogram/26997_500.webp" }
   ],
@@ -179,7 +176,7 @@ const initialPictograms = {
     { name: "Hoja", url: "https://hopedev.blob.core.windows.net/pictogram/5076_500.webp" },
     { name: "Rama", url: "https://hopedev.blob.core.windows.net/pictogram/7224_500.webp" },
     { name: "Trebol", url: "https://hopedev.blob.core.windows.net/pictogram/7281_500.webp" },
-    { name: "Arbol", url: "https://hopedev.blob.core.windows.net/pictogram/37131_500.webp" },
+    { name: "Árbol", url: "https://hopedev.blob.core.windows.net/pictogram/3057_500.webp" },
     { name: "Flor", url: "https://hopedev.blob.core.windows.net/pictogram/3102_500.webp" },
     { name: "Girasol", url: "https://hopedev.blob.core.windows.net/pictogram/11274_500.webp" },
     { name: "Bosque", url: "https://hopedev.blob.core.windows.net/pictogram/2666_500.webp" },
