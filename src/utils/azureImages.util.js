@@ -62,7 +62,7 @@ const updateAndUploadImage = async (file, blobName, containerName) => {
     });
 
     // delete the last blob for replace with the new one.
-    if(blobName != null) {
+    if(blobName !== null) {
       const blobClient = containerClient.getBlobClient(decodeURI(blobName));
 
       await blobClient.delete();
