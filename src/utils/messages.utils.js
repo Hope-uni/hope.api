@@ -540,6 +540,7 @@ const messages = {
         delete: `Pictograma no fue eliminado`,
         pictogram_not_match: `El pictograma personalizado que intenta modificar no pertenece al Paciente solicitante`,
         pictogram_used: `El pictograma que desea reemplazar ya tiene una personalización asociada`,
+        has_custom_pictograms: `El pictograma que desea eliminar tiene pictogramas personalizados asociados`,
         all: `Pictogramas no encontrados`,
       },
       not_found: `Pictograma no encontrado`,

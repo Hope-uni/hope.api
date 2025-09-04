@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Pictogram, Category, sequelize } = require('@models/index');
+const { Pictogram, Category, PatientPictogram, sequelize } = require('@models/index');
 const logger = require('@config/logger.config');
 const {
   messages,
@@ -235,6 +235,7 @@ module.exports = {
       }
 
       // TODO: Image exist logic has to be here.
+      /* eslint-disable no-param-reassign */
       if(file) {
         const { error, statusCode, message, url } = await azureImages.uploadImage(file, pictogramContainer);
 
@@ -482,7 +483,23 @@ module.exports = {
         }
       }
 
+      // validate if pictogram has not custom pictograms associated.
+      const hasCustomPictograms = await PatientPictogram.findOne({
+        where: {
+          pictogramId: id,
+          status: true,
+        }
+      });
+      if(hasCustomPictograms) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.pictogram.errors.service.has_custom_pictograms,
+        }
+      }
 
+      // Update pictogram with status false in order to delete it.
       const pictogramUpdated = await Pictogram.update(
         {
           status: false,
