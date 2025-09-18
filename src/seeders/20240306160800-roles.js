@@ -1,5 +1,12 @@
 const logger = require('../config/logger.config');
 const { SeederMeta } = require('../models/index');
+const {
+  isSuperadmin,
+  isAdmin,
+  isTutor,
+  isTherapist,
+  isPatient
+} = require('../config/variables.config');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -26,7 +33,7 @@ module.exports = {
       if(!executedSeeders) {
         await queryInterface.bulkInsert('Roles', [
           {
-            name: 'Superadmin',
+            name: isSuperadmin,
             status: true,
             createdAt: new Date(
               date.getYear(),
@@ -46,7 +53,7 @@ module.exports = {
             ),
           },
           {
-            name: 'Admin',
+            name: isAdmin,
             status: true,
             createdAt: new Date(
               date.getYear(),
@@ -66,7 +73,7 @@ module.exports = {
             ),
           },
           {
-            name: 'Terapeuta',
+            name: isTherapist,
             status: true,
             createdAt: new Date(
               date.getYear(),
@@ -86,7 +93,7 @@ module.exports = {
             ),
           },
           {
-            name: 'Paciente',
+            name: isPatient,
             status: true,
             createdAt: new Date(
               date.getYear(),
@@ -106,7 +113,7 @@ module.exports = {
             ),
           },
           {
-            name: 'Tutor',
+            name: isTutor,
             status: true,
             createdAt: new Date(
               date.getYear(),
