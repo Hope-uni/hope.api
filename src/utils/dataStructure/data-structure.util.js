@@ -5,6 +5,7 @@ const {
   getFullName
 } = require('@utils/dataStructure');
 const dates = require('../dates.util');
+const messages = require('../messages.utils');
 
 /* eslint-disable no-restricted-syntax */
 module.exports = {
@@ -32,15 +33,15 @@ module.exports = {
           rolesData.push(role.Role);
 
           if(role.Role.id === 3) {
-            const { data: therapistData } = await getTutorTherapist(iterator.id, iterator.imageUrl);
+            const { data: therapistData } = await getTutorTherapist(iterator.id, iterator.imageUrl, messages);
             iterator.setDataValue('profileId', therapistData.profileId);
           }
           if(role.Role.id === 4) {
-            const { data: patientData } = await getPatient(iterator.id, iterator.imageUrl);
+            const { data: patientData } = await getPatient(iterator.id, iterator.imageUrl, messages);
             iterator.setDataValue('profileId', patientData.profileId);
           }
           if(role.Role.id === 5) {
-            const { data: tutorData } = await getTutorTherapist(iterator.id, iterator.imageUrl);
+            const { data: tutorData } = await getTutorTherapist(iterator.id, iterator.imageUrl, messages);
             iterator.setDataValue('profileId', tutorData.profileId);
           }
         }
@@ -79,15 +80,15 @@ module.exports = {
         }
 
         if(role.Role.id === 3) {
-          const { data: therapistData } = await getTutorTherapist(data.id, data.imageUrl);
+          const { data: therapistData } = await getTutorTherapist(data.id, data.imageUrl, messages);
           data.setDataValue('profileId', therapistData.profileId);
         }
         if(role.Role.id === 4) {
-          const { data: patientData } = await getPatient(data.id, data.imageUrl);
+          const { data: patientData } = await getPatient(data.id, data.imageUrl, messages);
           data.setDataValue('profileId', patientData.profileId);
         }
         if(role.Role.id === 5) {
-          const { data: tutorData } = await getTutorTherapist(data.id, data.imageUrl);
+          const { data: tutorData } = await getTutorTherapist(data.id, data.imageUrl, messages);
           data.setDataValue('profileId', tutorData.profileId);
         }
 
@@ -406,6 +407,7 @@ module.exports = {
     } : null;
 
     // Achievements
+    /* eslint-disable array-callback-return */
     const patientAchievements = [];
     if(Object.keys(data).includes('HealthRecord') && data.HealthRecord !== null && data.HealthRecord.AchievementsHealthRecords !== null ) {
       data.HealthRecord.AchievementsHealthRecords.map((item) => {
@@ -524,15 +526,15 @@ module.exports = {
         data.setDataValue('admin', true);
       }
       if(iterator.Role.id === 3) {
-        const { data: therapistData } = await getTutorTherapist(data.id, data.imageUrl);
+        const { data: therapistData } = await getTutorTherapist(data.id, data.imageUrl, messages);
         data.setDataValue('profile', therapistData);
       }
       if(iterator.Role.id === 4) {
-        const { data: patientData } = await getPatient(data.id, data.imageUrl);
+        const { data: patientData } = await getPatient(data.id, data.imageUrl, messages);
         data.setDataValue('profile', patientData);
       }
       if(iterator.Role.id === 5) {
-        const { data: tutorData } = await getTutorTherapist(data.id, data.imageUrl);
+        const { data: tutorData } = await getTutorTherapist(data.id, data.imageUrl, messages);
         data.setDataValue('profile', tutorData);
       }
       roles.push(iterator.Role);

@@ -39,7 +39,8 @@
     "TEA",
     "api",
     "app",
-    "sequelize"
+    "sequelize",
+    "express"
   ],
   "author": "Edwin Vega",
   "license": "ISC",
