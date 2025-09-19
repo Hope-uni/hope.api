@@ -1,13 +1,12 @@
 const { Patient, TutorTherapist, HealthRecord, Person } = require('@models/index');
 const logger = require('@config/logger.config');
 const { getFullName } = require('@utils/dataStructure/index');
-const { messages } = require('@utils');
 const { getAge } = require('@utils/dates.util');
 
 
 module.exports = {
 
-  async getPatient(id, imageProfile) {
+  async getPatient(id, imageProfile, messages) {
     try {
 
       const patientResponse = await Patient.findOne({
@@ -74,7 +73,7 @@ module.exports = {
     }
   },
 
-  async getTutorTherapist(id, imageProfile) {
+  async getTutorTherapist(id, imageProfile, messages) {
     try {
 
       const tutorTherapistResponse = await TutorTherapist.findOne({
