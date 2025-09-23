@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "build": "(cd src && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all)",
-    "dev": "nodemon --exec node --trace-warnings app.js",
+    "dev": "nodemon app.js",
     "import-permissions": "node ./src/commands/update-permissions.js",
     "import-roles-permissions": "node ./src/commands/update-roles-permissions.js"
   },
