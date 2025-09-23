@@ -27,6 +27,17 @@ module.exports = {
     // Achievements
     const getAchievements = data.HealthRecord.AchievementsHealthRecords  ? data.HealthRecord.AchievementsHealthRecords.filter((item) => item.status === true) : []
 
+    // Therapist
+    const therapistData = data.therapist ? {
+      id: data.therapist.id,
+      userId: data.therapist.userId,
+      imageUrl: data.therapist.User.imageUrl,
+      fullName: data.therapist.Person.fullName,
+      email: data.therapist.User.email,
+      username: data.therapist.User.username,
+      phoneNumber: data.therapist.phoneNumber ? `${data.therapist.phoneNumber}` : null,
+    } : null;
+
     return {
       id: data.id,
       userId: data.userId,
@@ -37,6 +48,7 @@ module.exports = {
       achievementCount: getAchievements.length > 0 ? getAchievements.length : null,
       imageUrl: data.User.imageUrl ?? null,
       isVerified: data.User.userVerified,
+      therapist: therapistData,
     };
   }
 
