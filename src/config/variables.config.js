@@ -32,9 +32,11 @@ module.exports = {
   jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION,
 
   // Roles
+  isSuperadmin: process.env.IS_SUPERADMIN,
   isAdmin: process.env.IS_ADMIN,
   isTutor: process.env.IS_TUTOR,
   isTherapist: process.env.IS_THERAPIST,
+  isPatient: process.env.IS_PATIENT,
 
   // Azure variables.
   azureConection: process.env.CONECTION_STRING,
