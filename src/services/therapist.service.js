@@ -210,10 +210,22 @@ module.exports = {
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'status']
           },
-          include: {
-            model: Person,
-            attributes: ['id', 'firstName', 'surname']
-          }
+          include: [
+            {
+              model: Person,
+              attributes: ['id', 'firstName', 'surname']
+            },
+            {
+              model: User,
+              where: {
+                status: true,
+                userVerified: true,
+              },
+              attributes: {
+                exclude: ['createdAt','updatedAt','status','password']
+              },
+            }
+          ]
         },
         {
           model: User,
