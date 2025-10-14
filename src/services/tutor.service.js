@@ -279,7 +279,7 @@ module.exports = {
                       exclude: ['createdAt','updatedAt','status','password']
                     },
                   }
-              ]
+                ]
               },
               {
                 model: User,
