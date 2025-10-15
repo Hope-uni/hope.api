@@ -41,7 +41,7 @@ module.exports = {
           where: {
             status: true,
           },
-          order: [['createdAt', 'ASC']],
+          order: [['createdAt', 'DESC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','phaseId', 'pictogramSentence']
           },
@@ -85,7 +85,7 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt', 'ASC']],
+        order: [['createdAt', 'DESC']],
         where: {
           status: true,
         },
