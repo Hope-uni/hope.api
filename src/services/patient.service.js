@@ -81,7 +81,7 @@ module.exports = {
               isCompleted: false,
               status: true,
         });
-        conditionalInclude = [ ...conditionalInclude, ...activityCondition ];
+        conditionalInclude = [ ...conditionalInclude, activityCondition ];
       }
 
       // This query param will allow us to get all patients that has an activity assigned
@@ -90,7 +90,7 @@ module.exports = {
               isCompleted: false,
               status: true,
         });
-        conditionalInclude = [ ...conditionalInclude, ...activityCondition ];
+        conditionalInclude = [ ...conditionalInclude, activityCondition ];
       }
 
 
