@@ -10,6 +10,13 @@ const {
     patientTutorIncludes,
     findTutorIncludes,
 } = require('./tutor.includes');
+const {
+    baseTherapistIncludes,
+    therapistExistIncludes,
+    patientTherapistIncludes,
+    findTherapistIncludes,
+    createAndUpdateTherapistIncludes,
+} = require('./therapist.includes');
 
 
 module.exports = {
@@ -24,4 +31,11 @@ module.exports = {
     tutorExistIncludes,
     patientTutorIncludes,
     findTutorIncludes,
+
+    // Therapist
+    baseTherapistIncludes,
+    therapistExistIncludes,
+    patientTherapistIncludes,
+    findTherapistIncludes,
+    createAndUpdateTherapistIncludes,
 }
