@@ -11,7 +11,7 @@ const {
   pagination,
  azureImages
 } = require('@utils');
-const { patientCustomPictogramsIncludes, baseCustomPictogramsIncludes } = require('../queryIncludes');
+const { patientCustomPictogramsIncludes, baseCustomPictogramsIncludes, allPictogramsIncludes } = require('@queryIncludes');
 
 
 module.exports = {
@@ -20,7 +20,9 @@ module.exports = {
     try {
 
       // Variables
+      const basePictogramIncludes = baseCustomPictogramsIncludes();
       const patientIncludes = patientCustomPictogramsIncludes();
+      const pictogramIncludes = allPictogramsIncludes();
       let patientWhereCondition = {
         id: patientId,
         status: true,
@@ -117,15 +119,7 @@ module.exports = {
                 attributes: {
                   exclude: ['createdAt','updatedAt','status','categoryId']
                 },
-                include: {
-                  model: Category,
-                  where: {
-                    status: true,
-                  },
-                  attributes: {
-                    exclude: ['createdAt','updatedAt','status']
-                  }
-                }
+                include: pictogramIncludes,
               }
             ]
           });
@@ -172,15 +166,7 @@ module.exports = {
                 attributes: {
                   exclude: ['createdAt','updatedAt','status','categoryId']
                 },
-                include: {
-                  model: Category,
-                  where: {
-                    status: true,
-                  },
-                  attributes: {
-                    exclude: ['createdAt','updatedAt','status']
-                  }
-                }
+                include: pictogramIncludes
               }
             ]
           });
@@ -203,12 +189,7 @@ module.exports = {
               attributes: {
                 exclude: ['createdAt','updatedAt','status','categoryId']
               },
-              include: {
-                model: Category,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                }
-              }
+              include: pictogramIncludes
             }
           ]
         });
@@ -262,15 +243,7 @@ module.exports = {
               attributes: {
                 exclude: ['createdAt','updatedAt','status','categoryId']
               },
-              include: {
-                model: Category,
-                where: {
-                  status: true,
-                },
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                }
-              }
+              include: pictogramIncludes
             },
           ]
         });
@@ -328,15 +301,7 @@ module.exports = {
               attributes: {
                 exclude: ['createdAt','updatedAt','status','categoryId']
               },
-              include: {
-                model: Category,
-                where: {
-                  status: true,
-                },
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                }
-              }
+              include: pictogramIncludes
             },
           ]
         });
@@ -364,20 +329,7 @@ module.exports = {
         order: [['name', 'ASC']],
         where: pictogramWhereCondition,
         attributes: ['id', 'name', 'imageUrl'],
-        include: [
-          {
-            model: Pictogram,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','categoryId']
-            },
-            include: {
-              model: Category,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              }
-            }
-          },
-        ]
+        include: basePictogramIncludes
       });
 
       // Structuring the data form the request

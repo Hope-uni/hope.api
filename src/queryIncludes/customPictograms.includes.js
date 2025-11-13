@@ -33,8 +33,23 @@ const baseCustomPictogramsIncludes = () => {
     ];
 }
 
+const allPictogramsIncludes = () => {
+    return [
+        {
+            model: Category,
+            where: {
+                status: true,
+            },
+            attributes: {
+                exclude: ['createdAt', 'updatedAt', 'status']
+            }
+        }
+    ];
+}
+
 
 module.exports = {
     patientCustomPictogramsIncludes,
-    baseCustomPictogramsIncludes
+    baseCustomPictogramsIncludes,
+    allPictogramsIncludes
 }

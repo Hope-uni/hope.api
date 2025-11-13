@@ -30,6 +30,7 @@ const {
 const {
     baseCustomPictogramsIncludes,
     patientCustomPictogramsIncludes,
+    allPictogramsIncludes,
 } = require('./customPictograms.includes');
 
 
@@ -66,4 +67,5 @@ module.exports = {
     // Custom Pictograms
     baseCustomPictogramsIncludes,
     patientCustomPictogramsIncludes,
+    allPictogramsIncludes,
 }
