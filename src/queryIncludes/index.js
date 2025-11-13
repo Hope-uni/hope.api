@@ -23,6 +23,10 @@ const {
     patientUnAssignActivityIncludes,
     patientCurrentActivityIncludes,
 } = require('./activity.includes');
+const {
+    userLoginIncludes,
+    meIncludes,
+} = require('./auth.includes');
 
 
 module.exports = {
@@ -50,4 +54,8 @@ module.exports = {
     patientAssignActivityIncludes,
     patientUnAssignActivityIncludes,
     patientCurrentActivityIncludes,
+
+    // Auth
+    userLoginIncludes,
+    meIncludes,
 }
