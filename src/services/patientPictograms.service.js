@@ -3,14 +3,15 @@ const { PatientPictogram, Patient, Pictogram, Category, TutorTherapist, User, Us
 const logger = require('@config/logger.config');
 const { getPictogramsPatient } = require('@helpers');
 const { roleConstants: constants } = require('@constants');
-const { pictogramContainer, defaultPictogramImage } = require('../config/variables.config');
+const { pictogramContainer, defaultPictogramImage } = require('@config/variables.config');
 const {
   messages,
   dataStructure,
   formatErrorMessages,
   pagination,
  azureImages
-} = require('../utils');
+} = require('@utils');
+const { patientCustomPictogramsIncludes, baseCustomPictogramsIncludes } = require('../queryIncludes');
 
 
 module.exports = {
@@ -19,6 +20,7 @@ module.exports = {
     try {
 
       // Variables
+      const patientIncludes = patientCustomPictogramsIncludes();
       let patientWhereCondition = {
         id: patientId,
         status: true,
@@ -57,14 +59,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
-        include: [
-          {
-            model: User,
-            where: {
-              status: true,
-            }
-          }
-        ]
+        include: patientIncludes
       });
 
       if(!patientResponse) {
@@ -410,25 +405,19 @@ module.exports = {
     }
   },
 
+  // this endpoint will return all the custom pictograms base on patient logged.
+  // none of other users will be able to see the custom pictograms with this endpoint.
   async all(query, payload) {
     try {
-
+      // Variables
+      const patientIncludes = patientCustomPictogramsIncludes({ id: payload.id, userVerified: true });
 
       // get Patient
       const patientResponse = await Patient.findOne({
         where: {
           status: true,
         },
-        include: [
-          {
-            model: User,
-            where: {
-              id: payload.id,
-              status: true,
-              userVerified: true
-            }
-          }
-        ],
+        include: patientIncludes,
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         }
@@ -455,6 +444,9 @@ module.exports = {
   async createPatientPictogram(body, file) {
     const transaction = await sequelize.transaction();
     try {
+
+      // Variables
+      const pictogramIncludes = baseCustomPictogramsIncludes();
 
       // get Patient
       const patientResponse = await Patient.findOne({
@@ -582,20 +574,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
-        include: [
-          {
-            model: Pictogram,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Category,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            }
-          }
-        ]
+        include: pictogramIncludes,
       });
 
       return {
@@ -620,6 +599,8 @@ module.exports = {
   async updatePatientPictogram(id,body, payload, file) {
     const transaction = await sequelize.transaction();
     try {
+      // Variables
+      const pictogramIncludes = baseCustomPictogramsIncludes();
 
       // Destructuring data in order to get oly the fields to modify
       const { patientId, ...resBody } = body;
@@ -799,20 +780,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
-        include: [
-          {
-            model: Pictogram,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: {
-              model: Category,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            }
-          }
-        ]
+        include: pictogramIncludes
       });
 
       return {

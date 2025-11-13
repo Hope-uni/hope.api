@@ -27,6 +27,10 @@ const {
     userLoginIncludes,
     meIncludes,
 } = require('./auth.includes');
+const {
+    baseCustomPictogramsIncludes,
+    patientCustomPictogramsIncludes,
+} = require('./customPictograms.includes');
 
 
 module.exports = {
@@ -58,4 +62,8 @@ module.exports = {
     // Auth
     userLoginIncludes,
     meIncludes,
+
+    // Custom Pictograms
+    baseCustomPictogramsIncludes,
+    patientCustomPictogramsIncludes,
 }
