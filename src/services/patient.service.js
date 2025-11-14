@@ -8,6 +8,7 @@ const {
   UserRoles,
   PatientActivity,
   Activity,
+  Person,
   sequelize
 } = require('@models/index.js');
 const { getProgress, userSendEmail, getOnlyCustomPictogramsPatient } = require('@helpers');
@@ -99,11 +100,16 @@ module.exports = {
           where: {
             status: true,
           },
-          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
           include: conditionalInclude,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         // Return Patient
@@ -121,7 +127,6 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt', 'ASC']],
         where:{
           status: true,
         },
@@ -129,6 +134,12 @@ module.exports = {
           exclude: ['updatedAt','status']
         },
         include: conditionalInclude,
+        order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
       });
 
       // get Patient structured
@@ -231,11 +242,16 @@ module.exports = {
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Patient.findAll({
           where: patientWhereCondition,
-          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
           include: patientIncludes,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         return {
@@ -252,12 +268,17 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt', 'ASC']],
         where: patientWhereCondition,
         attributes: {
           exclude: ['updatedAt','status']
         },
         include: patientIncludes,
+        order:[
+          [{model: Person}, 'firstName', 'ASC'],
+          [{model: Person}, 'secondName', 'ASC'],
+          [{model: Person}, 'surname', 'ASC'],
+          [{model: Person}, 'secondSurname', 'ASC'],
+        ]
       });
 
       // get Patient structured
@@ -294,11 +315,16 @@ module.exports = {
             status: true,
             therapistId: null
           },
-          order: [['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
           include: patientIncludes,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         // Return Patient
@@ -316,7 +342,6 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt', 'ASC']],
         where: {
           status: true,
           therapistId: null
@@ -325,6 +350,12 @@ module.exports = {
           exclude: ['updatedAt','status']
         },
         include: patientIncludes,
+        order:[
+          [{model: Person}, 'firstName', 'ASC'],
+          [{model: Person}, 'secondName', 'ASC'],
+          [{model: Person}, 'surname', 'ASC'],
+          [{model: Person}, 'secondSurname', 'ASC'],
+        ]
       });
 
       // get Patient structured

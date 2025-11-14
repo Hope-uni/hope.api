@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { roleConstants } = require('@constants');
-const { TutorTherapist, User, Role, Patient, sequelize } = require('@models/index.js');
+const { TutorTherapist, User, Role, Patient, Person, sequelize } = require('@models/index.js');
 const { userSendEmail } = require('@helpers/index');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword, azureImages } = require('@utils');
 const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
@@ -28,11 +28,16 @@ module.exports = {
           where: {
             status: true
           },
-          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
           include: tutorModelIncludes,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         return {
@@ -50,7 +55,6 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order:[['createdAt','ASC']],
         where: {
           status: true
         },
@@ -58,6 +62,12 @@ module.exports = {
           exclude: ['updatedAt','status', 'personId']
         },
         include: tutorModelIncludes,
+        order:[
+          [{model: Person}, 'firstName', 'ASC'],
+          [{model: Person}, 'secondName', 'ASC'],
+          [{model: Person}, 'surname', 'ASC'],
+          [{model: Person}, 'secondSurname', 'ASC'],
+        ]
       });
 
       // Get Tutor Structure
@@ -113,11 +123,16 @@ module.exports = {
               status: true,
               tutorId: tutorExist.id,
             },
-            order:[['createdAt', 'ASC']],
             attributes: {
               exclude: ['createdAt','updatedAt','status','personId']
             },
-            include: patientModelIncludes
+            include: patientModelIncludes,
+            order:[
+              [{model: Person}, 'firstName', 'ASC'],
+              [{model: Person}, 'secondName', 'ASC'],
+              [{model: Person}, 'surname', 'ASC'],
+              [{model: Person}, 'secondSurname', 'ASC'],
+            ]
           });
 
           // Return Patient
@@ -135,7 +150,6 @@ module.exports = {
           limit,
           offset,
           distinct: true,
-          order:[['createdAt', 'ASC']],
           where: {
             status: true,
             tutorId: tutorExist.id,
@@ -143,7 +157,13 @@ module.exports = {
           attributes: {
             exclude: ['updatedAt','status']
           },
-          include: patientModelIncludes
+          include: patientModelIncludes,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         // get Patient structured
