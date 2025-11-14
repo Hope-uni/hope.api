@@ -24,15 +24,6 @@ const {
 
 module.exports = {
 
-
-  /**
-   * The function `allUsers` retrieves a paginated list of users with their associated roles, excluding
-   * certain attributes, and handles errors appropriately.
-   * @param query - The `allUsers` function you provided is an asynchronous function that retrieves a
-   * list of users with pagination and some filtering criteria. Here's a breakdown of the function:
-   * @returns The `allUsers` function returns an object with different properties based on the outcome
-   * of the database query and pagination.
-   */
   /* eslint-disable radix */
   /* eslint-disable consistent-return */
   /* eslint-disable no-plusplus */
@@ -46,7 +37,7 @@ module.exports = {
             },
             status: true
           },
-          order: [['createdAt', 'ASC']],
+          order: [['username', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status', 'password'],
           },
@@ -133,16 +124,6 @@ module.exports = {
     }
   },
 
-
-  /**
-   * The function `findUser` searches for a user by ID in a database and returns the user data if
-   * found, or an error message if not found or if an error occurs.
-   * @param id - The `id` parameter is used to find a user in the database. The function first checks
-   * if the `id` is equal to 1 and returns an error message if it matches. Otherwise, it tries to find
-   * a user with the provided `id` that has a status of true in the
-   * @returns The `findUser` function returns an object with different properties based on the
-   * conditions met during its execution. Here are the possible return values:
-   */
   async findUser(id) {
     try {
 
