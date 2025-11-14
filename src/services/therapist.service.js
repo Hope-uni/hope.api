@@ -2,24 +2,16 @@ const logger = require('@config/logger.config');
 const { Op } = require('sequelize');
 const {
   TutorTherapist,
-  Person,
   User,
   Role,
-  UserRoles,
   Patient,
-  HealthRecord,
-  TeaDegree,
-  Phase,
-  Observation,
-  Activity,
   PatientActivity,
-  Achievement,
-  AchievementsHealthRecord,
   sequelize } = require('@models/index');
 const { userSendEmail } = require('@helpers/index');
 const { roleConstants } = require('@constants');
 const { pagination, generatePassword, messages, dataStructure, formatErrorMessages, azureImages } = require('@utils');
 const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
+const { baseTherapistIncludes, therapistExistIncludes, patientTherapistIncludes, findTherapistIncludes, createAndUpdateTherapistIncludes } = require('@queryIncludes');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 
 
@@ -31,6 +23,9 @@ module.exports = {
   async all(query) {
     try {
 
+      // Variables
+      const tutorModelIncludes = baseTherapistIncludes();
+
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await TutorTherapist.findAll({
           where: {
@@ -40,54 +35,7 @@ module.exports = {
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','birthday']
-              },
-            },
-            {
-              model: User,
-              where: {
-                status: true,
-              },
-              attributes: {
-                exclude: ['createdAt','updatedAt','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  where: {
-                    roleId: 3,
-                  },
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
-            },
-            {
-              model: Patient,
-              as: 'patientTherapist',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: [
-                {
-                  model: Person
-                },
-                {
-                  model: User
-                }
-              ]
-            }
-          ],
+          include: tutorModelIncludes
         });
 
         // validate if user status is true
@@ -120,54 +68,7 @@ module.exports = {
         attributes: {
           exclude: ['updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 3,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTherapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              },
-            ]
-          }
-        ],
+        include: tutorModelIncludes
       });
 
       // get Therapist structured
@@ -192,128 +93,18 @@ module.exports = {
     }
   },
 
-
-
   async allPatientsTherapist(query, payload) {
     try {
-      // Variable
-      let conditinalInclude = [
-        {
-          model: Person,
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'status']
-          },
-        },
-        {
-          model: TutorTherapist,
-          as: 'therapist',
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'status']
-          },
-          include: [
-            {
-              model: Person,
-              attributes: ['id', 'firstName', 'surname']
-            },
-            {
-              model: User,
-              where: {
-                status: true,
-                userVerified: true,
-              },
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-            }
-          ]
-        },
-        {
-          model: User,
-          where: {
-            status: true,
-            userVerified: true,
-          },
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'status', 'password']
-          },
-          include: [
-            {
-              model: UserRoles,
-              include: [
-                {
-                  model: Role,
-                  attributes: {
-                    exclude: ['createdAt', 'updatedAt', 'status']
-                  },
-                }
-              ]
-            },
-          ]
-        },
-        {
-          model: HealthRecord,
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
-          },
-          include: [
-            {
-              model: AchievementsHealthRecord,
-              include: {
-                model: Achievement,
-                attributes: ['id', 'name', 'imageUrl']
-              }
-            },
-            {
-              model: TeaDegree,
-              attributes: {
-                exclude: ['createdAt', 'updatedAt'],
-              }
-            },
-            {
-              model: Phase,
-              attributes: {
-                exclude: ['createdAt', 'updatedAt'],
-              }
-            },
-            {
-              model: Observation,
-              attributes: {
-                exclude: ['createdAt', 'updatedAt', 'status', 'userId', 'healthRecordId'],
-              }
-            }
-          ],
-        }
-      ];
+      // Variables
+      const therapistModelIncludes = therapistExistIncludes();
+      let conditinalInclude = patientTherapistIncludes();
 
       // Get Therapist
       const therapistExist = await TutorTherapist.findOne({
         where: {
           userId: payload.id
         },
-        include: [
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 3,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        include: therapistModelIncludes
       });
 
       if(!therapistExist || therapistExist.User.UserRoles[0].name === roleConstants.THERAPIST_ROLE) {
@@ -325,7 +116,7 @@ module.exports = {
       }
 
 
-      // validate if activityId query was retrieved in the request. This query param will allow us to get all patients that has this activity.
+      // validate if activityId query was sent in the request. This query param will allow us to get all patients that has this activity.
       if(query.activityId) {
         conditinalInclude = [
           ...conditinalInclude,
@@ -418,29 +209,10 @@ module.exports = {
     }
   },
 
-
-  /**
-   * The function `findOne` retrieves a therapist's data based on their ID, excluding certain
-   * attributes, and includes related data such as person details, user information, roles, and
-   * permissions.
-   * @param id - The `findOne` function you provided is an asynchronous function that retrieves a
-   * therapist's data based on the `id` parameter. The function uses Sequelize ORM to query the
-   * database and fetches the therapist's information along with related data such as Person, User,
-   * Role, and Permission.
-   * @returns The `findOne` function is returning an object with the following structure:
-   * - If the therapist with the specified `id` is found:
-   *   ```
-   *   {
-   *     error: false,
-   *     message: 'Terapeuta encontrado',
-   *     data: { therapistData }
-   *   }
-   *   ```
-   *   - `error`: Indicates if there was an error (false in this case).
-   *   - `message`: A success
-   */
   async findOne(id) {
     try {
+      // Variables
+      const therapistModelIncludes = findTherapistIncludes();
 
       const data = await TutorTherapist.findOne({
         where: {
@@ -450,97 +222,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 3,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-              {
-                model: Activity,
-                attributes: {
-                  exclude: ['createdAt','updatedAt']
-                },
-                include: [
-                  {
-                    model: Phase,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTherapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User,
-                where: {
-                  status: true,
-                }
-              },
-              {
-                model: HealthRecord,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status','patientId']
-                },
-                include: [
-                  {
-                    model: TeaDegree,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Phase,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Observation,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                    }
-                  }
-                ],
-              }
-            ]
-          },
-        ],
+        include: therapistModelIncludes,
       });
 
       if(!data) {
@@ -568,19 +250,11 @@ module.exports = {
     }
   },
 
-  /**
-  * The function creates a new therapist with associated user and person data, performing validations
-  * and handling transactions.
-  * @param body - {
-  * @returns The `create` method is returning an object with the following properties:
-  * - `error`: A boolean indicating if an error occurred during the process.
-  * - `message`: A message describing the outcome of the operation.
-  * - `data`: If no error occurred, this property contains the newly created therapist data.
-  * - `statusCode`: An HTTP status code indicating the result of the operation.
-  */
   async create(body, file) {
+    // Variables
     const transaction = await sequelize.transaction();
     try {
+        const therapistModelIncludes = createAndUpdateTherapistIncludes();
 
         // destructuring Object
         const {
@@ -625,9 +299,25 @@ module.exports = {
       };
 
       // Assigning Roles and generate the temporary password.
+
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
-      resBody.password = passwordTemp;
-      resBody.roles = [3];
+      resBody.password = passwordTemp; // Assign the temporary password to the body.
+      // Find the therapist role in the database and assign it to the body.
+      const therapistRole = await Role.findOne({
+        where: {
+          name: roleConstants.THERAPIST_ROLE,
+        }
+      });
+      if(!therapistRole) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 400,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.therapist.errors.service.create),
+        };
+      };
+      resBody.roles = [therapistRole.id]; // Assign the therapist role to the body.
 
       // User and Person creation
       const { error:userPersonError, statusCode, message, validationErrors, data  } = await createUser({...resBody,file},transaction);
@@ -686,57 +376,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 3,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTherapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User,
-                where: {
-                  status: true,
-                }
-              }
-            ]
-          }
-        ],
+        include: therapistModelIncludes,
       });
 
       return {
@@ -758,10 +398,12 @@ module.exports = {
 
 
   async update(id,body, payload, file) {
+    // Variables
     const transaction = await sequelize.transaction();
     try {
 
-      // Variables
+      const therapistModelIncludes = createAndUpdateTherapistIncludes();
+      const therapistModelExistIncludes = therapistExistIncludes();
       let therapistWhereCondition = {
         status: true,
       }
@@ -781,20 +423,7 @@ module.exports = {
       // validate if therapist exist
       const therapistExist = await TutorTherapist.findOne({
         where: therapistWhereCondition,
-        include: [
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            include: {
-              model: UserRoles,
-              where: {
-                roleId: 3,
-              }
-            }
-          }
-        ]
+        include: therapistModelExistIncludes
       });
 
       if(!therapistExist) {
@@ -914,54 +543,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 3,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTherapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              }
-            ]
-          }
-        ],
+        include: therapistModelIncludes,
       });
 
       return {
@@ -981,15 +563,6 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `removeTherapist` removes a therapist by updating their status and associated user
-   * status in a transactional manner.
-   * @param id - The `id` parameter in the `removeTherapist` function is used to identify the therapist
-   * that needs to be removed from the system. It is expected to be the unique identifier of the
-   * therapist record in the database that you want to delete.
-   * @returns The `removeTherapist` function returns an object with properties based on the outcome of
-   * the operation. Here is the breakdown of what is being returned:
-   */
   async removeTherapist(id) {
     const transaction = await sequelize.transaction();
     try {

@@ -20,13 +20,13 @@ const {
   azureImages
 } = require('@utils');
 const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
-const { roleConstants } = require('../constants');
+const { roleConstants } = require('@constants');
 const { 
   basePatientIncludes, 
   getTutorTherapistsPatientIncludes, 
   patientActivityIncludes, 
   findPatientIncludes 
-} = require('../queryIncludes');
+} = require('@queryIncludes');
 const { deleteUser, createUser, updateUser } = require('./user.service');
 const { createHealthRecord } = require('./healthRecord.service');
 const { createObservation } = require('./observations.service');

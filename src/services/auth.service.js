@@ -1,9 +1,6 @@
 const {
   User,
-  Role,
-  Permission,
   AuthToken,
-  UserRoles,
   Patient,
   TutorTherapist,
   sequelize
@@ -17,25 +14,15 @@ const { jwtAccessExpiration, secretKey, domain, userEmail } = require('@config/v
 const { transporter, handlebarsOption } = require('@helpers');
 const { messages, formatErrorMessages, dataStructure } = require('@utils');
 const { roleConstants } = require('@constants');
+const { userLoginIncludes, meIncludes } = require('@queryIncludes');
 
 module.exports = {
 
-
-  /**
-   * The function performs user authentication by verifying credentials, generating access and refresh
-   * tokens using JWT, and handling errors with logging.
-   * @param body - The `login` function you provided is an asynchronous function that handles user
-   * authentication and generates access and refresh tokens using JWT. Here's a breakdown of the
-   * process:
-   * @returns The `login` function returns an object with the following properties:
-   * - `error`: A boolean indicating if an error occurred during the login process.
-   * - `message`: A message describing the outcome of the login attempt.
-   * - `accessToken`: A JWT access token generated for the user.
-   * - `refreshToken`: The refresh token generated for the user.
-   */
   async login(body) {
     const transaction = await sequelize.transaction();
     try {
+      // Variables
+      const  userIncludes = userLoginIncludes(); // Includes for user
       const getUserFromDb = await User.findOne({
         where: {
           [Op.and]: [
@@ -54,22 +41,7 @@ module.exports = {
             }
           ]
         },
-        include: [
-          {
-            model: UserRoles,
-            include: [
-              {
-                model: Role,
-                include: [
-                  {
-                    model: Permission,
-                    as: 'permissions'
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        include: userIncludes
       });
 
       // Verify if user exist
@@ -197,18 +169,6 @@ module.exports = {
     }
   },
 
-
-  /**
-   * The `forgotPassword` function in JavaScript handles the process of sending a password reset email
-   * to a user with error handling and logging.
-   * @param body - The `body` parameter in the `forgotPassword` function likely contains information
-   * needed to initiate the password reset process. This could include the user's email address, which
-   * is used to look up the user in the database and send them a password reset link.
-   * @returns The `forgotPassword` function returns an object with either an error or success message
-   * based on the outcome of the password reset process. If the process is successful, it returns an
-   * object with `error: false` and a success message. If there is an error during the process, it
-   * returns an object with `error: true`, an error message, and a status code.
-   */
   async forgotPassword(body) {
     try {
 
@@ -295,20 +255,6 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `resetPassword` asynchronously resets a user's password in a database, handling
-   * errors and returning appropriate messages.
-   * @param body - The `body` parameter likely contains the information needed to reset a user's
-   * password. It may include the new password that the user wants to set. This function uses the
-   * `bcrypt` library to hash the new password before updating it in the database. The `payload`
-   * parameter seems to contain the user
-   * @param payload - The `payload` parameter in the `resetPassword` function likely contains
-   * information about the user whose password is being reset. It seems to include at least an `id`
-   * field, which is used to identify the user whose password is being reset. Additionally, based on
-   * the code snippet provided, the `
-   * @returns The function `resetPassword` returns an object with properties based on the outcome of
-   * the password reset process.
-   */
   async resetPassword(body, payload){
     try {
       const salt = await bcrypt.genSalt(10);
@@ -351,17 +297,6 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `changePassword` updates a user's password after validating the current password and
-   * handling potential errors using transactions in a Node.js application.
-   * @param body - The `body` parameter in the `changePassword` function likely contains the following
-   * information related to changing a user's password:
-   * @param payload - The `payload` parameter likely contains information about the user making the
-   * request, such as their ID or other identifying details. It is used in this function to find the
-   * user in the database and update their password.
-   * @returns The `changePassword` function returns an object with properties based on the outcome of
-   * the password change operation.
-   */
   async changePassword(body, payload) {
     const transaction = await sequelize.transaction();
     try {
@@ -432,18 +367,7 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `changePasswordPatient` updates a patient's password after validating the current
-   * password and committing the changes in a transaction.
-   * @param body - The `body` parameter in the `changePasswordPatient` function likely contains the
-   * following information related to changing a patient's password:
-   * @param id - The `id` parameter in the `changePasswordPatient` function is used to specify the
-   * unique identifier of the patient whose password needs to be changed. This identifier is typically
-   * used to locate the specific patient record in the database and perform the password change
-   * operation for that patient.
-   * @returns The function `changePasswordPatient` returns an object with properties based on the
-   * outcome of the password change operation.
-   */
+
   async changePasswordPatient(body, id, payload) {
     const transaction = await sequelize.transaction();
     try {
@@ -551,18 +475,11 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `me` retrieves user data based on a payload, with error handling and logging.
-   * @param payload - The code you provided is an asynchronous function that retrieves user data based
-   * on the payload provided. The payload should contain an `id` property.
-   * @returns The function `me` is returning an object with the following structure:
-   * - If the payload is empty, it returns an error object with a message indicating that the payload
-   * is empty, along with an error flag and a status code of 400.
-   * - If the function executes successfully, it returns an object with an error flag set to false, a
-   * message indicating "User data", and the retrieved data from
-   */
   async me(payload) {
     try {
+
+      // Variables
+      const userMeIncludes = meIncludes(); // Includes for user
 
       // Payload Validation
       if (!payload) {
@@ -581,40 +498,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','password'],
         },
-        include: [
-          {
-            model: UserRoles,
-            attributes: {
-              exclude: ['createdAt','updatedAt','roleId','id']
-            },
-            include: [
-              {
-                model: Role,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Permission,
-                  as: 'permissions',
-                  attributes: {
-                    exclude: ['group','createdAt','updatedAt','status']
-                  },
-                  through: {
-                    attributes: {
-                      exclude: [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'roleId',
-                        'permissionId',
-                      ]
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        ]
+        include: userMeIncludes
       });
 
       return {
@@ -634,15 +518,6 @@ module.exports = {
     }
   },
 
-  /**
-   * The function `refreshAuth` handles the refreshing of access tokens using refresh tokens in a
-   * Node.js application.
-   * @param refreshToken - The provided code snippet is an asynchronous function named `refreshAuth`
-   * that handles the refreshing of authentication tokens. It takes a `refreshToken` as a parameter,
-   * which is used to generate a new access token and refresh token for the user.
-   * @returns The `refreshAuth` function returns an object with different properties based on the
-   * execution flow:
-   */
   async refreshAuth(refreshToken) {
     const transaction = await sequelize.transaction();
     // validate if the parameter is empty or not a string
@@ -776,17 +651,6 @@ module.exports = {
     }
   },
 
-
-  /**
-   * The function `removeRefreshToken` removes a refresh token from the database after validating its
-   * authenticity and existence.
-   * @param refreshToken - The `removeRefreshToken` function you provided is designed to remove a
-   * refresh token from the database. The `refreshToken` parameter is the token that needs to be
-   * removed from the database. This token is used for authentication purposes and is typically issued
-   * to clients for requesting new access tokens.
-   * @returns The `removeRefreshToken` function returns an object with properties based on different
-   * scenarios:
-   */
   async removeRefreshToken(refreshToken) {
     const transaction = await sequelize.transaction();
     try {

@@ -5,13 +5,7 @@ const {
   PatientActivity,
   Patient,
   TutorTherapist,
-  HealthRecord,
   User,
-  UserRoles,
-  Role,
-  TeaDegree,
-  Observation,
-  Person,
   sequelize
 } = require('@models/index');
 const {
@@ -27,7 +21,8 @@ const {
   dataStructure,
   pagination
 } = require('@utils');
-const { getFullName } = require('../utils/dataStructure/fullName.dataStructure');
+const { getFullName } = require('@utils/dataStructure/fullName.dataStructure');
+const { baseActivityIncludes, patientAssignActivityIncludes, patientUnAssignActivityIncludes, patientCurrentActivityIncludes } = require('@queryIncludes');
 
 
 module.exports = {
@@ -35,6 +30,8 @@ module.exports = {
   /* eslint-disable radix */
   async all(query) {
     try {
+      // Variables
+      const activityModelIncludes = baseActivityIncludes();
 
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await Activity.findAll({
@@ -45,25 +42,7 @@ module.exports = {
           attributes: {
             exclude: ['createdAt','updatedAt','status','phaseId', 'pictogramSentence']
           },
-          include: [
-            {
-              model: Phase,
-              attributes: ['id', 'name', 'description'],
-            },
-            {
-              model: User
-            },
-            {
-              model: PatientActivity,
-              attributes: ['id', 'isCompleted', 'status'],
-              include: [
-                {
-                  model: Patient,
-                  attributes: ['id'],
-                }
-              ]
-            }
-          ]
+          include: activityModelIncludes
         });
 
         return {
@@ -92,25 +71,7 @@ module.exports = {
         attributes: {
           exclude: ['updatedAt','status','phaseId', 'pictogramSentence']
         },
-        include: [
-          {
-            model: Phase,
-            attributes: ['id', 'name', 'description'],
-          },
-          {
-            model: User
-          },
-          {
-            model: PatientActivity,
-            attributes: ['id', 'isCompleted', 'status'],
-            include: [
-              {
-                model: Patient,
-                attributes: ['id'],
-              }
-            ]
-          }
-        ]
+        include: activityModelIncludes
       });
 
       if(!data) {
@@ -148,6 +109,9 @@ module.exports = {
   async findOne(id) {
     try {
 
+      // Variables
+      const activityModelIncludes = baseActivityIncludes();
+
       const data = await Activity.findOne({
         where: {
           id,
@@ -156,25 +120,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','phaseId']
         },
-        include: [
-          {
-            model: Phase,
-            attributes: ['id', 'name', 'description'],
-          },
-          {
-            model: User
-          },
-          {
-            model: PatientActivity,
-            attributes: ['id', 'isCompleted', 'status'],
-            include: [
-              {
-                model: Patient,
-                attributes: ['id'],
-              }
-            ]
-          }
-        ]
+        include: activityModelIncludes
       });
 
       if(!data) {
@@ -215,8 +161,11 @@ module.exports = {
   },
 
   async create({ name, description, satisfactoryPoints, pictogramSentence, phaseId }, payload) {
+    // Variables
     const transaction = await sequelize.transaction();
     try {
+
+      const activityModelIncludes = baseActivityIncludes();
 
       // validate if name already exist
       const activityNameExist = await Activity.findOne({
@@ -311,25 +260,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','phaseId']
         },
-        include: [
-          {
-            model: Phase,
-            attributes: ['id', 'name', 'description'],
-          },
-          {
-            model: User
-          },
-          {
-            model: PatientActivity,
-            attributes: ['id', 'isCompleted'],
-            include: [
-              {
-                model: Patient,
-                attributes: ['id'],
-              }
-            ]
-          }
-        ]
+        include: activityModelIncludes
       });
 
       const { error:pictogramError, message:pictogramMessage, pictograms } = await getPictograms(newData.pictogramSentence);
@@ -364,9 +295,10 @@ module.exports = {
   },
 
   async assingActivityPatient({ activityId, patients }, payload) {
+    // Variables
     const transaction = await sequelize.transaction();
     try {
-      // Variables
+      const patientActivityModelIncludes = patientAssignActivityIncludes();
       let patientWhereCondition = {
         status: true,
       }
@@ -427,35 +359,7 @@ module.exports = {
         // Validate if patient exist
         const patientItem = await Patient.findOne({
           where: patientWhereCondition,
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            },
-            {
-              model: User,
-              where: {
-                status: true,
-                userVerified: true
-              }
-            },
-            {
-              model: HealthRecord,
-              attributes: {
-                exclude: ['createdAt', 'updatedAt', 'status', 'patientId']
-              },
-              include: [
-                {
-                  model: Phase,
-                  attributes: {
-                    exclude: ['createdAt', 'updatedAt'],
-                  }
-                }
-              ],
-            }
-          ]
+          include: patientActivityModelIncludes
         });
 
         if(!patientItem) {
@@ -604,7 +508,6 @@ module.exports = {
       }
 
     } catch (error) {
-      // await transaction.rollback();
       logger.error(`${messages.activity.errors.service.base}: ${error}`);
       return {
         error: true,
@@ -738,10 +641,10 @@ module.exports = {
   },
 
   async unAssignActivityPatient({ patientId }, payload) {
+    // Variables
     const transaction = await sequelize.transaction();
     try {
-
-      // Variables
+      const patientActivityModelIncludes = patientUnAssignActivityIncludes();
       let whereCondition = {
         id: patientId,
         status: true,
@@ -771,22 +674,7 @@ module.exports = {
       // Patient exist validation
       const patientExist = await Patient.findOne({
         where: whereCondition,
-        include: [
-          {
-            model: User,
-            where: {
-              userVerified: true,
-              status: true,
-            }
-          },
-          {
-            model: PatientActivity,
-            where: {
-              status:true,
-              isCompleted: false,
-            }
-          }
-        ]
+        include: patientActivityModelIncludes
       });
       if(!patientExist) {
         await transaction.rollback();
@@ -884,7 +772,7 @@ module.exports = {
       }
 
       // validate if pictogramSentence has a valid pictograms
-      const { error, message, statusCode, validationErrors } = await validatePictogram(attempt);
+      const { error, statusCode } = await validatePictogram(attempt);
       if (error) {
         await transaction.rollback();
         return {
@@ -1030,6 +918,8 @@ module.exports = {
 
   async currentPatientActivity(payload) {
     try {
+      //  Variables
+      const patientActivityModelIncludes = patientCurrentActivityIncludes();
 
       if(payload.roles.some((name) => name === constants.ADMIN_ROLE || name === constants.SUPERADMIN_ROLE)) {
         return {
@@ -1047,117 +937,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: TutorTherapist,
-            as: 'tutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person,
-              },
-              {
-                model: User,
-              }
-            ]
-          },
-          {
-            model: TutorTherapist,
-            as: 'therapist',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person,
-              },
-              {
-                model: User,
-              }
-            ]
-          },
-          {
-            model: User,
-            where: {
-              status: true
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: PatientActivity,
-            attributes: {
-              exclude: ['updatedAt']
-            },
-            where: {
-              status: true,
-            },
-            include: [
-              {
-                model: Activity,
-                include: [
-                  {
-                    model: Phase,
-                  }
-                ]
-              }
-            ],
-          },
-          {
-            model: HealthRecord,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','patientId']
-            },
-            include: [
-              {
-                model: TeaDegree,
-                attributes: {
-                  exclude: ['createdAt','updatedAt'],
-                }
-              },
-              {
-                model: Phase,
-                attributes: {
-                  exclude: ['createdAt','updatedAt'],
-                }
-              },
-              {
-                model: Observation,
-                attributes: {
-                  exclude: ['updatedAt', 'status', 'healthRecordId'],
-                },
-                include: [
-                  {
-                    model: User,
-                    attributes: ['username'],
-                  }
-                ]
-              }
-            ],
-          }
-        ],
+        include: patientActivityModelIncludes,
         order:[
           [{model: PatientActivity}, 'createdAt', 'DESC'],
         ]

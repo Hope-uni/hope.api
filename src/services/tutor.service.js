@@ -1,24 +1,11 @@
 const { Op } = require('sequelize');
 const logger = require('@config/logger.config');
 const { roleConstants } = require('@constants');
-const {
-  TutorTherapist,
-  User,
-  Person,
-  Role,
-  UserRoles,
-  Patient,
-  HealthRecord,
-  TeaDegree,
-  Phase,
-  Observation,
-  Achievement,
-  AchievementsHealthRecord,
-  sequelize
-} = require('@models/index.js');
+const { TutorTherapist, User, Role, Patient, sequelize } = require('@models/index.js');
 const { userSendEmail } = require('@helpers/index');
 const { pagination, messages, dataStructure, formatErrorMessages, generatePassword, azureImages } = require('@utils');
 const { userBlockContainer, defaultUserImage } = require('@config/variables.config');
+const { baseTutorIncludes, tutorExistIncludes, patientTutorIncludes, findTutorIncludes } = require('@queryIncludes');
 const {
   deleteUser,
   createUser,
@@ -33,6 +20,9 @@ module.exports = {
   async all(query) {
     try {
 
+      // variables
+      const tutorModelIncludes = baseTutorIncludes();
+
       if(!query.page || !query.size || parseInt(query.page) === 0 && parseInt(query.size) === 0) {
         const data = await TutorTherapist.findAll({
           where: {
@@ -42,54 +32,7 @@ module.exports = {
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            },
-            {
-              model: User,
-              where: {
-                status: true,
-              },
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  where: {
-                    roleId: 5,
-                  },
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
-            },
-            {
-              model: Patient,
-              as: 'patientTutor',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: [
-                {
-                  model: Person
-                },
-                {
-                  model: User
-                }
-              ]
-            }
-          ]
+          include: tutorModelIncludes,
         });
 
         return {
@@ -114,54 +57,7 @@ module.exports = {
         attributes: {
           exclude: ['updatedAt','status', 'personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 5,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              }
-            ]
-          }
-        ]
+        include: tutorModelIncludes,
       });
 
       // Get Tutor Structure
@@ -190,35 +86,16 @@ module.exports = {
   async allPatientsTutor(query, payload) {
     try {
 
+      // Variables
+      const tutorModelIncludes = tutorExistIncludes();
+      const patientModelIncludes = patientTutorIncludes();
+
         // Get Tutor
         const tutorExist = await TutorTherapist.findOne({
           where: {
             userId: payload.id
           },
-          include: [
-            {
-              model: User,
-              where: {
-                status: true,
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  where: {
-                    roleId: 5,
-                  },
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          include: tutorModelIncludes
         });
 
         if(!tutorExist || tutorExist.User.UserRoles[0].name === roleConstants.TUTOR_ROLE) {
@@ -240,104 +117,7 @@ module.exports = {
             attributes: {
               exclude: ['createdAt','updatedAt','status','personId']
             },
-            include: [
-              {
-                model: Person,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-              },
-              {
-                model: TutorTherapist,
-                as: 'tutor',
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: {
-                  model: Person,
-                  attributes: ['id', 'firstName', 'surname']
-                }
-              },
-              {
-                model: TutorTherapist,
-                as: 'therapist',
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status']
-                },
-                include: [
-                  {
-                    model: Person,
-                    attributes: ['id', 'firstName', 'surname']
-                  },
-                  {
-                    model: User,
-                    where: {
-                      status: true,
-                      userVerified: true,
-                    },
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status','password']
-                    },
-                  }
-                ]
-              },
-              {
-                model: User,
-                where: {
-                  status: true,
-                  userVerified: true,
-                },
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status','password']
-                },
-                include: [
-                  {
-                    model: UserRoles,
-                    include: [
-                      {
-                        model: Role,
-                        attributes: {
-                          exclude: ['createdAt','updatedAt','status']
-                        },
-                      }
-                    ]
-                  },
-                ]
-              },
-              {
-                model: HealthRecord,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status','patientId']
-                },
-                include: [
-                  {
-                    model: AchievementsHealthRecord,
-                    include: {
-                      model: Achievement,
-                      attributes: ['id', 'name', 'imageUrl']
-                    }
-                  },
-                  {
-                    model: TeaDegree,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Phase,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Observation,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                    }
-                  }
-                ],
-              }
-            ]
+            include: patientModelIncludes
           });
 
           // Return Patient
@@ -363,104 +143,7 @@ module.exports = {
           attributes: {
             exclude: ['updatedAt','status']
           },
-          include: [
-            {
-              model: Person,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-            },
-            {
-              model: TutorTherapist,
-              as: 'tutor',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: {
-                model: Person,
-                attributes: ['id', 'firstName', 'surname']
-              }
-            },
-            {
-              model: TutorTherapist,
-              as: 'therapist',
-              attributes: {
-                exclude: ['createdAt','updatedAt','status']
-              },
-              include: [
-                  {
-                    model: Person,
-                    attributes: ['id', 'firstName', 'surname']
-                  },
-                  {
-                    model: User,
-                    where: {
-                      status: true,
-                      userVerified: true,
-                    },
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status','password']
-                    },
-                  }
-              ]
-            },
-            {
-              model: User,
-              where: {
-                status: true,
-                userVerified: true,
-              },
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','password']
-              },
-              include: [
-                {
-                  model: UserRoles,
-                  include: [
-                    {
-                      model: Role,
-                      attributes: {
-                        exclude: ['createdAt','updatedAt','status']
-                      },
-                    }
-                  ]
-                },
-              ]
-            },
-            {
-              model: HealthRecord,
-              attributes: {
-                exclude: ['createdAt','updatedAt','status','patientId']
-              },
-              include: [
-                {
-                  model: AchievementsHealthRecord,
-                  include: {
-                    model: Achievement,
-                    attributes: ['id', 'name', 'imageUrl']
-                  }
-                },
-                {
-                  model: TeaDegree,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt'],
-                  }
-                },
-                {
-                  model: Phase,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt'],
-                  }
-                },
-                {
-                  model: Observation,
-                  attributes: {
-                    exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                  }
-                }
-              ],
-            }
-          ]
+          include: patientModelIncludes
         });
 
         // get Patient structured
@@ -488,6 +171,9 @@ module.exports = {
   async findOne(id) {
     try {
 
+      // Variables 
+      const tutorModelIncludes = findTutorIncludes();
+
       const data = await TutorTherapist.findOne({
         where: {
           id,
@@ -496,80 +182,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 5,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              },
-              {
-                model: HealthRecord,
-                attributes: {
-                  exclude: ['createdAt','updatedAt','status','patientId']
-                },
-                include: [
-                  {
-                    model: TeaDegree,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Phase,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt'],
-                    }
-                  },
-                  {
-                    model: Observation,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt', 'status', 'userId', 'healthRecordId'],
-                    }
-                  }
-                ],
-              }
-            ]
-          }
-        ]
+        include: tutorModelIncludes,
       });
 
       if(!data) {
@@ -602,7 +215,12 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
 
+      // Variables 
+      const tutorModelIncludes = findTutorIncludes();
+
+
       // Destructuring object
+      // these keys belongs to TutorTherapist model and the resBody has the fields for User and Person model
       const { identificationNumber, phoneNumber, telephone, ...resBody } = body;
 
       // IdentificationNumber validation
@@ -660,8 +278,23 @@ module.exports = {
 
       // Assigning Roles and generate the temporary password.
       const passwordTemp = generatePassword(); // generate the temporary password using uuid and get the first 8 characters
-      resBody.password = passwordTemp;
-      resBody.roles = [5];
+      resBody.password = passwordTemp; // Assign the temporary password to the body.
+      // Find the tutor role in the database and assign it to the body.
+      const tutorRole = await Role.findOne({
+        where: {
+          name: roleConstants.TUTOR_ROLE,
+        }
+      });
+      if(!tutorRole) {
+        await transaction.rollback();
+        return {
+          error: true,
+          statusCode: 409,
+          message: messages.generalMessages.base,
+          validationErrors: formatErrorMessages('create', messages.tutor.errors.service.create),
+        };
+      };
+      resBody.roles = [tutorRole.id]; // Assign the tutor role to the body.
 
       // Validate and create User and Person
       const { error: userPersonError, message, statusCode, validationErrors, data } = await createUser({...resBody, file}, transaction);
@@ -722,54 +355,7 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 5,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              }
-            ]
-          }
-        ]
+        include: tutorModelIncludes
       });
 
       return {
@@ -793,6 +379,8 @@ module.exports = {
     const transaction = await sequelize.transaction();
     try {
       // Variables
+      const tutorModelExistIncludes = tutorExistIncludes();
+      const tutorModelIncludes = findTutorIncludes();
       let tutorWhereCondition = {
         status: true,
       }
@@ -812,20 +400,7 @@ module.exports = {
       // validate if tutor exist
       const tutorExist = await TutorTherapist.findOne({
         where: tutorWhereCondition,
-        include: [
-          {
-            model: User,
-            where: {
-              status: true
-            },
-            include: {
-              model: UserRoles,
-              where: {
-                roleId: 5,
-              }
-            }
-          }
-        ]
+        include: tutorModelExistIncludes
       },{transaction});
       if(!tutorExist) {
         await transaction.rollback();
@@ -966,57 +541,8 @@ module.exports = {
         attributes: {
           exclude: ['createdAt','updatedAt','status','personId']
         },
-        include: [
-          {
-            model: Person,
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-          },
-          {
-            model: User,
-            where: {
-              status: true,
-            },
-            attributes: {
-              exclude: ['createdAt','updatedAt','status','password']
-            },
-            include: [
-              {
-                model: UserRoles,
-                where: {
-                  roleId: 5,
-                },
-                include: [
-                  {
-                    model: Role,
-                    attributes: {
-                      exclude: ['createdAt','updatedAt','status']
-                    },
-                  }
-                ]
-              },
-            ]
-          },
-          {
-            model: Patient,
-            as: 'patientTutor',
-            attributes: {
-              exclude: ['createdAt','updatedAt','status']
-            },
-            include: [
-              {
-                model: Person
-              },
-              {
-                model: User
-              }
-            ]
-          }
-        ]
+        include: tutorModelIncludes
       });
-
-
 
       return {
         error: false,
@@ -1024,6 +550,7 @@ module.exports = {
         message: messages.tutor.success.update,
         data: dataStructure.updateTutorDataStructure(newData),
       }
+
     } catch (error) {
       await transaction.rollback();
       logger.error(`${messages.tutor.errors.service.base}: ${error}`);

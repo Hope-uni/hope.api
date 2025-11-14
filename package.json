@@ -25,7 +25,8 @@
     "@events": "./src/events",
     "@listeners": "./src/listeners",
     "@constants": "./src/constants",
-    "@fixtures": "./src/fixtures"
+    "@fixtures": "./src/fixtures",
+    "@queryIncludes": "./src/queryIncludes"
   },
   "_moduleDirectories": [
     "node_modules_custom"
