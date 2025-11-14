@@ -6,6 +6,7 @@ const {
   Role,
   Patient,
   PatientActivity,
+  Person,
   sequelize } = require('@models/index');
 const { userSendEmail } = require('@helpers/index');
 const { roleConstants } = require('@constants');
@@ -31,11 +32,16 @@ module.exports = {
           where: {
             status: true,
           },
-          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
-          include: tutorModelIncludes
+          include: tutorModelIncludes,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         // validate if user status is true
@@ -61,14 +67,19 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order:[['createdAt', 'ASC']],
         where: {
           status: true
         },
         attributes: {
           exclude: ['updatedAt','status','personId']
         },
-        include: tutorModelIncludes
+        include: tutorModelIncludes,
+        order:[
+          [{model: Person}, 'firstName', 'ASC'],
+          [{model: Person}, 'secondName', 'ASC'],
+          [{model: Person}, 'surname', 'ASC'],
+          [{model: Person}, 'secondSurname', 'ASC'],
+        ]
       });
 
       // get Therapist structured
@@ -153,11 +164,16 @@ module.exports = {
             status: true,
             therapistId: therapistExist.id,
           },
-          order:[['createdAt', 'ASC']],
           attributes: {
             exclude: ['createdAt','updatedAt','status','personId']
           },
           include: conditinalInclude,
+          order:[
+            [{model: Person}, 'firstName', 'ASC'],
+            [{model: Person}, 'secondName', 'ASC'],
+            [{model: Person}, 'surname', 'ASC'],
+            [{model: Person}, 'secondSurname', 'ASC'],
+          ]
         });
 
         // Return Patient
@@ -176,7 +192,6 @@ module.exports = {
         limit,
         offset,
         distinct: true,
-        order:[['createdAt', 'ASC']],
         where: {
           status: true,
           therapistId: therapistExist.id,
@@ -184,7 +199,13 @@ module.exports = {
         attributes: {
           exclude: ['updatedAt','status']
         },
-        include: conditinalInclude
+        include: conditinalInclude,
+        order:[
+          [{model: Person}, 'firstName', 'ASC'],
+          [{model: Person}, 'secondName', 'ASC'],
+          [{model: Person}, 'surname', 'ASC'],
+          [{model: Person}, 'secondSurname', 'ASC'],
+        ]
       });
 
       // get Patient structured
